@@ -206,6 +206,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
 	        $user['ADDRESS.COUNTRY'],              // Billing address country code            
 	        $user['CONTACT.EMAIL']                 // Customer mail address
 	        );
+	    $this->_heidelpayPaymentMethod->getRequest()->getCriterion()->set('guest', $user['CRITERION.GUEST']);
 	    
 	    $this->_heidelpayPaymentMethod->getRequest()->basketData(
 	        $quote->getId(),                                                               // Reference Id of your application
@@ -294,6 +295,11 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
 		
 		foreach ($billing->getStreet() as $street) {
 			$billingStreet .= $street.' ';
+		}
+		$CustomerId = $order->getCustomerId();
+		$user['CRITERION.GUEST'] = 'false';
+		if ( $CustomerId == 0) {
+		    $user['CRITERION.GUEST'] = 'true';
 		}
 	
 		$user['NAME.COMPANY'] = ($billing->getCompany() === false) ? NULL : trim($billing->getCompany());
