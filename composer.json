@@ -11,8 +11,8 @@
 		"magento/module-customer" : "<100.2.0",
 		"magento/module-payment" : "<100.2.0",
 		"magento/module-backend" : "<100.2.0",
-		"magento/framework" : "100.*.*",
-		"heidelpay/php-api" : "16.10.27"
+		"magento/framework" : "<100.2.0",
+		"heidelpay/php-api" : "dev-master"
 	},
 	"suggest" : {
 		"magento/module-checkout-agreements" : "<100.2.0"
