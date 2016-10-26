@@ -11,7 +11,7 @@ Currently supported payment methods are:
 * PayPal
 * prepayment
 
-See manual for more information - https://dev.heidelpay.de/shopmodule/magento/magento-2-x/
+For more information please have visit - https://dev.heidelpay.de/shopmodule/magento/magento-2-x/
 
 ### SYSTEM REQUIREMENTS
 
@@ -21,3 +21,8 @@ It also depends on the Heidelpay php-api library.
 ### LICENSE
 
 You can find a copy of this license in [LICENSE.md](LICENSE.md).
+
+### Release notes
+
+All versions greater than 16.10.17 are based on the heidelpay php-api. (https://github.com/heidelpay/php-api). Please visit https://dev.heidelpay.de/PhpApi/ for the developer documentation.
+

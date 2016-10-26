@@ -18,7 +18,7 @@ namespace Heidelpay\Gateway\Controller\Index;
  * @subpackage Magento2
  * @category Magento2
  */
-
+use Heidelpay\PhpApi\Response AS HeidelpayResponse;
 
 class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
 {
@@ -49,8 +49,9 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
     		$this->_logger->error('Heidelpay Redirect load transactions fail. '.$e->getMessage());
     	}
 		
+    	$HeidelpayResponse = new  HeidelpayResponse($data);
 				
-		if ($data !== NULL && $data['PROCESSING_RESULT'] == 'ACK'){
+		if ($data !== NULL && $HeidelpayResponse->isSuccess()){
 			
 			/*
 			 * Set Parameters for Success page
@@ -78,8 +79,8 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
 			
 			/* set QouteIds */
 			$session->setLastQuoteId($quoteId)
-					->setLastSuccessQuoteId($quoteId)
-					->clearHelperData();
+					->setLastSuccessQuoteId($quoteId);
+					//->clearHelperData();
 			
 			/* set OrderIds */
 			$session->setLastOrderId($order->getId())

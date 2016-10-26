@@ -2,7 +2,7 @@
 namespace Heidelpay\Gateway\Controller;
 /**
  * Abstract controller class
- * 
+ *
  * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
  * @copyright Copyright © 2016-present Heidelberger Payment GmbH. All rights reserved.
  * @link  https://dev.heidelpay.de/magento
@@ -12,6 +12,7 @@ namespace Heidelpay\Gateway\Controller;
  * @subpackage Magento2
  * @category Magento2
  */
+
 use Heidelpay\Gateway\Helper\Payment AS HeidelpayHelper;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
