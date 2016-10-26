@@ -215,8 +215,14 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
 	        $this->_encryptor->exportKeys()                                                // A secret passphrase from your application
 	        );
 	    
+	    /** Magento Version 
+	     * @todo replace fixed shop version and plugin version
+	     * */
+	    $this->_heidelpayPaymentMethod->getRequest()->getCriterion()->set('SHOP.TYPE', 'Magento 2.x');
+	    $this->_heidelpayPaymentMethod->getRequest()->getCriterion()->set('SHOPMODULE.VERSION', 'Heidelpay Gateway - 16.10.27');
+	    
 	    /** @todo should be removed after using heidelpay php-api for every payment method */
-	    $this->_heidelpayPaymentMethod->getRequest()->getCriterion()->set('secret',$this->_encryptor->getHash($quote->getId().$this->_encryptor->exportKeys()));
+	    //$this->_heidelpayPaymentMethod->getRequest()->getCriterion()->set('secret',$this->_encryptor->getHash($quote->getId().$this->_encryptor->exportKeys()));
 	    
 	    /** Force PhpApi to just generate the request instead of sending it directly */
 	    $this->_heidelpayPaymentMethod->_dryRun=TRUE;

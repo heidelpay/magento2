@@ -8,7 +8,7 @@
             		<sandbox_mode>1</sandbox_mode>
             		<active>0</active>
             		<default_css>http://demoshops.heidelpay.de/css/mage2-hpf.css</default_css>
-            		<model>Heidelpay\Gateway\Model\Payment\HgwAbstract</model>
+            		<model>Heidelpay\Gateway\PaymentMethodes\HeidelpayAbstractPaymentMethod</model>
             	</hgwmain>
             	<hgwpp>
             		<active>0</active>
@@ -30,7 +30,7 @@
                     <specificcountry></specificcountry>
                     <min_order_total>0</min_order_total>
                     <max_order_total>0</max_order_total>
-                    <model>Heidelpay\Gateway\Model\Payment\Hgwcc</model>
+                    <model>Heidelpay\Gateway\PaymentMethodes\HeidelpayCreditCardPaymentMethod</model>
             	</hgwcc>
             	<hgwdc>
             		<active>0</active>
@@ -41,7 +41,7 @@
                     <specificcountry></specificcountry>
                     <min_order_total>0</min_order_total>
                     <max_order_total>0</max_order_total>
-                    <model>Heidelpay\Gateway\Model\Payment\Hgwdc</model>
+                    <model>Heidelpay\Gateway\PaymentMethodes\HeidelpayDebitCardPaymentMethod</model>
             	</hgwdc>
             	<hgwsue>
             		<active>0</active>
@@ -52,7 +52,7 @@
                     <specificcountry>BE,DE,IT,NL,AT,SI,ES</specificcountry>
                     <min_order_total>0</min_order_total>
                     <max_order_total>0</max_order_total>
-                    <model>Heidelpay\Gateway\Model\Payment\Hgwsue</model>
+                    <model>Heidelpay\Gateway\PaymentMethodes\HeidelpaySofortPaymentMethod</model>
             	</hgwsue>
             	<hgwpal>
             		<active>0</active>
@@ -63,7 +63,7 @@
                     <specificcountry></specificcountry>
                     <min_order_total>0</min_order_total>
                     <max_order_total>0</max_order_total>
-                    <model>Heidelpay\Gateway\Model\Payment\Hgwpal</model>
+                    <model>Heidelpay\Gateway\PaymentMethodes\HeidelpayPayPalPaymentMethod</model>
             	</hgwpal>
         </payment>
     </default>

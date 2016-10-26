@@ -1,6 +1,6 @@
 {
 	"name" : "heidelpay/magento2",
-	"description" : "heidelpay payment extension for magento2",
+	"description" : "heidelpay payment extension for magento 2",
 	"require" : {
 		"php" : "~5.5.0|~5.6.0|~7.0.0",
 		"magento/module-config" : "<100.2.0",
@@ -11,19 +11,19 @@
 		"magento/module-customer" : "<100.2.0",
 		"magento/module-payment" : "<100.2.0",
 		"magento/module-backend" : "<100.2.0",
-		"magento/framework" : "<100.2.0",
-		"heidelpay/php-api" : "dev-master"
+		"magento/framework" : "100.*.*",
+		"heidelpay/php-api" : "16.10.27"
 	},
 	"suggest" : {
 		"magento/module-checkout-agreements" : "<100.2.0"
 	},
 	"repositories" : [{
-			"type" : "git",
-			"url" : "https://github.com/heidelpay/php-api.git"
+			"type" : "composer",
+			"url" : "https://dev.heidelpay.de/packages"
 		}
 	],
 	"type" : "magento2-module",
-	"version" : "16.10.17",
+	"version" : "16.10.27",
 	"license" : "Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.",
 	"autoload" : {
 		"files" : [
