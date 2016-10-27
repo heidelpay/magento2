@@ -11,7 +11,35 @@ Currently supported payment methods are:
 * PayPal
 * prepayment
 
-For more information please have visit - https://dev.heidelpay.de/shopmodule/magento/magento-2-x/
+For more information please visit - https://dev.heidelpay.de/shopmodule/magento/magento-2-x/
+
+### Installation
+
+add composer repository
+
+composer config repositories.heidelpay composer https://heidelpay.de/packages
+
+install packages
+
+composer  require "heidelpay/php-api:16.10.27"
+composer  require "heidelpay/magento2:16.10.27"
+
+enable extension in Magento
+
+php -f bin/magento module:enable --clear-static-content Heidelpay_Gateway
+
+
+setup and refresh cache
+
+php -f bin/magento setup:upgrade
+
+php -f bin/magento cache_flush
+
+php -f bin/magento setup:di:compile
+ 
+php -f bin/magento setup:static-content:deploy 
+
+and you are ready to go.
 
 ### SYSTEM REQUIREMENTS
 
