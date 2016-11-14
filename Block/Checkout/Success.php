@@ -1,7 +1,9 @@
-<?php 
+<?php
+
 namespace Heidelpay\Gateway\Block\Checkout;
+
 /**
- * Add payment information to the checkout success block 
+ * Add payment information to the checkout success block
  *
  *
  * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
@@ -13,16 +15,18 @@ namespace Heidelpay\Gateway\Block\Checkout;
  * @subpackage Magento2
  * @category Magento2
  */
-
 class Success extends \Magento\Checkout\Block\Onepage\Success
 {
+    /**
+     * @return bool
+     */
+    public function getHeidelpayInfo()
+    {
+        $session = $this->_checkoutSession;
+        $heidelpayInfo = $session->getHeidelpayInfo();
+        $info = ($heidelpayInfo !== false) ? $heidelpayInfo : false;
+        $session->setHeidelpayInfo(false);
 
-    function getHeidelpayInfo() {
-        $info = ($this->_checkoutSession->getHeidelpayInfo() !== false) ? $this->_checkoutSession->getHeidelpayInfo() : false;
-        $this->_checkoutSession->setHeidelpayInfo(false);
-        return $info ;
-
+        return $info;
     }
-
-
 }

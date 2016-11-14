@@ -1,5 +1,9 @@
 <?php
+
 namespace Heidelpay\Gateway\Block\Payment;
+
+use Magento\Payment\Block\Form\Cc;
+
 /**
  *Abstract payment block
  *
@@ -12,30 +16,10 @@ namespace Heidelpay\Gateway\Block\Payment;
  * @subpackage Magento2
  * @category Magento2
  */
-class HgwAbstract extends \Magento\Payment\Block\Form\Cc
+class HgwAbstract extends Cc
 {
-	/**
-	 * @var string
-	 */
-	protected $_template = 'Magento_Payment::form/cc.phtml';
-
-	/**
-	 * Payment config model
-	 *
-	 * @var \Magento\Payment\Model\Config
-	 */
-
-	/**
-	 * @param \Magento\Framework\View\Element\Template\Context $context
-	 * @param \Magento\Payment\Model\Config $paymentConfig
-	 * @param array $data
-	 */
-
-
-	/**
-	 * Render block HTML
-	 *
-	 * @return string
-	 */
-	
+    /**
+     * @var string
+     */
+    protected $_template = 'Magento_Payment::form/cc.phtml';
 }

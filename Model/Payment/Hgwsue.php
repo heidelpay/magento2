@@ -1,5 +1,6 @@
 <?php
-namespace Heidelpay\Gateway\Model\Payment ;
+namespace Heidelpay\Gateway\Model\Payment;
+
 /**
  * Sofortüberweisung payment method
  *
@@ -12,17 +13,22 @@ namespace Heidelpay\Gateway\Model\Payment ;
  * @subpackage Magento2
  * @category Magento2
  */
-use \Heidelpay\Gateway\Model\Payment\HgwAbstract;
-
-class Hgwsue extends   HgwAbstract
+class Hgwsue extends HgwAbstract
 {
     const CODE = 'hgwsue';
 
+    /**
+     * @var string
+     */
     protected $_code = 'hgwsue';
 
-    protected $_isGateway                   = true;
-    protected $_canAuthorize 				= true;
+    /**
+     * @var bool
+     */
+    protected $_isGateway = true;
 
-
-    
+    /**
+     * @var bool
+     */
+    protected $_canAuthorize = true;
 }

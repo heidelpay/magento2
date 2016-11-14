@@ -1,5 +1,7 @@
 <?php
-namespace Heidelpay\Gateway\Model\Payment ;
+
+namespace Heidelpay\Gateway\Model\Payment;
+
 /**
  * Credit card payment method
  *
@@ -12,25 +14,35 @@ namespace Heidelpay\Gateway\Model\Payment ;
  * @subpackage Magento2
  * @category Magento2
  */
-use \Heidelpay\Gateway\Model\Payment\HgwAbstract;
-
-class Hgwcc extends   HgwAbstract
+class Hgwcc extends HgwAbstract
 {
     const CODE = 'hgwcc';
 
+    /**
+     * @var string
+     */
     protected $_code = 'hgwcc';
 
-    protected $_isGateway                   = true;
-    protected $_canAuthorize 				= true;
-    //protected $_canCapture                  = true;
-    //protected $_canCapturePartial           = true;
-    //protected $_canRefund                   = true;
-    //protected $_canRefundInvoicePartial     = true;
+    /**
+     * @var bool
+     */
+    protected $_isGateway = true;
+
+    /**
+     * @var bool
+     */
+    protected $_canAuthorize = true;
+
+    /**
+     * @var string
+     */
     protected $_formBlockType = 'Heidelpay\Gateway\Block\Payment\Hgwpp';
 
-	
-    public function	activeRedirct() {
-    	return false ;
+    /**
+     * @return bool
+     */
+    public function activeRedirect()
+    {
+        return false;
     }
-    
 }

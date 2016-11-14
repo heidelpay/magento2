@@ -1,5 +1,7 @@
 <?php
-namespace Heidelpay\Gateway\Model\Payment ;
+
+namespace Heidelpay\Gateway\Model\Payment;
+
 /**
  * PayPal payment method
  *
@@ -12,21 +14,22 @@ namespace Heidelpay\Gateway\Model\Payment ;
  * @subpackage Magento2
  * @category Magento2
  */
-use \Heidelpay\Gateway\Model\Payment\HgwAbstract;
-
-class Hgwpal extends   HgwAbstract
+class Hgwpal extends HgwAbstract
 {
     const CODE = 'hgwpal';
 
+    /**
+     * @var string
+     */
     protected $_code = 'hgwpal';
 
-    protected $_isGateway                   = true;
-    protected $_canAuthorize 				= true;
-    //protected $_canCapture                  = true;
-    //protected $_canCapturePartial           = true;
-    //protected $_canRefund                   = true;
-    //protected $_canRefundInvoicePartial     = true;
+    /**
+     * @var bool
+     */
+    protected $_isGateway = true;
 
-
-    
+    /**
+     * @var bool
+     */
+    protected $_canAuthorize = true;
 }
