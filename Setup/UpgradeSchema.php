@@ -1,7 +1,13 @@
 <?php
+
 namespace Heidelpay\Gateway\Setup;
+
+use Magento\Framework\Setup\UpgradeSchemaInterface;
+use Magento\Framework\Setup\SchemaSetupInterface;
+use Magento\Framework\Setup\ModuleContextInterface;
+
 /**
- * Upgrade method 
+ * Upgrade method
  *
  *
  * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
@@ -13,20 +19,15 @@ namespace Heidelpay\Gateway\Setup;
  * @subpackage Magento2
  * @category Magento2
  */
-
-use Magento\Framework\Setup\UpgradeSchemaInterface;
-use Magento\Framework\Setup\SchemaSetupInterface;
-use Magento\Framework\Setup\ModuleContextInterface;
-
 class UpgradeSchema implements UpgradeSchemaInterface
-
 {
+    /**
+     * @param SchemaSetupInterface $upgrade
+     * @param ModuleContextInterface $module
+     */
     public function upgrade(SchemaSetupInterface $upgrade, ModuleContextInterface $module)
     {
         $upgrade->startSetup();
- 
- 
- 
         $upgrade->endSetup();
     }
 }

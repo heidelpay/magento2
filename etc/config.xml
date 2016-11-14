@@ -1,70 +1,71 @@
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
     <default>
         <payment>
-            	<hgwmain>
-            		<security_sender>31HA07BC8142C5A171745D00AD63D182</security_sender>
-            		<user_login>31ha07bc8142c5a171744e5aef11ffd3</user_login>
-            		<user_passwd backend_model="Magento\Config\Model\Config\Backend\Encrypted">93167DE7</user_passwd>
-            		<sandbox_mode>1</sandbox_mode>
-            		<active>0</active>
-            		<default_css>http://demoshops.heidelpay.de/css/mage2-hpf.css</default_css>
-            		<model>Heidelpay\Gateway\PaymentMethodes\HeidelpayAbstractPaymentMethod</model>
-            	</hgwmain>
-            	<hgwpp>
-            		<active>0</active>
-            		<payment_action>authorize</payment_action>
-            		<title>Prepayment</title>
-                	<channel>31HA07BC8142C5A171749A60D979B6E4</channel>
-            		<allowspecific>0</allowspecific>
-                    <specificcountry></specificcountry>
-                    <min_order_total>0</min_order_total>
-                    <max_order_total>0</max_order_total>
-                    <model>Heidelpay\Gateway\PaymentMethodes\HeidelpayPrepaymentPaymentMethod</model>
-            	</hgwpp>
-            	<hgwcc>
-            		<active>0</active>
-            		<payment_action>authorize</payment_action>
-            		<title><![CDATA[Credit card]]></title>
-                	<channel>31HA07BC8142C5A171744F3D6D155865</channel>
-            		<allowspecific>0</allowspecific>
-                    <specificcountry></specificcountry>
-                    <min_order_total>0</min_order_total>
-                    <max_order_total>0</max_order_total>
-                    <model>Heidelpay\Gateway\PaymentMethodes\HeidelpayCreditCardPaymentMethod</model>
-            	</hgwcc>
-            	<hgwdc>
-            		<active>0</active>
-            		<payment_action>authorize</payment_action>
-            		<title><![CDATA[Debit card]]></title>
-                	<channel>31HA07BC8142C5A171744F3D6D155865</channel>
-            		<allowspecific>0</allowspecific>
-                    <specificcountry></specificcountry>
-                    <min_order_total>0</min_order_total>
-                    <max_order_total>0</max_order_total>
-                    <model>Heidelpay\Gateway\PaymentMethodes\HeidelpayDebitCardPaymentMethod</model>
-            	</hgwdc>
-            	<hgwsue>
-            		<active>0</active>
-            		<payment_action>authorize</payment_action>
-            		<title><![CDATA[Sofortüberweisung]]></title>
-                	<channel>31HA07BC8142C5A171749CDAA43365D2</channel>
-            		<allowspecific>1</allowspecific>
-                    <specificcountry>BE,DE,IT,NL,AT,SI,ES</specificcountry>
-                    <min_order_total>0</min_order_total>
-                    <max_order_total>0</max_order_total>
-                    <model>Heidelpay\Gateway\PaymentMethodes\HeidelpaySofortPaymentMethod</model>
-            	</hgwsue>
-            	<hgwpal>
-            		<active>0</active>
-            		<payment_action>authorize</payment_action>
-            		<title><![CDATA[PayPal]]></title>
-                	<channel>31HA07BC8142C5A171744F3D6D155865</channel>
-            		<allowspecific>0</allowspecific>
-                    <specificcountry></specificcountry>
-                    <min_order_total>0</min_order_total>
-                    <max_order_total>0</max_order_total>
-                    <model>Heidelpay\Gateway\PaymentMethodes\HeidelpayPayPalPaymentMethod</model>
-            	</hgwpal>
+            <hgwmain>
+                <security_sender>31HA07BC8142C5A171745D00AD63D182</security_sender>
+                <user_login>31ha07bc8142c5a171744e5aef11ffd3</user_login>
+                <user_passwd backend_model="Magento\Config\Model\Config\Backend\Encrypted">93167DE7</user_passwd>
+                <sandbox_mode>1</sandbox_mode>
+                <active>0</active>
+                <default_css>http://demoshops.heidelpay.de/css/mage2-hpf.css</default_css>
+                <model>Heidelpay\Gateway\PaymentMethodes\HeidelpayAbstractPaymentMethod</model>
+            </hgwmain>
+            <hgwpp>
+                <active>0</active>
+                <payment_action>authorize</payment_action>
+                <title>Prepayment</title>
+                <channel>31HA07BC8142C5A171749A60D979B6E4</channel>
+                <allowspecific>0</allowspecific>
+                <specificcountry/>
+                <min_order_total>0</min_order_total>
+                <max_order_total>0</max_order_total>
+                <model>Heidelpay\Gateway\PaymentMethodes\HeidelpayPrepaymentPaymentMethod</model>
+            </hgwpp>
+            <hgwcc>
+                <active>0</active>
+                <payment_action>authorize</payment_action>
+                <title><![CDATA[Credit card]]></title>
+                <channel>31HA07BC8142C5A171744F3D6D155865</channel>
+                <allowspecific>0</allowspecific>
+                <specificcountry/>
+                <min_order_total>0</min_order_total>
+                <max_order_total>0</max_order_total>
+                <model>Heidelpay\Gateway\PaymentMethodes\HeidelpayCreditCardPaymentMethod</model>
+            </hgwcc>
+            <hgwdc>
+                <active>0</active>
+                <payment_action>authorize</payment_action>
+                <title><![CDATA[Debit card]]></title>
+                <channel>31HA07BC8142C5A171744F3D6D155865</channel>
+                <allowspecific>0</allowspecific>
+                <specificcountry/>
+                <min_order_total>0</min_order_total>
+                <max_order_total>0</max_order_total>
+                <model>Heidelpay\Gateway\PaymentMethodes\HeidelpayDebitCardPaymentMethod</model>
+            </hgwdc>
+            <hgwsue>
+                <active>0</active>
+                <payment_action>authorize</payment_action>
+                <title><![CDATA[Sofortüberweisung]]></title>
+                <channel>31HA07BC8142C5A171749CDAA43365D2</channel>
+                <allowspecific>1</allowspecific>
+                <specificcountry>BE,DE,IT,NL,AT,SI,ES</specificcountry>
+                <min_order_total>0</min_order_total>
+                <max_order_total>0</max_order_total>
+                <model>Heidelpay\Gateway\PaymentMethodes\HeidelpaySofortPaymentMethod</model>
+            </hgwsue>
+            <hgwpal>
+                <active>0</active>
+                <payment_action>authorize</payment_action>
+                <title><![CDATA[PayPal]]></title>
+                <channel>31HA07BC8142C5A171744F3D6D155865</channel>
+                <allowspecific>0</allowspecific>
+                <specificcountry/>
+                <min_order_total>0</min_order_total>
+                <max_order_total>0</max_order_total>
+                <model>Heidelpay\Gateway\PaymentMethodes\HeidelpayPayPalPaymentMethod</model>
+            </hgwpal>
         </payment>
     </default>
 </config>

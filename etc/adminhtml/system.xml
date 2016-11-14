@@ -1,263 +1,308 @@
-
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../Magento/Config/etc/system_file.xsd">
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../../Magento/Config/etc/system_file.xsd">
     <system>
         <section id="payment">
-        <group id="hgw" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+            <group id="hgw" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1"
+                   showInStore="1">
                 <label>HGW_PAYMENT</label>
                 <comment>
                     <![CDATA[HGW_ABOUT_US]]>
                 </comment>
-            <group id="hgwmain" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
-                <label>HGWMAIN</label>
-                <field id="security_sender" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Security Sender</label>
-                    <config_path>payment/hgwmain/security_sender</config_path>
-                </field>
-                <field id="user_login" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>User Login</label>
-                    <config_path>payment/hgwmain/user_login</config_path>
-                </field>
-                <field id="user_passwd" translate="label" type="obscure" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>UserPassword</label>
-                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
-                    <config_path>payment/hgwmain/user_passwd</config_path>
-                </field>
-                <field id="sandbox_mode" translate="label" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Sandbox Mode</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment>If this is enabled the heidelpay sandbox will be used. Otherwise the real payment system will be used.</comment>
-                    <config_path>payment/hgwmain/sandbox_mode</config_path>
-                </field>
-                <field id="default_css" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Iframe css</label>
-                    <config_path>payment/hgwmain/default_css</config_path>
-                </field>
-			</group>
-            <group id="hgwcc" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
-			<label>HGWCC</label>
-                <field id="active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Enabled</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <config_path>payment/hgwcc/active</config_path>
-                </field>
-                <field id="title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Title</label>
-                    <config_path>payment/hgwcc/title</config_path>
-                </field>
-                <field id="channel" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Channel</label>
-                    <config_path>payment/hgwcc/channel</config_path>
-                </field>
-                <!-- <field id="bookingmode" translate="label" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Directbooking</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <config_path>payment/hgwcc/bookingmode</config_path>
-                    <comment>If this is enabled the card will be charged immediately. Otherwise the amount will just be authorised.</comment>
-                </field> -->
-                <field id="sort_order" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Sort Order</label>
-                    <config_path>payment/hgwcc/sort_order</config_path>
-                </field>
-                <field id="allowspecific" translate="label" type="allowspecific" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Payment from Applicable Countries</label>
-                    <source_model>Magento\Payment\Model\Config\Source\Allspecificcountries</source_model>
-                    <config_path>payment/hgwcc/allowspecific</config_path>
-                </field>
-                <field id="specificcountry" translate="label" type="multiselect" sortOrder="51" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Payment from Specific Countries</label>
-                    <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
-                    <config_path>payment/hgwcc/specificcountry</config_path>
-                </field>
-                <!-- 
-                <field id="min_order_total" translate="label" type="text" sortOrder="98" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Minimum Order Total</label>
-                    <config_path>payment/hgwcc/min_order_total</config_path>
-                </field>
-                <field id="max_order_total" translate="label" type="text" sortOrder="99" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Maximum Order Total</label>
-                    <config_path>payment/hgwcc/max_order_total</config_path>
-                    <comment>Insert 0 to disable limit.</comment>
-                </field>
-                 -->
+                <group id="hgwmain" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>HGWMAIN</label>
+                    <field id="security_sender" translate="label" type="text" sortOrder="1" showInDefault="1"
+                           showInWebsite="1" showInStore="1">
+                        <label>Security Sender</label>
+                        <config_path>payment/hgwmain/security_sender</config_path>
+                    </field>
+                    <field id="user_login" translate="label" type="text" sortOrder="2" showInDefault="1"
+                           showInWebsite="1" showInStore="1">
+                        <label>User Login</label>
+                        <config_path>payment/hgwmain/user_login</config_path>
+                    </field>
+                    <field id="user_passwd" translate="label" type="obscure" sortOrder="3" showInDefault="1"
+                           showInWebsite="1" showInStore="1">
+                        <label>UserPassword</label>
+                        <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                        <config_path>payment/hgwmain/user_passwd</config_path>
+                    </field>
+                    <field id="sandbox_mode" translate="label" type="select" sortOrder="4" showInDefault="1"
+                           showInWebsite="1" showInStore="1">
+                        <label>Sandbox Mode</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        <comment>If this is enabled the heidelpay sandbox will be used. Otherwise the real payment
+                            system will be used.
+                        </comment>
+                        <config_path>payment/hgwmain/sandbox_mode</config_path>
+                    </field>
+                    <field id="default_css" translate="label" type="text" sortOrder="5" showInDefault="1"
+                           showInWebsite="1" showInStore="1">
+                        <label>Iframe css</label>
+                        <config_path>payment/hgwmain/default_css</config_path>
+                    </field>
                 </group>
-            <group id="hgwdc" translate="label" type="text" sortOrder="110" showInDefault="1" showInWebsite="1" showInStore="1">
-			<label>HGWDC</label>
-                <field id="active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Enabled</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <config_path>payment/hgwdc/active</config_path>
-                </field>
-                <field id="title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Title</label>
-                    <config_path>payment/hgwdc/title</config_path>
-                </field>
-                <field id="channel" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Channel</label>
-                    <config_path>payment/hgwdc/channel</config_path>
-                </field>
-                <!-- <field id="bookingmode" translate="label" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Directbooking</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <config_path>payment/hgwdc/bookingmode</config_path>
-                    <comment>If this is enabled the card will be charged immediately. Otherwise the amount will just be authorised.</comment>
-                </field> -->
-                <field id="sort_order" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Sort Order</label>
-                    <config_path>payment/hgwdc/sort_order</config_path>
-                </field>
-                <field id="allowspecific" translate="label" type="allowspecific" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Payment from Applicable Countries</label>
-                    <source_model>Magento\Payment\Model\Config\Source\Allspecificcountries</source_model>
-                    <config_path>payment/hgwdc/allowspecific</config_path>
-                </field>
-                <field id="specificcountry" translate="label" type="multiselect" sortOrder="51" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Payment from Specific Countries</label>
-                    <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
-                    <config_path>payment/hgwdc/specificcountry</config_path>
-                </field>
-                <!-- 
-                <field id="min_order_total" translate="label" type="text" sortOrder="98" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Minimum Order Total</label>
-                    <config_path>payment/hgwdc/min_order_total</config_path>
-                </field>
-                <field id="max_order_total" translate="label" type="text" sortOrder="99" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Maximum Order Total</label>
-                    <config_path>payment/hgwdc/max_order_total</config_path>
-                    <comment>Insert 0 to disable limit.</comment>
-                </field>
-                 -->
+                <group id="hgwcc" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>HGWCC</label>
+                    <field id="active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1"
+                           showInStore="1">
+                        <label>Enabled</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        <config_path>payment/hgwcc/active</config_path>
+                    </field>
+                    <field id="title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1"
+                           showInStore="1">
+                        <label>Title</label>
+                        <config_path>payment/hgwcc/title</config_path>
+                    </field>
+                    <field id="channel" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1"
+                           showInStore="1">
+                        <label>Channel</label>
+                        <config_path>payment/hgwcc/channel</config_path>
+                    </field>
+                    <!-- <field id="bookingmode" translate="label" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Directbooking</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        <config_path>payment/hgwcc/bookingmode</config_path>
+                        <comment>If this is enabled the card will be charged immediately. Otherwise the amount will just be authorised.</comment>
+                    </field> -->
+                    <field id="sort_order" translate="label" type="text" sortOrder="5" showInDefault="1"
+                           showInWebsite="1" showInStore="1">
+                        <label>Sort Order</label>
+                        <config_path>payment/hgwcc/sort_order</config_path>
+                    </field>
+                    <field id="allowspecific" translate="label" type="allowspecific" sortOrder="50" showInDefault="1"
+                           showInWebsite="1" showInStore="1">
+                        <label>Payment from Applicable Countries</label>
+                        <source_model>Magento\Payment\Model\Config\Source\Allspecificcountries</source_model>
+                        <config_path>payment/hgwcc/allowspecific</config_path>
+                    </field>
+                    <field id="specificcountry" translate="label" type="multiselect" sortOrder="51" showInDefault="1"
+                           showInWebsite="1" showInStore="1">
+                        <label>Payment from Specific Countries</label>
+                        <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
+                        <config_path>payment/hgwcc/specificcountry</config_path>
+                    </field>
+                    <!--
+                    <field id="min_order_total" translate="label" type="text" sortOrder="98" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Minimum Order Total</label>
+                        <config_path>payment/hgwcc/min_order_total</config_path>
+                    </field>
+                    <field id="max_order_total" translate="label" type="text" sortOrder="99" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Maximum Order Total</label>
+                        <config_path>payment/hgwcc/max_order_total</config_path>
+                        <comment>Insert 0 to disable limit.</comment>
+                    </field>
+                     -->
                 </group>
-                <group id="hgwsue" translate="label" type="text" sortOrder="140" showInDefault="1" showInWebsite="1" showInStore="1">
-			<label>HGWSUE</label>
-                <field id="active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Enabled</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <config_path>payment/hgwsue/active</config_path>
-                </field>
-			<field id="title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
-				<label>Title</label>
-				<config_path>payment/hgwsue/title</config_path>
-                </field>
-                <field id="channel" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Channel</label>
-                    <config_path>payment/hgwsue/channel</config_path>
-                </field>
-                <field id="sort_order" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Sort Order</label>
-                    <config_path>payment/hgwsue/sort_order</config_path>
-                </field>
-                <field id="allowspecific" translate="label" type="allowspecific" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Payment from Applicable Countries</label>
-                    <source_model>Magento\Payment\Model\Config\Source\Allspecificcountries</source_model>
-                    <config_path>payment/hgwsue/allowspecific</config_path>
-                </field>
-                <field id="specificcountry" translate="label" type="multiselect" sortOrder="51" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Payment from Specific Countries</label>
-                    <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
-                    <config_path>payment/hgwsue/specificcountry</config_path>
-                </field>
-                <!-- 
-                <field id="min_order_total" translate="label" type="text" sortOrder="98" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Minimum Order Total</label>
-                    <config_path>payment/hgwsue/min_order_total</config_path>
-                </field>
-                <field id="max_order_total" translate="label" type="text" sortOrder="99" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Maximum Order Total</label>
-                    <config_path>payment/hgwsue/max_order_total</config_path>
-                    <comment>Insert 0 to disable limit.</comment>
-                </field>
-                 -->
+                <group id="hgwdc" translate="label" type="text" sortOrder="110" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>HGWDC</label>
+                    <field id="active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1"
+                           showInStore="1">
+                        <label>Enabled</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        <config_path>payment/hgwdc/active</config_path>
+                    </field>
+                    <field id="title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1"
+                           showInStore="1">
+                        <label>Title</label>
+                        <config_path>payment/hgwdc/title</config_path>
+                    </field>
+                    <field id="channel" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1"
+                           showInStore="1">
+                        <label>Channel</label>
+                        <config_path>payment/hgwdc/channel</config_path>
+                    </field>
+                    <!-- <field id="bookingmode" translate="label" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Directbooking</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        <config_path>payment/hgwdc/bookingmode</config_path>
+                        <comment>If this is enabled the card will be charged immediately. Otherwise the amount will just be authorised.</comment>
+                    </field> -->
+                    <field id="sort_order" translate="label" type="text" sortOrder="5" showInDefault="1"
+                           showInWebsite="1" showInStore="1">
+                        <label>Sort Order</label>
+                        <config_path>payment/hgwdc/sort_order</config_path>
+                    </field>
+                    <field id="allowspecific" translate="label" type="allowspecific" sortOrder="50" showInDefault="1"
+                           showInWebsite="1" showInStore="1">
+                        <label>Payment from Applicable Countries</label>
+                        <source_model>Magento\Payment\Model\Config\Source\Allspecificcountries</source_model>
+                        <config_path>payment/hgwdc/allowspecific</config_path>
+                    </field>
+                    <field id="specificcountry" translate="label" type="multiselect" sortOrder="51" showInDefault="1"
+                           showInWebsite="1" showInStore="1">
+                        <label>Payment from Specific Countries</label>
+                        <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
+                        <config_path>payment/hgwdc/specificcountry</config_path>
+                    </field>
+                    <!--
+                    <field id="min_order_total" translate="label" type="text" sortOrder="98" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Minimum Order Total</label>
+                        <config_path>payment/hgwdc/min_order_total</config_path>
+                    </field>
+                    <field id="max_order_total" translate="label" type="text" sortOrder="99" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Maximum Order Total</label>
+                        <config_path>payment/hgwdc/max_order_total</config_path>
+                        <comment>Insert 0 to disable limit.</comment>
+                    </field>
+                     -->
                 </group>
-            <group id="hgwpal" translate="label" type="text" sortOrder="150" showInDefault="1" showInWebsite="1" showInStore="1">
-			<label>HGWPAL</label>
-                <field id="active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Enabled</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <config_path>payment/hgwpal/active</config_path>
-                </field>
-                <field id="title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Title</label>
-                    <config_path>payment/hgwpal/title</config_path>
-                </field>
-                <field id="channel" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Channel</label>
-                    <config_path>payment/hgwpal/channel</config_path>
-                </field>
-                <!-- <field id="bookingmode" translate="label" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Directbooking</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <config_path>payment/hgwpal/bookingmode</config_path>
-                    <comment>If this is enabled the card will be charged immediately. Otherwise the amount will just be authorised.</comment>
-                </field> -->
-                <field id="sort_order" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Sort Order</label>
-                    <config_path>payment/hgwpal/sort_order</config_path>
-                </field>
-                <field id="allowspecific" translate="label" type="allowspecific" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Payment from Applicable Countries</label>
-                    <source_model>Magento\Payment\Model\Config\Source\Allspecificcountries</source_model>
-                    <config_path>payment/hgwpal/allowspecific</config_path>
-                </field>
-                <field id="specificcountry" translate="label" type="multiselect" sortOrder="51" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Payment from Specific Countries</label>
-                    <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
-                    <config_path>payment/hgwpal/specificcountry</config_path>
-                </field>
-                <!-- 
-                <field id="min_order_total" translate="label" type="text" sortOrder="98" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Minimum Order Total</label>
-                    <config_path>payment/hgwpal/min_order_total</config_path>
-                </field>
-                <field id="max_order_total" translate="label" type="text" sortOrder="99" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Maximum Order Total</label>
-                    <config_path>payment/hgwpal/max_order_total</config_path>
-                    <comment>Insert 0 to disable limit.</comment>
-                </field>
-                 -->
-           	</group>
-			<group id="hgwpp" translate="label" type="text" sortOrder="160" showInDefault="1" showInWebsite="1" showInStore="1">
-			<label>HGWPP</label>
-                <field id="active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Enabled</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <config_path>payment/hgwpp/active</config_path>
-                </field>
-                <field id="title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Title</label>
-                    <comment>Currently there is no back channel, so you have to manually match on money received</comment>
-                    <config_path>payment/hgwpp/title</config_path>
-                </field>
-                <field id="channel" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Channel</label>
-                    <config_path>payment/hgwpp/channel</config_path>
-                </field>
-                <field id="sort_order" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Sort Order</label>
-                    <config_path>payment/hgwpp/sort_order</config_path>
-                </field>
-                <field id="allowspecific" translate="label" type="allowspecific" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Payment from Applicable Countries</label>
-                    <source_model>Magento\Payment\Model\Config\Source\Allspecificcountries</source_model>
-                    <config_path>payment/hgwpp/allowspecific</config_path>
-                </field>
-                <field id="specificcountry" translate="label" type="multiselect" sortOrder="51" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Payment from Specific Countries</label>
-                    <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
-                    <config_path>payment/hgwpp/specificcountry</config_path>
-                </field>
-                <!-- 
-                <field id="min_order_total" translate="label" type="text" sortOrder="98" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Minimum Order Total</label>
-                    <config_path>payment/hgwpp/min_order_total</config_path>
-                </field>
-                <field id="max_order_total" translate="label" type="text" sortOrder="99" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Maximum Order Total</label>
-                    <config_path>payment/hgwpp/max_order_total</config_path>
-                    <comment>Insert 0 to disable limit.</comment>
-                </field>
-                 -->
+                <group id="hgwsue" translate="label" type="text" sortOrder="140" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>HGWSUE</label>
+                    <field id="active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1"
+                           showInStore="1">
+                        <label>Enabled</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        <config_path>payment/hgwsue/active</config_path>
+                    </field>
+                    <field id="title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1"
+                           showInStore="1">
+                        <label>Title</label>
+                        <config_path>payment/hgwsue/title</config_path>
+                    </field>
+                    <field id="channel" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1"
+                           showInStore="1">
+                        <label>Channel</label>
+                        <config_path>payment/hgwsue/channel</config_path>
+                    </field>
+                    <field id="sort_order" translate="label" type="text" sortOrder="5" showInDefault="1"
+                           showInWebsite="1" showInStore="1">
+                        <label>Sort Order</label>
+                        <config_path>payment/hgwsue/sort_order</config_path>
+                    </field>
+                    <field id="allowspecific" translate="label" type="allowspecific" sortOrder="50" showInDefault="1"
+                           showInWebsite="1" showInStore="1">
+                        <label>Payment from Applicable Countries</label>
+                        <source_model>Magento\Payment\Model\Config\Source\Allspecificcountries</source_model>
+                        <config_path>payment/hgwsue/allowspecific</config_path>
+                    </field>
+                    <field id="specificcountry" translate="label" type="multiselect" sortOrder="51" showInDefault="1"
+                           showInWebsite="1" showInStore="1">
+                        <label>Payment from Specific Countries</label>
+                        <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
+                        <config_path>payment/hgwsue/specificcountry</config_path>
+                    </field>
+                    <!--
+                    <field id="min_order_total" translate="label" type="text" sortOrder="98" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Minimum Order Total</label>
+                        <config_path>payment/hgwsue/min_order_total</config_path>
+                    </field>
+                    <field id="max_order_total" translate="label" type="text" sortOrder="99" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Maximum Order Total</label>
+                        <config_path>payment/hgwsue/max_order_total</config_path>
+                        <comment>Insert 0 to disable limit.</comment>
+                    </field>
+                     -->
+                </group>
+                <group id="hgwpal" translate="label" type="text" sortOrder="150" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>HGWPAL</label>
+                    <field id="active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1"
+                           showInStore="1">
+                        <label>Enabled</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        <config_path>payment/hgwpal/active</config_path>
+                    </field>
+                    <field id="title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1"
+                           showInStore="1">
+                        <label>Title</label>
+                        <config_path>payment/hgwpal/title</config_path>
+                    </field>
+                    <field id="channel" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1"
+                           showInStore="1">
+                        <label>Channel</label>
+                        <config_path>payment/hgwpal/channel</config_path>
+                    </field>
+                    <!-- <field id="bookingmode" translate="label" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Directbooking</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        <config_path>payment/hgwpal/bookingmode</config_path>
+                        <comment>If this is enabled the card will be charged immediately. Otherwise the amount will just be authorised.</comment>
+                    </field> -->
+                    <field id="sort_order" translate="label" type="text" sortOrder="5" showInDefault="1"
+                           showInWebsite="1" showInStore="1">
+                        <label>Sort Order</label>
+                        <config_path>payment/hgwpal/sort_order</config_path>
+                    </field>
+                    <field id="allowspecific" translate="label" type="allowspecific" sortOrder="50" showInDefault="1"
+                           showInWebsite="1" showInStore="1">
+                        <label>Payment from Applicable Countries</label>
+                        <source_model>Magento\Payment\Model\Config\Source\Allspecificcountries</source_model>
+                        <config_path>payment/hgwpal/allowspecific</config_path>
+                    </field>
+                    <field id="specificcountry" translate="label" type="multiselect" sortOrder="51" showInDefault="1"
+                           showInWebsite="1" showInStore="1">
+                        <label>Payment from Specific Countries</label>
+                        <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
+                        <config_path>payment/hgwpal/specificcountry</config_path>
+                    </field>
+                    <!--
+                    <field id="min_order_total" translate="label" type="text" sortOrder="98" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Minimum Order Total</label>
+                        <config_path>payment/hgwpal/min_order_total</config_path>
+                    </field>
+                    <field id="max_order_total" translate="label" type="text" sortOrder="99" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Maximum Order Total</label>
+                        <config_path>payment/hgwpal/max_order_total</config_path>
+                        <comment>Insert 0 to disable limit.</comment>
+                    </field>
+                     -->
+                </group>
+                <group id="hgwpp" translate="label" type="text" sortOrder="160" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>HGWPP</label>
+                    <field id="active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1"
+                           showInStore="1">
+                        <label>Enabled</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        <config_path>payment/hgwpp/active</config_path>
+                    </field>
+                    <field id="title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1"
+                           showInStore="1">
+                        <label>Title</label>
+                        <comment>Currently there is no back channel, so you have to manually match on money received
+                        </comment>
+                        <config_path>payment/hgwpp/title</config_path>
+                    </field>
+                    <field id="channel" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1"
+                           showInStore="1">
+                        <label>Channel</label>
+                        <config_path>payment/hgwpp/channel</config_path>
+                    </field>
+                    <field id="sort_order" translate="label" type="text" sortOrder="5" showInDefault="1"
+                           showInWebsite="1" showInStore="1">
+                        <label>Sort Order</label>
+                        <config_path>payment/hgwpp/sort_order</config_path>
+                    </field>
+                    <field id="allowspecific" translate="label" type="allowspecific" sortOrder="50" showInDefault="1"
+                           showInWebsite="1" showInStore="1">
+                        <label>Payment from Applicable Countries</label>
+                        <source_model>Magento\Payment\Model\Config\Source\Allspecificcountries</source_model>
+                        <config_path>payment/hgwpp/allowspecific</config_path>
+                    </field>
+                    <field id="specificcountry" translate="label" type="multiselect" sortOrder="51" showInDefault="1"
+                           showInWebsite="1" showInStore="1">
+                        <label>Payment from Specific Countries</label>
+                        <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
+                        <config_path>payment/hgwpp/specificcountry</config_path>
+                    </field>
+                    <!--
+                    <field id="min_order_total" translate="label" type="text" sortOrder="98" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Minimum Order Total</label>
+                        <config_path>payment/hgwpp/min_order_total</config_path>
+                    </field>
+                    <field id="max_order_total" translate="label" type="text" sortOrder="99" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Maximum Order Total</label>
+                        <config_path>payment/hgwpp/max_order_total</config_path>
+                        <comment>Insert 0 to disable limit.</comment>
+                    </field>
+                     -->
+                </group>
             </group>
-           </group>
         </section>
     </system>
 </config>

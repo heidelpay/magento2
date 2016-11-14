@@ -1,8 +1,7 @@
-
 var config = {
     map: {
         '*': {
-        	heidelpayCcAfter:           'Heidelpay_Gateway/js/heidelpayCcAfter'
+            heidelpayCcAfter: 'Heidelpay_Gateway/js/heidelpayCcAfter'
         }
     }
 };

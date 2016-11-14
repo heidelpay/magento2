@@ -1,5 +1,8 @@
 <?php
+
 namespace Heidelpay\Gateway\Block;
+use Magento\Framework\View\Element\Template;
+
 /**
  * Heidelpay Gateway Block
  *
@@ -13,24 +16,18 @@ namespace Heidelpay\Gateway\Block;
  * @subpackage Magento2
  * @category Magento2
  */
-
-class Hgw extends \Magento\Framework\View\Element\Template
+class Hgw extends Template
 {
-	
-	protected $_hgwUrl;
-	
-	public function _prepareLayout()
-	{
-	    return parent::_prepareLayout();
-	}
-	
-	/*
-	protected function setHgwUrl($url) {
-		$this->_hgwUrl = $url;
-	}
-	
-	protected function getHgwUrl() {
-		return $this->_hgwUrl;
-	}
-	*/
+    /**
+     * @var string
+     */
+    protected $_hgwUrl;
+
+    /**
+     * @return Template
+     */
+    public function _prepareLayout()
+    {
+        return parent::_prepareLayout();
+    }
 }

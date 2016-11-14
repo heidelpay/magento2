@@ -1,5 +1,14 @@
 <?php
-namespace Heidelpay\Gateway\Model; 
+
+namespace Heidelpay\Gateway\Model;
+
+use Magento\Framework\Data\Collection\AbstractDb;
+use Magento\Framework\Model\AbstractModel;
+use Magento\Framework\Model\Context;
+use Magento\Framework\Model\ResourceModel\AbstractResource;
+use Magento\Framework\Registry;
+use Magento\Payment\Helper\Data;
+
 /**
  * Transaction resource model
  *
@@ -12,35 +21,57 @@ namespace Heidelpay\Gateway\Model;
  * @subpackage Magento2
  * @category Magento2
  */
-
-class Transaction extends  \Magento\Framework\Model\AbstractModel
+class Transaction extends AbstractModel
 {
-   public function __construct(
-        \Magento\Framework\Model\Context $context,
-        \Magento\Framework\Registry $registry,
-        \Magento\Payment\Helper\Data $paymentData,
-        \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
-        \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
+    /**
+     * @var Data
+     */
+    protected $paymentData;
+
+    /**
+     * Transaction constructor.
+     * @param Context $context
+     * @param Registry $registry
+     * @param Data $paymentData
+     * @param AbstractResource|null $resource
+     * @param AbstractDb|null $resourceCollection
+     * @param array $data
+     */
+    public function __construct(
+        Context $context,
+        Registry $registry,
+        Data $paymentData,
+        AbstractResource $resource = null,
+        AbstractDb $resourceCollection = null,
         array $data = []
-    ) {
-        $this->_paymentData = $paymentData;
+    )
+    {
+        $this->paymentData = $paymentData;
         parent::__construct($context, $registry, $resource, $resourceCollection, $data);
     }
-	public function _construct()
-	{
-	    $this->_init('Heidelpay\Gateway\Model\ResourceModel\Transaction');
-	}
-	
-	public function loadLastTransactionByQuoteId($modelId, $field = null)
+
+    /**
+     * @return void
+     */
+    public function _construct()
+    {
+        $this->_init('Heidelpay\Gateway\Model\ResourceModel\Transaction');
+    }
+
+    /**
+     * @param $modelId
+     * @param null $field
+     * @return $this
+     */
+    public function loadLastTransactionByQuoteId($modelId, $field = null)
     {
         $this->_beforeLoad($modelId, $field);
-        $this->_getResource()->loadLastTransactionByQuoteId($this, $modelId, $field);
+        $abstractDb = $this->_getResource();
+        $abstractDb->loadLastTransactionByQuoteId($this, $modelId, $field);
         $this->_afterLoad();
         $this->setOrigData();
         $this->_hasDataChanges = false;
-        //$this->updateStoredData();
+
         return $this;
-		
-	}
-	
+    }
 }

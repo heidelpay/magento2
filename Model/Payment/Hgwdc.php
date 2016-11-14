@@ -29,7 +29,7 @@ class Hgwdc extends   HgwAbstract
   
 
 	
-    public function	activeRedirct() {
+    public function	activeRedirect() {
     	return false ;
     }
     
