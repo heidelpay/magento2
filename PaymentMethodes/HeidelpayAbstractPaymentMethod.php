@@ -219,7 +219,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
 	     * @todo replace fixed shop version and plugin version
 	     * */
 	    $this->_heidelpayPaymentMethod->getRequest()->getCriterion()->set('SHOP.TYPE', 'Magento 2.x');
-	    $this->_heidelpayPaymentMethod->getRequest()->getCriterion()->set('SHOPMODULE.VERSION', 'Heidelpay Gateway - 16.10.27');
+	    $this->_heidelpayPaymentMethod->getRequest()->getCriterion()->set('SHOPMODULE.VERSION', 'Heidelpay Gateway - 16.11.16');
 	    
 	    /** @todo should be removed after using heidelpay php-api for every payment method */
 	    //$this->_heidelpayPaymentMethod->getRequest()->getCriterion()->set('secret',$this->_encryptor->getHash($quote->getId().$this->_encryptor->exportKeys()));
@@ -252,9 +252,9 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
 		$config ['SECURITY.SENDER'] = $this->_scopeConfig->getValue ( $path . "security_sender", \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $storeId );
 		
 		if ($this->_scopeConfig->getValue ( $path . "sandbox_mode", \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $storeId ) == 0) {
-			$config ['TRANSACTION.MODE'] = 'FALSE';
+			$config ['TRANSACTION.MODE'] = FALSE;
 		} else {
-			$config ['TRANSACTION.MODE'] = 'TRUE';
+			$config ['TRANSACTION.MODE'] = TRUE;
 		}
 		$config ['USER.LOGIN'] = trim ( $this->_scopeConfig->getValue ( $path . "user_login", \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $storeId ) );
 		$config ['USER.PWD'] = trim ( $this->_scopeConfig->getValue ( $path . "user_passwd", \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $storeId ) );
