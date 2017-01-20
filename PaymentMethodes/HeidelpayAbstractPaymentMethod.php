@@ -54,7 +54,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
      * canUseInternal
      * @var boolean
      */
-    protected $_canUseInternal = true;
+    protected $_canUseInternal = false;
 	/**
 	 * form block type
 	 * @var string
