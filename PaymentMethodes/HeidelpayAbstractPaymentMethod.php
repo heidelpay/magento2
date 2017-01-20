@@ -27,7 +27,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
 	protected $_code = 'hgwabstract';
 	/**
 	 * PaymentCode
-	 * @var string
+	 * @var boolean
 	 */
 	protected $_isGateway = true;
 	/**
@@ -42,14 +42,19 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
 	protected $_canCapturePartial = false;
 	/**
 	 * canRefund
-	 * @var string
+	 * @var boolean
 	 */
 	protected $_canRefund = false;
 	/**
 	 * canRefundInvoicePartial
-	 * @var string
+	 * @var boolean
 	 */
 	protected $_canRefundInvoicePartial = false;
+    /**
+     * canUseInternal
+     * @var boolean
+     */
+    protected $_canUseInternal = true;
 	/**
 	 * form block type
 	 * @var string
@@ -219,7 +224,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
 	     * @todo replace fixed shop version and plugin version
 	     * */
 	    $this->_heidelpayPaymentMethod->getRequest()->getCriterion()->set('SHOP.TYPE', 'Magento 2.x');
-	    $this->_heidelpayPaymentMethod->getRequest()->getCriterion()->set('SHOPMODULE.VERSION', 'Heidelpay Gateway - 16.11.16');
+	    $this->_heidelpayPaymentMethod->getRequest()->getCriterion()->set('SHOPMODULE.VERSION', 'Heidelpay Gateway - 17.1.20');
 	    
 	    /** @todo should be removed after using heidelpay php-api for every payment method */
 	    //$this->_heidelpayPaymentMethod->getRequest()->getCriterion()->set('secret',$this->_encryptor->getHash($quote->getId().$this->_encryptor->exportKeys()));
