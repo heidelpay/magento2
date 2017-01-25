@@ -23,7 +23,7 @@
 		}
 	],
 	"type" : "magento2-module",
-	"version" : "17.1.20",
+	"version" : "17.1.25",
 	"license" : "Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.",
 	"autoload" : {
 		"files" : [
