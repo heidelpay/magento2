@@ -10,6 +10,7 @@ Currently supported payment methods are:
 * Sofortüberweisung
 * PayPal
 * Prepayment
+* giropay
 
 For more information please visit -https://dev.heidelpay.de/magento2/
 
@@ -28,13 +29,10 @@ All versions greater than 16.10.17 are based on the heidelpay php-api. (https://
 
 ## Installation
 
-### Add the heidelpay composer repository
-
-```composer config repositories.heidelpay composer https://dev.heidelpay.de/packages```
 
 ### Install the heidelpay Magento 2 composer package
 
-```composer require "heidelpay/magento2:17.1.20"```
+```composer require "heidelpay/magento2:17.2.7"```
 
 ### Enable the extension in Magento 2
 
