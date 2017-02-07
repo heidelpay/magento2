@@ -28,6 +28,10 @@ define(
             {
                 type: 'hgwpp',
                 component: 'Heidelpay_Gateway/js/view/payment/method-renderer/hgw-abstract'
+            },
+            {
+                type: 'hgwgp',
+                component: 'Heidelpay_Gateway/js/view/payment/method-renderer/hgw-abstract'
             }
             
         );

@@ -63,6 +63,7 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
 				/** Sende Invoice main to customer */
 				$this->_orderSender->send($order);
 			} catch (\Exception $e) {
+			    // TODO: Change to "cannot create order or send order mail"
 				$this->_logger->error('Heidelpay Redirect load order fail. '.$e->getMessage());
 			}
 			
@@ -74,7 +75,8 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
 					$this->_invoiceSender->send($invoice);
 				
 			}
-			
+
+
 			$session->clearHelperData();
 			
 			/* set QouteIds */
@@ -86,7 +88,11 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
 			$session->setLastOrderId($order->getId())
 					->setLastRealOrderId($order->getIncrementId())
 					->setLastOrderStatus($order->getStatus());
-			
+
+
+            // TODO: Clear quote (shopping cart)
+
+
 			$additionalPaymentInformation = $order->getPayment()->getMethodInstance()->additionalPaymentInformation($data);
 			
 			$this->_logger->addDebug('Additional Payment Information : '.$additionalPaymentInformation);

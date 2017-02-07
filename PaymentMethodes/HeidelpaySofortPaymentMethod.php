@@ -48,27 +48,23 @@ class HeidelpaySofortPaymentMethod extends   HeidelpayAbstractPaymentMethod
      * @see \Heidelpay\Gateway\PaymentMethodes\HeidelpayAbstractPaymentMethod::getHeidelpayUrl()
      */
     
-     public function getHeidelpayUrl($quote) {
-     
+     public function getHeidelpayUrl($quote)
+     {
          $this->_heidelpayPaymentMethod = new HeidelpayPhpApiSofort();
          
          parent::getHeidelpayUrl($quote);
          
          /** Force PhpApi to just generate the request instead of sending it directly */
          $this->_heidelpayPaymentMethod->_dryRun = TRUE;
-         
-         
-         /** Set payment type to debit */
-         $this->_heidelpayPaymentMethod->debit();
+
+         /** Set payment type to authorize */
+         $this->_heidelpayPaymentMethod->authorize();
          
          /** Prepare and send request to heidelpay */
          $request =   $this->_heidelpayPaymentMethod->getRequest()->prepareRequest();
          $response =  $this->_heidelpayPaymentMethod->getRequest()->send($this->_heidelpayPaymentMethod->getPaymentUrl(), $request);
-          
+
          return $response[0];
-         
-         
-         
      }
      
 }
