@@ -1,3 +1,6 @@
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/heidelpay/magento2.svg?style=flat-square)](https://packagist.org/packages/heidelpay/magento2)
+[![Codacy Badge](https://api.codacy.com/project/badge/grade/1eb6c98b1e10463999496a9e079b0164)](https://www.codacy.com/app/heidelpay/magento2/dashboard)
+
 ![Logo](https://dev.heidelpay.de/devHeidelpay_400_180.jpg)
 
 # Heidelpay payment extension for Magento2
