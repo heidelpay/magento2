@@ -1,5 +1,6 @@
 <?php
-namespace Heidelpay\Gateway\PaymentMethodes ;
+namespace Heidelpay\Gateway\PaymentMethodes;
+
 /**
  * heidelpay sofort payment method
  *
@@ -8,46 +9,51 @@ namespace Heidelpay\Gateway\PaymentMethodes ;
  *
  * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
  * @copyright Copyright © 2016-present Heidelberger Payment GmbH. All rights reserved.
+ *
  * @link  https://dev.heidelpay.de/magento
+ *
  * @author  Jens Richter
  *
  * @package  Heidelpay
  * @subpackage Magento2
  * @category Magento2
  */
-use \Heidelpay\PhpApi\PaymentMethodes\SofortPaymentMethod as HeidelpayPhpApiSofort;
-use \Heidelpay\Gateway\PaymentMethodes\HeidelpayAbstractPaymentMethod;
+use Heidelpay\PhpApi\PaymentMethodes\SofortPaymentMethod as HeidelpayPhpApiSofort;
+use Heidelpay\Gateway\PaymentMethodes\HeidelpayAbstractPaymentMethod;
 
-class HeidelpaySofortPaymentMethod extends   HeidelpayAbstractPaymentMethod
+class HeidelpaySofortPaymentMethod extends HeidelpayAbstractPaymentMethod
 {
     /**
      * Payment Code
+     *
      * @var string PayentCode
      */
     const CODE = 'hgwsue';
     /**
      * Payment Code
+     *
      * @var string PayentCode
      */
     protected $_code = 'hgwsue';
     /**
-     * isGateway 
+     * isGateway
+     *
      * @var boolean
      */
     protected $_isGateway                   = true;
     /**
      * canAuthorize
+     *
      * @var boolean
      */
-    protected $_canAuthorize 				= true;
-    
+    protected $_canAuthorize                = true;
         
     /**
-     * Initial Request to heidelpay payment server to get the form / iframe url 
+     * Initial Request to heidelpay payment server to get the form / iframe url
      * {@inheritDoc}
+     *
      * @see \Heidelpay\Gateway\PaymentMethodes\HeidelpayAbstractPaymentMethod::getHeidelpayUrl()
      */
-    
      public function getHeidelpayUrl($quote)
      {
          $this->_heidelpayPaymentMethod = new HeidelpayPhpApiSofort();
@@ -55,7 +61,7 @@ class HeidelpaySofortPaymentMethod extends   HeidelpayAbstractPaymentMethod
          parent::getHeidelpayUrl($quote);
          
          /** Force PhpApi to just generate the request instead of sending it directly */
-         $this->_heidelpayPaymentMethod->_dryRun = TRUE;
+         $this->_heidelpayPaymentMethod->_dryRun = true;
 
          /** Set payment type to authorize */
          $this->_heidelpayPaymentMethod->authorize();
@@ -66,5 +72,4 @@ class HeidelpaySofortPaymentMethod extends   HeidelpayAbstractPaymentMethod
 
          return $response[0];
      }
-     
 }

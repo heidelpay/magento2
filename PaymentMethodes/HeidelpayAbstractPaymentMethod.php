@@ -10,7 +10,9 @@ namespace Heidelpay\Gateway\PaymentMethodes;
  *
  * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
  * @copyright Copyright © 2016-present Heidelberger Payment GmbH. All rights reserved.
+ *
  * @link  https://dev.heidelpay.de/magento
+ *
  * @author  Jens Richter
  *
  * @package  Heidelpay
@@ -18,48 +20,54 @@ namespace Heidelpay\Gateway\PaymentMethodes;
  * @category Magento2
  */
 
-use \Heidelpay\PhpApi\PaymentMethodes\AbstractPaymentMethod as HeidelpayPaymentMethod;
-
 class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\AbstractMethod
 {
     /**
      * PaymentCode
+     *
      * @var string
      */
     const CODE = 'hgwabstract';
     protected $_code = 'hgwabstract';
     /**
      * PaymentCode
+     *
      * @var boolean
      */
     protected $_isGateway = true;
     /**
      * canCapture
+     *
      * @var boolean
      */
     protected $_canCapture = false;
     /**
      * canCapturePartial
+     *
      * @var boolean
      */
     protected $_canCapturePartial = false;
     /**
      * canRefund
+     *
      * @var boolean
      */
     protected $_canRefund = false;
     /**
      * canRefundInvoicePartial
+     *
      * @var boolean
      */
     protected $_canRefundInvoicePartial = false;
     /**
      * canUseInternal
+     *
      * @var boolean
      */
     protected $_canUseInternal = false;
     /**
      * form block type
+     *
      * @var string
      */
     protected $_formBlockType = 'Heidelpay\Gateway\Block\Payment\HgwAbstract';
@@ -92,22 +100,22 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
      *
      * @var \Magento\Payment\Model\Method\Logger
      */
-
     protected $logger = null;
     /**
      *
      * @var \Magento\Framework\Encryption\Encryptor
      */
-
     protected $_encryptor = null;
 
     /**
      * Productive payment server url
+     *
      * @var string https://heidelpay.hpcgw.net/ngw/post
      */
     protected $_live_url = 'https://heidelpay.hpcgw.net/ngw/post';
     /**
      * Sandbox payment server url
+     *
      * @var string https://test-heidelpay.hpcgw.net/ngw/post
      */
     protected $_sandbox_url = 'https://test-heidelpay.hpcgw.net/ngw/post';
@@ -115,21 +123,21 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
     /**
      * contract
      *
-     * @param \Magento\Framework\Model\Context $context
-     * @param \Magento\Framework\Registry $registry
-     * @param \Magento\Framework\Api\ExtensionAttributesFactory $extensionFactory
-     * @param \Magento\Framework\Api\AttributeValueFactory $customAttributeFactory
-     * @param \Magento\Payment\Helper\Data $paymentData
-     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
-     * @param \Magento\Framework\App\RequestInterface $request
-     * @param \Magento\Framework\UrlInterface $urlinterface
-     * @param \Magento\Framework\Encryption\Encryptor $encryptor
-     * @param \Magento\Payment\Model\Method\Logger $logger
-     * @param \Magento\Framework\Locale\ResolverInterface $localeResolver
-     * @param \Heidelpay\Gateway\Helper\Payment $paymentHelper
+     * @param \Magento\Framework\Model\Context                        $context
+     * @param \Magento\Framework\Registry                             $registry
+     * @param \Magento\Framework\Api\ExtensionAttributesFactory       $extensionFactory
+     * @param \Magento\Framework\Api\AttributeValueFactory            $customAttributeFactory
+     * @param \Magento\Payment\Helper\Data                            $paymentData
+     * @param \Magento\Framework\App\Config\ScopeConfigInterface      $scopeConfig
+     * @param \Magento\Framework\App\RequestInterface                 $request
+     * @param \Magento\Framework\UrlInterface                         $urlinterface
+     * @param \Magento\Framework\Encryption\Encryptor                 $encryptor
+     * @param \Magento\Payment\Model\Method\Logger                    $logger
+     * @param \Magento\Framework\Locale\ResolverInterface             $localeResolver
+     * @param \Heidelpay\Gateway\Helper\Payment                       $paymentHelper
      * @param \Magento\Framework\Model\ResourceModel\AbstractResource $resource
-     * @param \Magento\Framework\Data\Collection\AbstractDb $resourceCollection
-     * @param array $data
+     * @param \Magento\Framework\Data\Collection\AbstractDb           $resourceCollection
+     * @param array                                                   $data
      */
     public function __construct(
         \Magento\Framework\Model\Context $context,
@@ -167,9 +175,9 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
      *
      * This function will return false, if the used payment method needs additional
      * customer payment data to pursue.
+     *
      * @return boolean
      */
-
     public function activeRedirct()
     {
         return true;
@@ -177,28 +185,28 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
 
     /**
      * override getConfig to change the configuration path
+     *
      * @param unknown $field
      * @param unknown $storeId
+     *
      * @return string config value
      */
-
     public function getConfigData($field, $storeId = null)
     {
         $path = 'payment/' . $this->getCode() . '/' . $field;
-        return $this->_scopeConfig->getValue($path, \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $storeId);;
+        return $this->_scopeConfig->getValue($path, \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $storeId);
     }
 
     public function getHeidelpayUrl($quote)
     {
-
         $config = $this->getMainConfig($this->_code, $this->getStore());
 
         $this->_heidelpayPaymentMethod->getRequest()->authentification(
-            $config ['SECURITY.SENDER'],        // SecuritySender
-            $config ['USER.LOGIN'],             // UserLogin
-            $config ['USER.PWD'],               // UserPassword
-            $config ['TRANSACTION.CHANNEL'],    // TransactionChannel credit card without 3d secure
-            $config ['TRANSACTION.MODE']        // Enable sandbox mode
+            $config['SECURITY.SENDER'],        // SecuritySender
+            $config['USER.LOGIN'],             // UserLogin
+            $config['USER.PWD'],               // UserPassword
+            $config['TRANSACTION.CHANNEL'],    // TransactionChannel credit card without 3d secure
+            $config['TRANSACTION.MODE']        // Enable sandbox mode
         );
 
         $frontend = $this->getFrontend();
@@ -258,34 +266,33 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
     /**
      * getMainConfig will return the backend configuration for the given payment method
      *
-     * @param string $code payment method name
+     * @param string $code    payment method name
      * @param string $storeId id of the store front
+     *
      * @return array configuration form backend
      */
-
-
     public function getMainConfig($code, $storeId = false)
     {
         $path = "payment/hgwmain/";
         $config = array();
 
-        $config ['SECURITY.SENDER'] = $this->_scopeConfig->getValue($path . "security_sender",
+        $config['SECURITY.SENDER'] = $this->_scopeConfig->getValue($path . "security_sender",
             \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $storeId);
 
+        $config['TRANSACTION.MODE'] = true;
+        
         if ($this->_scopeConfig->getValue($path . "sandbox_mode", \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
                 $storeId) == 0
         ) {
-            $config ['TRANSACTION.MODE'] = false;
-        } else {
-            $config ['TRANSACTION.MODE'] = true;
-        }
-        $config ['USER.LOGIN'] = trim($this->_scopeConfig->getValue($path . "user_login",
+            $config['TRANSACTION.MODE'] = false;
+        
+        $config['USER.LOGIN'] = trim($this->_scopeConfig->getValue($path . "user_login",
             \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $storeId));
-        $config ['USER.PWD'] = trim($this->_scopeConfig->getValue($path . "user_passwd",
+        $config['USER.PWD'] = trim($this->_scopeConfig->getValue($path . "user_passwd",
             \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $storeId));
 
         $path = 'payment/' . $code . '/';
-        $config ['TRANSACTION.CHANNEL'] = trim($this->_scopeConfig->getValue($path . "channel",
+        $config['TRANSACTION.CHANNEL'] = trim($this->_scopeConfig->getValue($path . "channel",
             \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $storeId));
 
         return $config;
@@ -296,7 +303,6 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
      *
      * @return array shop language and response url
      */
-
     public function getFrontend()
     {
         $langCode = explode('_', (string)$this->_localResolver->getLocale());
@@ -316,11 +322,11 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
      *  getUser extract customer information form magento order object
      *
      * @param  $order object
+     *
      * @return array customer information
      */
     public function getUser($order)
     {
-
         $user = array();
         $billing = $order->getBillingAddress();
         $email = ($order->getBillingAddress()->getEmail()) ? $order->getBillingAddress()->getEmail() : $order->getCustomerEmail();
@@ -353,10 +359,11 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
      *
      * This function will return a text message used to show payment information
      * to your customer on the checkout success page
+     *
      * @param unknown $Response
+     *
      * @return string|boolean payment information or false
      */
-
     public function additionalPaymentInformation($Response)
     {
         return false;

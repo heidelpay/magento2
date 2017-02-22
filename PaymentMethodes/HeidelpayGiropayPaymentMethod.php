@@ -9,15 +9,16 @@ namespace Heidelpay\Gateway\PaymentMethodes;
  *
  * @license Use of this software requires acceptance of the License Agreement. See LICENSE file.
  * @copyright Copyright © 2016-present Heidelberger Payment GmbH. All rights reserved.
+ *
  * @link https://dev.heidelpay.de/magento2
+ *
  * @author Stephano Vogel
  *
  * @package heidelpay
  * @subpackage magento2
  * @category magento2
  */
-
-use \Heidelpay\PhpApi\PaymentMethodes\GiropayPaymentMethod as HeidelpayPhpApiGiropay;
+use Heidelpay\PhpApi\PaymentMethodes\GiropayPaymentMethod as HeidelpayPhpApiGiropay;
 
 class HeidelpayGiropayPaymentMethod extends HeidelpayAbstractPaymentMethod
 {
@@ -28,6 +29,7 @@ class HeidelpayGiropayPaymentMethod extends HeidelpayAbstractPaymentMethod
      * Returns the redirect url to the giropay site.
      *
      * @param $quote
+     *
      * @return array $response An array with heidelpay processing results
      */
     public function getHeidelpayUrl($quote)
