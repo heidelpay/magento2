@@ -19,7 +19,6 @@ namespace Heidelpay\Gateway\PaymentMethodes;
  * @category Magento2
  */
 use Heidelpay\PhpApi\PaymentMethodes\PayPalPaymentMethod as HeidelpayPhpApiPayPal;
-use Heidelpay\Gateway\PaymentMethodes\HeidelpayAbstractPaymentMethod;
 
 class HeidelpayPayPalPaymentMethod extends HeidelpayAbstractPaymentMethod
 {

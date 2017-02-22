@@ -19,7 +19,6 @@ namespace Heidelpay\Gateway\PaymentMethodes;
  * @category Magento2
  */
 use Heidelpay\PhpApi\PaymentMethodes\SofortPaymentMethod as HeidelpayPhpApiSofort;
-use Heidelpay\Gateway\PaymentMethodes\HeidelpayAbstractPaymentMethod;
 
 class HeidelpaySofortPaymentMethod extends HeidelpayAbstractPaymentMethod
 {

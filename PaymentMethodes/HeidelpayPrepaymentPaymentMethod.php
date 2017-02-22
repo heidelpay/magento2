@@ -19,7 +19,6 @@ namespace Heidelpay\Gateway\PaymentMethodes;
  * @category Magento2
  */
 use Heidelpay\PhpApi\PaymentMethodes\PrepaymentPaymentMethod as HeidelpayPhpApiPrepayment;
-use Heidelpay\Gateway\PaymentMethodes\HeidelpayAbstractPaymentMethod;
 
 class HeidelpayPrepaymentPaymentMethod extends HeidelpayAbstractPaymentMethod
 {

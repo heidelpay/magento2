@@ -19,7 +19,6 @@ namespace Heidelpay\Gateway\PaymentMethodes;
  * @category Magento2
  */
 use Heidelpay\PhpApi\PaymentMethodes\DebitCardPaymentMethod as HeidelpayPhpApiDebitCard;
-use Heidelpay\Gateway\PaymentMethodes\HeidelpayAbstractPaymentMethod;
 
 class HeidelpayDebitCardPaymentMethod extends HeidelpayAbstractPaymentMethod
 {

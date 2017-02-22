@@ -355,6 +355,7 @@ class Payment extends \Magento\Framework\App\Helper\AbstractHelper
     
     /**
      * function to format amount
+     *
      * @param mixed $number
      */
     public function format($number)
@@ -373,6 +374,7 @@ class Payment extends \Magento\Framework\App\Helper\AbstractHelper
     
     /**
      * helper to generate customer payment error messages
+     *
      * @param null|mixed $errorCode
      */
     public function handleError($errorCode=null)
