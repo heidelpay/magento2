@@ -1,21 +1,23 @@
 <?php
-namespace Heidelpay\Gateway\Model; 
+namespace Heidelpay\Gateway\Model;
+
 /**
  * Transaction resource model
  *
  * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
  * @copyright Copyright © 2016-present Heidelberger Payment GmbH. All rights reserved.
+ *
  * @link  https://dev.heidelpay.de/magento
+ *
  * @author  Jens Richter
  *
  * @package  Heidelpay
  * @subpackage Magento2
  * @category Magento2
  */
-
-class Transaction extends  \Magento\Framework\Model\AbstractModel
+class Transaction extends \Magento\Framework\Model\AbstractModel
 {
-   public function __construct(
+    public function __construct(
         \Magento\Framework\Model\Context $context,
         \Magento\Framework\Registry $registry,
         \Magento\Payment\Helper\Data $paymentData,
@@ -26,12 +28,13 @@ class Transaction extends  \Magento\Framework\Model\AbstractModel
         $this->_paymentData = $paymentData;
         parent::__construct($context, $registry, $resource, $resourceCollection, $data);
     }
-	public function _construct()
-	{
-	    $this->_init('Heidelpay\Gateway\Model\ResourceModel\Transaction');
-	}
-	
-	public function loadLastTransactionByQuoteId($modelId, $field = null)
+
+    public function _construct()
+    {
+        $this->_init('Heidelpay\Gateway\Model\ResourceModel\Transaction');
+    }
+    
+    public function loadLastTransactionByQuoteId($modelId, $field = null)
     {
         $this->_beforeLoad($modelId, $field);
         $this->_getResource()->loadLastTransactionByQuoteId($this, $modelId, $field);
@@ -40,7 +43,5 @@ class Transaction extends  \Magento\Framework\Model\AbstractModel
         $this->_hasDataChanges = false;
         //$this->updateStoredData();
         return $this;
-		
-	}
-	
+    }
 }
