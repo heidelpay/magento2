@@ -20,18 +20,16 @@ define(
             redirectOnSuccess = redirectOnSuccess !== false;
             
             if (agreementsConfig.isEnabled) {
-                
-            var agreementForm = $('.payment-method._active form[data-role=checkout-agreements]'),
-                agreementData = agreementForm.serializeArray(),
-                agreementIds = [];
+                var agreementForm = $('.payment-method._active form[data-role=checkout-agreements]'),
+                    agreementData = agreementForm.serializeArray(),
+                    agreementIds = [];
 
-            agreementData.forEach(function(item) {
-                agreementIds.push(item.value);
-            });
+                agreementData.forEach(function(item) {
+                    agreementIds.push(item.value);
+                });
 
-            paymentData.extension_attributes = {agreement_ids: agreementIds};
+                paymentData.extension_attributes = {agreement_ids: agreementIds};
             }
-            
 
             /** Checkout for guest and registered customer. */
             if (!customer.isLoggedIn()) {
@@ -58,9 +56,38 @@ define(
             return storage.post(
                 serviceUrl, JSON.stringify(payload)
             ).done(
-            		function () {
+                function () {
+                    // write additional information to heidelpay
+                    // when the payment method is direct debit...
+                    if ( paymentData.method == 'hgwdd' ) {
+                        var newUrl = urlBuilder.createUrl('/hgw', {});
+
+                        // heidelpay Payload
+                        var hgwPayload = {
+                            cartId: quote.getQuoteId(),
+                            hgwIban: paymentData.additional_data.hgw_iban,
+                            hgwOwner: paymentData.additional_data.hgw_owner
+                        };
+
+                        storage.post(newUrl, JSON.stringify(hgwPayload))
+                            .done(
+                                function(response) {
+                                    window.location.replace(url.build('hgw/'));
+                                }
+                            )
+                            .fail(
+                                function(response) {
+                                    errorProcessor.process(response, messageContainer);
+                                    fullScreenLoader.stopLoader();
+                                }
+                            );
+                    }
+
+                    // ... if not, just redirect to heidelpay Gateway Index.
+                    else {
                         window.location.replace(url.build('hgw/'));
                     }
+                }
             ).fail(
                 function (response) {
                     errorProcessor.process(response, messageContainer);
