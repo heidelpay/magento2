@@ -8,7 +8,7 @@
                 <sandbox_mode>1</sandbox_mode>
                 <active>0</active>
                 <default_css>http://demoshops.heidelpay.de/css/mage2-hpf.css</default_css>
-                <model>Heidelpay\Gateway\PaymentMethodes\HeidelpayAbstractPaymentMethod</model>
+                <model>Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod</model>
             </hgwmain>
             <hgwpp>
                 <active>0</active>
@@ -19,7 +19,7 @@
                 <specificcountry></specificcountry>
                 <min_order_total>0</min_order_total>
                 <max_order_total>0</max_order_total>
-                <model>Heidelpay\Gateway\PaymentMethodes\HeidelpayPrepaymentPaymentMethod</model>
+                <model>Heidelpay\Gateway\PaymentMethods\HeidelpayPrepaymentPaymentMethod</model>
             </hgwpp>
             <hgwcc>
                 <active>0</active>
@@ -30,7 +30,7 @@
                 <specificcountry></specificcountry>
                 <min_order_total>0</min_order_total>
                 <max_order_total>0</max_order_total>
-                <model>Heidelpay\Gateway\PaymentMethodes\HeidelpayCreditCardPaymentMethod</model>
+                <model>Heidelpay\Gateway\PaymentMethods\HeidelpayCreditCardPaymentMethod</model>
             </hgwcc>
             <hgwdc>
                 <active>0</active>
@@ -41,7 +41,7 @@
                 <specificcountry></specificcountry>
                 <min_order_total>0</min_order_total>
                 <max_order_total>0</max_order_total>
-                <model>Heidelpay\Gateway\PaymentMethodes\HeidelpayDebitCardPaymentMethod</model>
+                <model>Heidelpay\Gateway\PaymentMethods\HeidelpayDebitCardPaymentMethod</model>
             </hgwdc>
             <hgwsue>
                 <active>0</active>
@@ -52,7 +52,7 @@
                 <specificcountry>BE,DE,IT,NL,AT,SI,ES</specificcountry>
                 <min_order_total>0</min_order_total>
                 <max_order_total>0</max_order_total>
-                <model>Heidelpay\Gateway\PaymentMethodes\HeidelpaySofortPaymentMethod</model>
+                <model>Heidelpay\Gateway\PaymentMethods\HeidelpaySofortPaymentMethod</model>
             </hgwsue>
             <hgwpal>
                 <active>0</active>
@@ -63,7 +63,7 @@
                 <specificcountry></specificcountry>
                 <min_order_total>0</min_order_total>
                 <max_order_total>0</max_order_total>
-                <model>Heidelpay\Gateway\PaymentMethodes\HeidelpayPayPalPaymentMethod</model>
+                <model>Heidelpay\Gateway\PaymentMethods\HeidelpayPayPalPaymentMethod</model>
             </hgwpal>
             <hgwgp>
                 <active>0</active>
@@ -74,7 +74,7 @@
                 <specificcountry>DE</specificcountry>
                 <min_order_total>0</min_order_total>
                 <max_order_total>0</max_order_total>
-                <model>Heidelpay\Gateway\PaymentMethodes\HeidelpayGiropayPaymentMethod</model>
+                <model>Heidelpay\Gateway\PaymentMethods\HeidelpayGiropayPaymentMethod</model>
             </hgwgp>
             <hgwdd>
                 <active>0</active>
@@ -85,7 +85,7 @@
                 <specificcountry></specificcountry>
                 <min_order_total>0</min_order_total>
                 <max_order_total>0</max_order_total>
-                <model>Heidelpay\Gateway\PaymentMethodes\HeidelpayDirectDebitPaymentMethod</model>
+                <model>Heidelpay\Gateway\PaymentMethods\HeidelpayDirectDebitPaymentMethod</model>
             </hgwdd>
         </payment>
     </default>

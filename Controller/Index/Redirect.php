@@ -1,4 +1,5 @@
 <?php
+
 namespace Heidelpay\Gateway\Controller\Index;
 
 /**
@@ -11,20 +12,17 @@ namespace Heidelpay\Gateway\Controller\Index;
  *
  * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
  * @copyright Copyright © 2016-present Heidelberger Payment GmbH. All rights reserved.
- * @link  https://dev.heidelpay.de/magento
- * @author  Jens Richter
+ * @link https://dev.heidelpay.de/magento
+ * @author Jens Richter
  *
- * @package  Heidelpay
- * @subpackage Magento2
- * @category Magento2
+ * @package heidelpay
+ * @subpackage magento2
+ * @category magento2
  */
-use Heidelpay\PhpApi\Response AS HeidelpayResponse;
-
 class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
 {
     protected $resultPageFactory;
     protected $logger;
-
 
     public function execute()
     {

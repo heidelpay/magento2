@@ -1,5 +1,8 @@
 <?php
+
 namespace Heidelpay\Gateway\Controller\Index;
+
+use Heidelpay\PhpApi\Response as HeidelpayResponse;
 
 /**
  * Notification handler for the payment response
@@ -15,16 +18,14 @@ namespace Heidelpay\Gateway\Controller\Index;
  * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
  * @copyright Copyright © 2016-present Heidelberger Payment GmbH. All rights reserved.
  *
- * @link  https://dev.heidelpay.de/magento
+ * @link https://dev.heidelpay.de/magento
  *
- * @author  Jens Richter
+ * @author Jens Richter
  *
- * @package  Heidelpay
- * @subpackage Magento2
- * @category Magento2
+ * @package heidelpay
+ * @subpackage magento2
+ * @category magento2
  */
-use Heidelpay\PhpApi\Response as HeidelpayResponse;
-
 class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
 {
     protected $resultPageFactory;
@@ -136,9 +137,7 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
                         ->setCustomerGroupId(\Magento\Customer\Model\Group::NOT_LOGGED_IN_ID);
                 }
 
-                $this->_logger->debug('submitting quote...');
                 $order = $this->_cartManagement->submit($quote);
-                $this->_logger->debug('order: ' . $order->toJson());
             } catch (\Exception $e) {
                 $this->_logger->debug('Heidelpay Response save order. ' . $e->getMessage());
             }
