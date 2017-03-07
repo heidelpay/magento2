@@ -13,9 +13,6 @@
     </type>
 
     <preference for="Heidelpay\Gateway\Api\PaymentInterface"
-                type="Heidelpay\Gateway\Model\Payment" />
-
-    <preference for="Heidelpay\Gateway\Api\Data\PaymentInformationInterface"
-                type="Heidelpay\Gateway\Model\PaymentInformation" />
+                type="Heidelpay\Gateway\Api\Payment" />
 
 </config>

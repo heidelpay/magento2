@@ -1,6 +1,6 @@
 <?php
 
-namespace Heidelpay\Gateway\Api\Data;
+namespace Heidelpay\Gateway\Model;
 
 /**
  * $Summary$
@@ -20,6 +20,30 @@ namespace Heidelpay\Gateway\Api\Data;
  */
 interface PaymentInformationInterface
 {
+    /** @const string The Unique Id column */
+    const PAYMENTINFORMATION_ID = 'id';
+
+    /** @const string The Store Id column */
+    const STORE_ID = 'storeid';
+
+    /** @const string The Customer/Guest's e-mail address column */
+    const CUSTOMER_EMAIL = 'customer_email';
+
+    /** @const string The heidelpay payment method column */
+    const PAYMENT_METHOD = 'paymentmethod';
+
+    /** @const string The shipping hash column */
+    const SHIPPING_HASH = 'shipping_hash';
+
+    /** @const string The additional payment data column */
+    const ADDITIONAL_DATA = 'additional_data';
+
+    /** @const string The heidelpay payment reference column */
+    const PAYMENT_REFERENCE = 'heidelpay_payment_reference';
+
+    /** @const The creation date column */
+    const CREATE_DATE = 'create_date';
+
     /**
      * Returns the id.
      *
@@ -88,7 +112,7 @@ interface PaymentInformationInterface
      * Sets the store.
      *
      * @param \Magento\Store\Api\Data\StoreInterface|integer $store
-     * @return \Heidelpay\Gateway\Api\Data\PaymentInformationInterface
+     * @return \Heidelpay\Gateway\Model\PaymentInformationInterface
      * @api
      */
     public function setStore($store);
@@ -97,7 +121,7 @@ interface PaymentInformationInterface
      * Sets the customer/guest e-mail address.
      *
      * @param string $email
-     * @return \Heidelpay\Gateway\Api\Data\PaymentInformationInterface
+     * @return \Heidelpay\Gateway\Model\PaymentInformationInterface
      * @api
      */
     public function setCustomerEmail($email);
@@ -106,7 +130,7 @@ interface PaymentInformationInterface
      * Sets the heidelpay payment method.
      *
      * @param string $method
-     * @return \Heidelpay\Gateway\Api\Data\PaymentInformationInterface
+     * @return \Heidelpay\Gateway\Model\PaymentInformationInterface
      * @api
      */
     public function setPaymentMethod($method);
@@ -115,7 +139,7 @@ interface PaymentInformationInterface
      * Sets the shipping hash.
      *
      * @param string $shippingHash
-     * @return \Heidelpay\Gateway\Api\Data\PaymentInformationInterface
+     * @return \Heidelpay\Gateway\Model\PaymentInformationInterface
      * @api
      */
     public function setShippingHash($shippingHash);
@@ -124,7 +148,7 @@ interface PaymentInformationInterface
      * Sets additional payment data.
      *
      * @param $additionalData
-     * @return \Heidelpay\Gateway\Api\Data\PaymentInformationInterface
+     * @return \Heidelpay\Gateway\Model\PaymentInformationInterface
      * @api
      */
     public function setAdditionalData($additionalData);
@@ -133,7 +157,7 @@ interface PaymentInformationInterface
      * Sets the heidelpay payment reference.
      *
      * @param string $reference
-     * @return \Heidelpay\Gateway\Api\Data\PaymentInformationInterface
+     * @return \Heidelpay\Gateway\Model\PaymentInformationInterface
      * @api
      */
     public function setHeidelpayPaymentReference($reference);
@@ -142,7 +166,7 @@ interface PaymentInformationInterface
      * Loads the data set by id.
      *
      * @param integer $id
-     * @return \Heidelpay\Gateway\Api\Data\PaymentInformationInterface
+     * @return \Heidelpay\Gateway\Model\PaymentInformationInterface
      * @api
      */
     public function load($id);
@@ -150,7 +174,7 @@ interface PaymentInformationInterface
     /**
      * Saves the model.
      *
-     * @return \Heidelpay\Gateway\Api\Data\PaymentInformationInterface
+     * @return \Heidelpay\Gateway\Model\PaymentInformationInterface
      * @api
      */
     public function save();

@@ -29,7 +29,12 @@ class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\Ab
      */
     protected function _construct()
     {
-        $this->_init(PaymentInformation::class, PaymentInformationResource::class);
+        // register the PaymentInformation Model and ResourceModel
+        $this->_init(
+            PaymentInformation::class,
+            PaymentInformationResource::class
+        );
+
         parent::_construct();
     }
 
@@ -44,9 +49,8 @@ class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\Ab
         return $this->addStoreFilter($quote->getStoreId())
             ->addCustomerEmailFilter($quote->getCustomer()->getEmail())
             ->addPaymentMethodFilter($quote->getPayment()->getMethod())
-            ->setOrder('id')
             ->load()
-            ->getFirstItem();
+            ->getLastItem();
     }
 
     /**

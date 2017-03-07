@@ -2,7 +2,10 @@
 
 namespace Heidelpay\Gateway\Controller\Index;
 
-use Heidelpay\PhpApi\Response as HeidelpayResponse;
+use Heidelpay\Gateway\Helper\Payment as HeidelpayHelper;
+use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
+use Magento\Sales\Model\Order\Email\Sender\OrderCommentSender;
+use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 
 /**
  * Notification handler for the payment response
@@ -31,46 +34,86 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
     protected $resultPageFactory;
     protected $logger;
 
+    /** @var \Heidelpay\PhpApi\Response The heidelpay response object */
+    protected $heidelpayResponse;
+
+    /**
+     * heidelpay Response constructor.
+     *
+     * @param \Magento\Framework\App\Action\Context $context
+     * @param \Magento\Customer\Model\Session $customerSession
+     * @param \Magento\Checkout\Model\Session $checkoutSession
+     * @param \Magento\Sales\Model\OrderFactory $orderFactory
+     * @param \Magento\Framework\Url\Helper\Data $urlHelper
+     * @param \Psr\Log\LoggerInterface $logger
+     * @param \Magento\Quote\Api\CartManagementInterface $cartManagement
+     * @param \Magento\Quote\Api\CartRepositoryInterface $quoteObject
+     * @param \Magento\Framework\View\Result\PageFactory $resultPageFactory
+     * @param HeidelpayHelper $paymentHelper
+     * @param OrderSender $orderSender
+     * @param InvoiceSender $invoiceSender
+     * @param OrderCommentSender $orderCommentSender
+     * @param \Magento\Framework\Encryption\Encryptor $encryptor
+     * @param \Magento\Customer\Model\Url $customerUrl
+     * @param \Heidelpay\PhpApi\Response $heidelpayResponse
+     */
+    public function __construct(
+        \Magento\Framework\App\Action\Context $context,
+        \Magento\Customer\Model\Session $customerSession,
+        \Magento\Checkout\Model\Session $checkoutSession,
+        \Magento\Sales\Model\OrderFactory $orderFactory,
+        \Magento\Framework\Url\Helper\Data $urlHelper,
+        \Psr\Log\LoggerInterface $logger,
+        \Magento\Quote\Api\CartManagementInterface $cartManagement,
+        \Magento\Quote\Api\CartRepositoryInterface $quoteObject,
+        \Magento\Framework\View\Result\PageFactory $resultPageFactory,
+        HeidelpayHelper $paymentHelper,
+        OrderSender $orderSender,
+        InvoiceSender $invoiceSender,
+        OrderCommentSender $orderCommentSender,
+        \Magento\Framework\Encryption\Encryptor $encryptor,
+        \Magento\Customer\Model\Url $customerUrl,
+        \Heidelpay\PhpApi\Response $heidelpayResponse
+    ) {
+        parent::__construct($context, $customerSession, $checkoutSession, $orderFactory, $urlHelper, $logger,
+            $cartManagement, $quoteObject, $resultPageFactory, $paymentHelper, $orderSender, $invoiceSender,
+            $orderCommentSender, $encryptor, $customerUrl);
+
+        $this->heidelpayResponse = $heidelpayResponse;
+    }
+
     public function execute()
     {
-        $Request = $this->getRequest();
-        $data = array();
+        $request = $this->getRequest();
+        $data = [];
 
-        /**
-         * Quit processing on an empty post response
-         */
-        $data['PROCESSING_RESULT'] = $Request->getPOST('PROCESSING_RESULT');
+        // Quit processing on an empty post response
+        $data['PROCESSING_RESULT'] = $request->getPOST('PROCESSING_RESULT');
+        $data['CRITERION_SECRET'] = $request->getPost('CRITERION_SECRET');
+        $data['IDENTIFICATION_TRANSACTIONID'] = $request->getPOST('IDENTIFICATION_TRANSACTIONID');
 
-        $data['CRITERION_SECRET'] = $Request->getPost('CRITERION_SECRET');
-
-        $data['IDENTIFICATION_TRANSACTIONID'] = $Request->getPOST('IDENTIFICATION_TRANSACTIONID');
-
-
-        $HeidelpayResponse = new  HeidelpayResponse($data);
-
+        // initialize the Response object with data from the transaction.
+        $this->heidelpayResponse = $this->heidelpayResponse->splitArray($data);
 
         $secret = $this->_encryptor->exportKeys();
-        $identificationTransactionId = $HeidelpayResponse->getIdentification()->getTransactionId();
+        $identificationTransactionId = $this->heidelpayResponse->getIdentification()->getTransactionId();
 
-        $this->_logger->addDebug('Heidelpay response postdata : ' . print_r($HeidelpayResponse, 1));
-        $this->_logger->addDebug('Heidelpay $secret: ' . print_r($secret, 1));
-        $this->_logger->addDebug('Heidelpay $$identificationTransactionId: ' . print_r($identificationTransactionId,
-                1));
-        /*
-    	 * validate Hash to prevent manipulation
-    	 */
+        $this->_logger->debug('Heidelpay response postdata : ' . print_r($this->heidelpayResponse, 1));
+        $this->_logger->debug('Heidelpay $secret: ' . print_r($secret, 1));
+        $this->_logger->debug('Heidelpay $$identificationTransactionId: ' . print_r($identificationTransactionId, 1));
 
+        // validate Hash to prevent manipulation
         try {
-            $HeidelpayResponse->verifySecurityHash($secret, $identificationTransactionId);
+            $this->heidelpayResponse->verifySecurityHash($secret, $identificationTransactionId);
         } catch (\Exception $e) {
             $this->_logger->critical("Heidelpay response object fail " . $e->getMessage());
             $this->_logger->critical(
                 "Heidelpay response object form server "
-                . $Request->getServer('REMOTE_ADDR')
+                . $request->getServer('REMOTE_ADDR')
                 . " with an invalid hash. This could be some kind of manipulation."
             );
             $this->_logger->critical(
-                'Heidelpay reference object hash ' . $HeidelpayResponse->getCriterion()->getSecretHash()
+                'Heidelpay reference object hash ' . $this->heidelpayResponse->getCriterion()->getSecretHash()
             );
             echo $this->_url->getUrl('hgw/index/redirect', [
                 '_forced_secure' => true,
@@ -80,56 +123,55 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
             return;
         }
 
-        $data['IDENTIFICATION_TRANSACTIONID'] = (int)$Request->getPOST('IDENTIFICATION_TRANSACTIONID');
-        $data['PROCESSING_STATUS_CODE'] = (int)$Request->getPOST('PROCESSING_STATUS_CODE');
-        $data['PROCESSING_RETURN'] = $Request->getPOST('PROCESSING_RETURN');
-        $data['PROCESSING_RETURN_CODE'] = $Request->getPOST('PROCESSING_RETURN_CODE');
-        $data['PAYMENT_CODE'] = $Request->getPOST('PAYMENT_CODE');
-        $data['IDENTIFICATION_UNIQUEID'] = $Request->getPOST('IDENTIFICATION_UNIQUEID');
-        $data['IDENTIFICATION_SHORTID'] = $Request->getPOST('IDENTIFICATION_SHORTID');
-        $data['IDENTIFICATION_SHOPPERID'] = (int)$Request->getPOST('IDENTIFICATION_SHOPPERID');
-        $data['CRITERION_GUEST'] = $Request->getPOST('CRITERION_GUEST');
+        $data['IDENTIFICATION_TRANSACTIONID'] = (int)$request->getPOST('IDENTIFICATION_TRANSACTIONID');
+        $data['PROCESSING_STATUS_CODE'] = (int)$request->getPOST('PROCESSING_STATUS_CODE');
+        $data['PROCESSING_RETURN'] = $request->getPOST('PROCESSING_RETURN');
+        $data['PROCESSING_RETURN_CODE'] = $request->getPOST('PROCESSING_RETURN_CODE');
+        $data['PAYMENT_CODE'] = $request->getPOST('PAYMENT_CODE');
+        $data['IDENTIFICATION_UNIQUEID'] = $request->getPOST('IDENTIFICATION_UNIQUEID');
+        $data['IDENTIFICATION_SHORTID'] = $request->getPOST('IDENTIFICATION_SHORTID');
+        $data['IDENTIFICATION_SHOPPERID'] = (int)$request->getPOST('IDENTIFICATION_SHOPPERID');
+        $data['CRITERION_GUEST'] = $request->getPOST('CRITERION_GUEST');
 
         /**
          * information
          */
-        $data['TRANSACTION_MODE'] = ($Request->getPOST('TRANSACTION_MODE') == 'LIVE') ? 'LIVE' : 'CONNECTOR_TEST';
-        $data['PRESENTATION_CURRENCY'] = $Request->getPOST('PRESENTATION_CURRENCY');
-        $data['PRESENTATION_AMOUNT'] = floatval($Request->getPOST('PRESENTATION_AMOUNT'));
-        $data['ACCOUNT_BRAND'] = $Request->getPOST('ACCOUNT_BRAND');
+        $data['TRANSACTION_MODE'] = ($request->getPOST('TRANSACTION_MODE') == 'LIVE') ? 'LIVE' : 'CONNECTOR_TEST';
+        $data['PRESENTATION_CURRENCY'] = $request->getPOST('PRESENTATION_CURRENCY');
+        $data['PRESENTATION_AMOUNT'] = floatval($request->getPOST('PRESENTATION_AMOUNT'));
+        $data['ACCOUNT_BRAND'] = $request->getPOST('ACCOUNT_BRAND');
 
-        $PaymentCode = $this->_paymentHelper->splitPaymentCode($data['PAYMENT_CODE']);
+        $paymentCode = $this->_paymentHelper->splitPaymentCode($data['PAYMENT_CODE']);
 
         $data['SOURCE'] = 'RESPONSE';
 
         if ($data['PAYMENT_CODE'] == "PP.PA") {
-            $data['CONNECTOR_ACCOUNT_HOLDER'] = $Request->getPOST('CONNECTOR_ACCOUNT_HOLDER');
-            $data['CONNECTOR_ACCOUNT_IBAN'] = $Request->getPOST('CONNECTOR_ACCOUNT_IBAN');
-            $data['CONNECTOR_ACCOUNT_BIC'] = $Request->getPOST('CONNECTOR_ACCOUNT_BIC');
+            $data['CONNECTOR_ACCOUNT_HOLDER'] = $request->getPOST('CONNECTOR_ACCOUNT_HOLDER');
+            $data['CONNECTOR_ACCOUNT_IBAN'] = $request->getPOST('CONNECTOR_ACCOUNT_IBAN');
+            $data['CONNECTOR_ACCOUNT_BIC'] = $request->getPOST('CONNECTOR_ACCOUNT_BIC');
         }
 
         // in case of direct debit
         if ($data['PAYMENT_CODE'] == 'DD.DB') {
-            $data['ACCOUNT_IBAN'] = $Request->getPOST('ACCOUNT_IBAN');
-            $data['ACCOUNT_IDENTIFICATION'] = $Request->getPOST('ACCOUNT_IDENTIFICATION');
-            $data['IDENTIFICATION_CREDITOR_ID'] = $Request->getPOST('IDENTIFICATION_CREDITOR_ID');
+            $data['ACCOUNT_IBAN'] = $request->getPOST('ACCOUNT_IBAN');
+            $data['ACCOUNT_IDENTIFICATION'] = $request->getPOST('ACCOUNT_IDENTIFICATION');
+            $data['IDENTIFICATION_CREDITOR_ID'] = $request->getPOST('IDENTIFICATION_CREDITOR_ID');
         }
 
-        $HeidelpayResponse->splitArray($data);
+        $this->heidelpayResponse = $this->heidelpayResponse->splitArray($data);
 
-        $paymentMethode = $PaymentCode[0];
-        $paymentType = $PaymentCode[1];
+        $paymentMethode = $paymentCode[0];
+        $paymentType = $paymentCode[1];
 
-        $this->_logger->addDebug('Heidelpay response postdata : ' . print_r($HeidelpayResponse, 1));
+        $this->_logger->debug('Heidelpay response postdata : ' . print_r($this->heidelpayResponse, 1));
 
-
-        if ($HeidelpayResponse->isSuccess()) {
+        if ($this->heidelpayResponse->isSuccess()) {
             try {
                 $quote = $this->_objectManager->create('Magento\Quote\Model\Quote')->load($data['IDENTIFICATION_TRANSACTIONID']);
                 $quote->collectTotals();
                 //$this->_quoteObject()->save($quote);
 
-                /** in case of quest checkout */
+                /** in case of guest checkout */
                 if ($data['CRITERION_GUEST'] === 'true') {
                     $quote->setCustomerId(null)
                         ->setCustomerEmail($quote->getBillingAddress()->getEmail())
@@ -139,11 +181,10 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
 
                 $order = $this->_cartManagement->submit($quote);
             } catch (\Exception $e) {
-                $this->_logger->debug('Heidelpay Response save order. ' . $e->getMessage());
+                $this->_logger->debug('Heidelpay: Cannot submit the Quote. ' . $e->getMessage());
             }
 
             $data['ORDER_ID'] = $order->getIncrementId();
-
 
             $this->_paymentHelper->mapStatus(
                 $data,
@@ -151,6 +192,8 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
             );
             $order->save();
         }
+
+        // TODO: Clear data when customer is a guest.
 
         $url = $this->_url->getUrl('hgw/index/redirect', array(
             '_forced_secure' => true,

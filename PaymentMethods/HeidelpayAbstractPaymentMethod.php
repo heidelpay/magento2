@@ -282,11 +282,8 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         // add the module version to the heidelpay request
         $this->_heidelpayPaymentMethod->getRequest()->getCriterion()->set(
             'SHOPMODULE.VERSION',
-            'Heidelpay Gateway - ' . $this->moduleResource->getDbVersion('Heidelpay_Gateway')
+            'Heidelpay Gateway ' . $this->moduleResource->getDataVersion('Heidelpay_Gateway')
         );
-
-        /** @todo should be removed after using heidelpay php-api for every payment method */
-        //$this->_heidelpayPaymentMethod->getRequest()->getCriterion()->set('secret',$this->_encryptor->getHash($quote->getId().$this->_encryptor->exportKeys()));
 
         /** Force PhpApi to just generate the request instead of sending it directly */
         $this->_heidelpayPaymentMethod->_dryRun = true;

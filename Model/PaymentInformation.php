@@ -2,7 +2,7 @@
 
 namespace Heidelpay\Gateway\Model;
 
-use Heidelpay\Gateway\Api\Data\PaymentInformationInterface as HeidelpayPaymentInformationInterface;
+use Heidelpay\Gateway\Model\PaymentInformationInterface as HeidelpayPaymentInformationInterface;
 use Magento\Framework\Model\AbstractModel;
 use Magento\Store\Api\Data\StoreInterface as MageApiDataStoreInterface;
 
@@ -69,7 +69,7 @@ class PaymentInformation extends AbstractModel implements HeidelpayPaymentInform
      */
     public function getId()
     {
-        return $this->getData('id');
+        return $this->getData(self::PAYMENTINFORMATION_ID);
     }
 
     /**
@@ -77,7 +77,7 @@ class PaymentInformation extends AbstractModel implements HeidelpayPaymentInform
      */
     public function getStore()
     {
-        return $this->storeFactory->create()->load($this->getData('storeid'));
+        return $this->storeFactory->create()->load($this->getData(self::STORE_ID));
     }
 
     /**
@@ -92,13 +92,13 @@ class PaymentInformation extends AbstractModel implements HeidelpayPaymentInform
             $id = $store;
         }
 
-        $this->setData('storeid', $id);
+        $this->setData(self::STORE_ID, $id);
         return $this;
     }
 
     public function getCustomerEmail()
     {
-        return $this->getData('customer_email');
+        return $this->getData(self::CUSTOMER_EMAIL);
     }
 
     /**
@@ -106,7 +106,7 @@ class PaymentInformation extends AbstractModel implements HeidelpayPaymentInform
      */
     public function setCustomerEmail($email)
     {
-        $this->setData('customer_email', $email);
+        $this->setData(self::CUSTOMER_EMAIL, $email);
 
         return $this;
     }
@@ -116,7 +116,7 @@ class PaymentInformation extends AbstractModel implements HeidelpayPaymentInform
      */
     public function getPaymentMethod()
     {
-        return $this->getData('paymentmethod');
+        return $this->getData(self::PAYMENT_METHOD);
     }
 
     /**
@@ -124,7 +124,7 @@ class PaymentInformation extends AbstractModel implements HeidelpayPaymentInform
      */
     public function setPaymentMethod($method)
     {
-        $this->setData('paymentmethod', $method);
+        $this->setData(self::PAYMENT_METHOD, $method);
 
         return $this;
     }
@@ -134,7 +134,7 @@ class PaymentInformation extends AbstractModel implements HeidelpayPaymentInform
      */
     public function getShippingHash()
     {
-        return $this->getData('shipping_hash');
+        return $this->getData(self::SHIPPING_HASH);
     }
 
     /**
@@ -142,7 +142,7 @@ class PaymentInformation extends AbstractModel implements HeidelpayPaymentInform
      */
     public function setShippingHash($shippingHash)
     {
-        $this->setData('shipping_hash', $shippingHash);
+        $this->setData(self::SHIPPING_HASH, $shippingHash);
 
         return $this;
     }
@@ -154,7 +154,7 @@ class PaymentInformation extends AbstractModel implements HeidelpayPaymentInform
     {
         return json_decode(
             $this->encryptor->decrypt(
-                $this->getData('additional_data')
+                $this->getData(self::ADDITIONAL_DATA)
             )
         );
     }
@@ -165,7 +165,7 @@ class PaymentInformation extends AbstractModel implements HeidelpayPaymentInform
     public function setAdditionalData($additionalData)
     {
         $this->setData(
-            'additional_data',
+            self::ADDITIONAL_DATA,
             $this->encryptor->encrypt(json_encode($additionalData))
         );
 
@@ -177,7 +177,7 @@ class PaymentInformation extends AbstractModel implements HeidelpayPaymentInform
      */
     public function getHeidelpayPaymentReference()
     {
-        return $this->getData('heidelpay_payment_reference');
+        return $this->getData(self::PAYMENT_REFERENCE);
     }
 
     /**
@@ -185,7 +185,7 @@ class PaymentInformation extends AbstractModel implements HeidelpayPaymentInform
      */
     public function setHeidelpayPaymentReference($reference)
     {
-        $this->setData('heidelpay_payment_reference', $reference);
+        $this->setData(self::PAYMENT_REFERENCE, $reference);
 
         return $this;
     }
@@ -195,6 +195,6 @@ class PaymentInformation extends AbstractModel implements HeidelpayPaymentInform
      */
     public function getCreateDate()
     {
-        return $this->getData('create_date');
+        return $this->getData(self::CREATE_DATE);
     }
 }

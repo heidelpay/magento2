@@ -1,8 +1,7 @@
 <?php
 
-namespace Heidelpay\Gateway\Model;
+namespace Heidelpay\Gateway\Api;
 
-use Heidelpay\Gateway\Api\PaymentInterface;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
 
 /**
@@ -69,23 +68,35 @@ class Payment implements PaymentInterface
      */
     public function saveDirectDebitInfo($cartId, $hgwIban, $hgwHolder)
     {
+        $additionalData = [
+            'hgw_iban' => $hgwIban,
+            'hgw_holder' => $hgwHolder
+        ];
+
         // get the quote information by cart id
         $quote = $this->quoteRepository->get($cartId);
 
         // create a new instance for the payment information collection.
         $paymentInfoCollection = $this->paymentInformationCollectionFactory->create();
 
-        $additionalData = [
-            'hgw_iban' => $hgwIban,
-            'hgw_holder' => $hgwHolder
-        ];
+        // load payment information by the customer's quote.
+        /** @var \Heidelpay\Gateway\Model\PaymentInformation $paymentInfo */
+        $paymentInfo = $paymentInfoCollection->loadByCustomerInformation($quote);
 
-        // TODO: Check if the data is the same or has changed
+        // if there is no payment information data set, we create a new one...
+        if ($paymentInfo->isEmpty()) {
+            // create a new instance for the payment information data.
+            $paymentInfoFactory = $this->paymentInformationFactory->create();
 
-        // create a new instance for the payment information data.
-        $paymentInfo = $this->paymentInformationFactory->create();
+            // save the payment information
+            if ($this->savePaymentInformation($paymentInfoFactory, $quote, $additionalData)) {
+                return true;
+            }
 
-        // save the payment information
+            return false;
+        }
+
+        // ... else, we update the data and save the model.
         if ($this->savePaymentInformation($paymentInfo, $quote, $additionalData)) {
             return true;
         }
@@ -120,7 +131,7 @@ class Payment implements PaymentInterface
      * @param \Magento\Quote\Model\Quote $quote
      * @param array $additionalData
      * @param string $paymentRef
-     * @return \Heidelpay\Gateway\Api\Data\PaymentInformationInterface
+     * @return \Heidelpay\Gateway\Model\PaymentInformationInterface
      */
     private function savePaymentInformation($paymentInformation, $quote, $additionalData, $paymentRef = null)
     {
