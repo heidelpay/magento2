@@ -13,3 +13,6 @@
 
 ### Fixed
 - Fixed an issue where the minicart wasn't cleared after the successful checkout
+
+### Removed
+- Unused Customer Model and it's table definition

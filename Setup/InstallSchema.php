@@ -1,4 +1,11 @@
 <?php
+
+namespace Heidelpay\Gateway\Setup;
+
+use Magento\Framework\Setup\InstallSchemaInterface;
+use Magento\Framework\Setup\ModuleContextInterface;
+use Magento\Framework\Setup\SchemaSetupInterface;
+
 /**
  * Installation method
  *
@@ -6,29 +13,20 @@
  *
  * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
  * @copyright Copyright © 2016-present Heidelberger Payment GmbH. All rights reserved.
- * @link  https://dev.heidelpay.de/magento
- * @author  Jens Richter
+ * @link https://dev.heidelpay.de/magento
+ * @author Jens Richter
  *
- * @package  Heidelpay
- * @subpackage Magento2
- * @category Magento2
+ * @package heidelpay
+ * @subpackage magento2
+ * @category magento2
  */
-namespace Heidelpay\Gateway\Setup;
-
-use Magento\Framework\Setup\InstallSchemaInterface;
-use Magento\Framework\Setup\ModuleContextInterface;
-use Magento\Framework\Setup\SchemaSetupInterface;
-
 class InstallSchema implements InstallSchemaInterface
 {
     public function install(SchemaSetupInterface $installer, ModuleContextInterface $context)
     {
-
         $installer->startSetup();
 
-        /**
-         * create transactions table
-         */
+        // create transactions table
         $tablerealname = 'heidelpay_transaction';
         $tablename = $installer->getTable($tablerealname);
         if ($installer->getConnection()->isTableExists($tablename) != true) {
@@ -103,64 +101,6 @@ class InstallSchema implements InstallSchemaInterface
                     'source'
                 ]), [
                     'source'
-                ]);
-            $installer->getConnection()->createTable($table);
-        }
-
-        /**
-         * create customer data table
-         */
-        $tablerealname = 'heidelpay_customer';
-        $tablename = $installer->getTable($tablerealname);
-        if ($installer->getConnection()->isTableExists($tablename) != true) {
-            $table = $installer->getConnection()->newTable($tablename)
-                ->addColumn('id', \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER, null, [
-                    'unsigned' => true,
-                    'nullable' => false,
-                    'primary' => true,
-                    'identity' => true,
-                    'auto_increment' => true
-                ])
-                ->addColumn('paymentmethode', \Magento\Framework\DB\Ddl\Table::TYPE_TEXT, 10, [
-                    'nullable' => false
-                ])
-                ->addColumn('uniqeid', \Magento\Framework\DB\Ddl\Table::TYPE_TEXT, 50, [
-                    'nullable' => false,
-                    'COMMENT' => "Heidelpay transaction identifier"
-                ])
-                ->addColumn('customerid', \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER, null, [
-                    'unsigned' => true,
-                    'nullable' => false,
-                    'COMMENT' => "magento customer id"
-                ])
-                ->addColumn('storeid', \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER, null, [
-                    'unsigned' => true,
-                    'nullable' => false,
-                    'COMMENT' => "magento store id"
-                ])
-                ->addColumn('payment_data', \Magento\Framework\DB\Ddl\Table::TYPE_BLOB, null, [
-                    'nullable' => false,
-                    'COMMENT' => "custumer payment data"
-                ])
-                ->addIndex($installer->getIdxName($tablerealname, [
-                    'uniqeid'
-                ]), [
-                    'uniqeid'
-                ])
-                ->addIndex($installer->getIdxName($tablerealname, [
-                    'customerid'
-                ]), [
-                    'customerid'
-                ])
-                ->addIndex($installer->getIdxName($tablerealname, [
-                    'storeid'
-                ]), [
-                    'storeid'
-                ])
-                ->addIndex($installer->getIdxName($tablerealname, [
-                    'paymentmethode'
-                ]), [
-                    'paymentmethode'
                 ]);
             $installer->getConnection()->createTable($table);
         }

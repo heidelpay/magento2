@@ -24,8 +24,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
     public function upgrade(SchemaSetupInterface $upgrade, ModuleContextInterface $module)
     {
         $upgrade->startSetup();
-
-        // Version 17.3.1 Upgrade
+        
+        // Version 17.3.10 Upgrade
         if (version_compare($module->getVersion(), '17.3.10') < 0) {
             $this->run170310Upgrade($upgrade);
         }

@@ -42,8 +42,6 @@ define(
                             }
                         )
                     }
-                } else {
-                    console.log('Customer is not logged in.');
                 }
 
                 return this;
