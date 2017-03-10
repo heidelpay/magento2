@@ -40,7 +40,7 @@ define(
                                 console.log(e);
                                 console.log(data);
                             }
-                        )
+                        );
                     }
                 }
 

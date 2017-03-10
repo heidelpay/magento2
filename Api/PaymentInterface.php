@@ -3,9 +3,10 @@
 namespace Heidelpay\Gateway\Api;
 
 /**
- * Test!
+ * API implementation for the heidelpay Payment functionality
  *
- * Test
+ * To work with additional data, the module stored customer payment information
+ * in a seperate data set to avoid mixing up Magento 2 and heidelpay data.
  *
  * @license Use of this software requires acceptance of the License Agreement. See LICENSE file.
  * @copyright Copyright © 2016-present Heidelberger Payment GmbH. All rights reserved.
@@ -25,9 +26,12 @@ interface PaymentInterface
      * if the recognition is allowed and customer payment data is stored for
      * the requested payment method.
      *
+     * Returns an array of payment data, if information is available.
+     * Else, it just returns null.
+     *
      * @param integer $quoteId
      * @param string $paymentMethod
-     * @return mixed|null
+     * @return string[] | null
      */
     public function getAdditionalPaymentInformation($quoteId, $paymentMethod);
 
@@ -37,7 +41,7 @@ interface PaymentInterface
      * @param int $cartId
      * @param string $hgwIban
      * @param string $hgwOwner
-     * @return mixed
+     * @return boolean
      */
     public function saveDirectDebitInfo($cartId, $hgwIban, $hgwOwner);
 
@@ -47,7 +51,7 @@ interface PaymentInterface
      * @param string $cartId
      * @param string $hgwIban
      * @param string $hgwOwner
-     * @return mixed
+     * @return boolean
      */
     public function saveGuestDirectDebitInfo($cartId, $hgwIban, $hgwOwner);
 }

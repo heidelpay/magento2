@@ -78,6 +78,8 @@ class Payment implements PaymentInterface
      */
     public function getAdditionalPaymentInformation($quoteId, $paymentMethod)
     {
+        $result = null;
+
         // get the quote information by cart id
         $quote = $this->quoteRepository->get($quoteId);
 
@@ -88,11 +90,9 @@ class Payment implements PaymentInterface
             $quote->getStoreId()
         );
 
-        $this->logger->debug('Recognition setting for [' . $paymentMethod . ']: ' . $allowRecognition);
-
         // if recognition is set to 'never', we don't return any data.
         if ($allowRecognition == Recognition::RECOGNITION_NEVER) {
-            return null;
+            return $result;
         }
 
         // get the customer payment information by given data from the request.
@@ -104,29 +104,23 @@ class Payment implements PaymentInterface
             $paymentMethod
         );
 
-        // if there is payment information stored, we can work with it...
+        // if there is payment information stored, we can work with it.
         if (!$paymentInfo->isEmpty()) {
             // if recognition is set to 'always', we always return the additional data.
             if ($allowRecognition === Recognition::RECOGNITION_ALWAYS) {
-                return $paymentInfo->getAdditionalData();
+                $result = $paymentInfo->getAdditionalData();
             }
 
             // we only return additional payment data, if the shipping data is the same (to prevent fraud)
             if ($allowRecognition === Recognition::RECOGNITION_SAME_SHIPPING_ADDRESS) {
-                $this->logger->debug('Same shipping address reached');
-                $this->logger->debug('Old shipping hash: ' . $paymentInfo->getShippingHash());
-                $this->logger->debug('New  shipping hash: ' . $this->createShippingHash($quote->getShippingAddress()));
-
                 // if the shipping hashes are the same, we can safely return the addtional payment data.
                 if ($this->createShippingHash($quote->getShippingAddress()) == $paymentInfo->getShippingHash()) {
-                    $this->logger->debug('Shipping hashes match.');
-                    return $paymentInfo->getAdditionalData();
+                    $result = $paymentInfo->getAdditionalData();
                 }
             }
         }
 
-        // ... else, we just return nothing.
-        return null;
+        return $result;
     }
 
     /**
