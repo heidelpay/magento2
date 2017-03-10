@@ -81,7 +81,6 @@ class Payment implements PaymentInterface
         // get the quote information by cart id
         $quote = $this->quoteRepository->get($quoteId);
 
-        // TODO: 'Fatal Error: 'Uncaught Error: Cannot instantiate interface Magento\Store\Model\ScopeInterface'
         // get the recognition configuration for the given payment method and store id.
         $allowRecognition = $this->scopeConfig->getValue(
             'payment/' . $paymentMethod . '/recognition',
