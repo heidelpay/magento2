@@ -188,7 +188,7 @@ class InstallSchema implements InstallSchemaInterface
                 ->addColumn('paymentmethod', \Magento\Framework\DB\Ddl\Table::TYPE_TEXT, 10, [
                     'nullable' => false
                 ])
-                ->addColumn('shipping_hash', \Magento\Framework\DB\Ddl\Table::TYPE_TEXT, 256, [
+                ->addColumn('shipping_hash', \Magento\Framework\DB\Ddl\Table::TYPE_TEXT, 255, [
                     'nullable' => false,
                 ])
                 ->addColumn('additional_data', \Magento\Framework\DB\Ddl\Table::TYPE_BLOB, null, [
