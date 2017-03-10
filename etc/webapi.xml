@@ -1,12 +1,21 @@
 <?xml version="1.0"?>
 <routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../app/code/Magento/Webapi/etc/webapi.xsd">
-    <route url="/V1/hgw" method="POST">
-        <service class="Heidelpay\Gateway\Api\PaymentInterface" method="saveDirectDebitInfo"/>
+    <route url="/V1/hgw/set-payment-info" method="POST">
+        <service class="Heidelpay\Gateway\Api\PaymentInterface" method="saveDirectDebitInfo" />
+        <resources>
+            <resource ref="self"/>
+        </resources>
+    </route>
+    <route url="/V1/hgw/guest/set-payment-info" method="POST">
+        <service class="Heidelpay\Gateway\Api\PaymentInterface" method="saveGuestDirectDebitInfo" />
         <resources>
             <resource ref="anonymous"/>
         </resources>
-        <data>
-            <parameter name="cartId" force="true">%cart_id%</parameter>
-        </data>
+    </route>
+    <route url="/V1/hgw/get-payment-info" method="POST">
+        <service class="Heidelpay\Gateway\Api\PaymentInterface" method="getAdditionalPaymentInformation" />
+        <resources>
+            <resource ref="self" />
+        </resources>
     </route>
 </routes>

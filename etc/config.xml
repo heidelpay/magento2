@@ -82,6 +82,7 @@
                 <title><![CDATA[Direct Debit]]></title>
                 <channel>31HA07BC8142C5A171749A60D979B6E4</channel>
                 <allowspecific>0</allowspecific>
+                <recognition>never</recognition>
                 <specificcountry></specificcountry>
                 <min_order_total>0</min_order_total>
                 <max_order_total>0</max_order_total>

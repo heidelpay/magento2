@@ -90,7 +90,11 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
 
         // load the payment information by store id, customer email address and payment method
         /** @var \Heidelpay\Gateway\Model\PaymentInformation $paymentInfo */
-        $paymentInfo = $paymentInfoCollection->loadByCustomerInformation($quote);
+        $paymentInfo = $paymentInfoCollection->loadByCustomerInformation(
+            $quote->getStoreId(),
+            $quote->getCustomerEmail(),
+            $quote->getPayment()->getMethod()
+        );
 
         // make an initial request to the heidelpay payment.
         parent::getHeidelpayUrl($quote);

@@ -26,11 +26,14 @@ if ($additionalPaymentInformation !== false) {
 <!-- Clear minicart START -->
 <script>
     require([
-        'Magento_Customer/js/customer-data'
-    ], function(customerData) {
-        var sections = ['cart'];
-        customerData.invalidate(sections);
-        customerData.reload(sections, true);
+        'Magento_Customer/js/customer-data',
+        'Magento_Customer/js/model/customer'
+    ], function(customerData, customer) {
+        if(customer.isLoggedIn()) {
+            var sections = ['cart'];
+            customerData.invalidate(sections);
+            customerData.reload(sections, true);
+        }
     })
 </script>
 <!-- Clear minicart END -->

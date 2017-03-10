@@ -47,18 +47,18 @@ abstract class HgwAbstract extends \Magento\Framework\App\Action\Action
 
     protected $_quoteObject;
 
-    /*
-     * \Magento\Quote\Api\CartManagementInterface
+    /**
+     * @var \Magento\Quote\Api\CartManagementInterface
      */
     protected $_cartManagement;
 
-    /*
-     * \Magento\Sales\Model\Order\Email\Sender\OrderSender;
+    /**
+     * @var \Magento\Sales\Model\Order\Email\Sender\OrderSender;
      */
     protected $_orderSender;
 
-    /*
-     * \Magento\Sales\Model\Order\Email\Sender\OrderCommentSender;
+    /**
+     * @var \Magento\Sales\Model\Order\Email\Sender\OrderCommentSender;
      */
     protected $_orderCommentSender;
 
@@ -68,12 +68,30 @@ abstract class HgwAbstract extends \Magento\Framework\App\Action\Action
 
     protected $_invoiceSender;
 
-    /*
-     * \Magento\Framework\View\Result\PageFactory
+    /**
+     * @var \Magento\Framework\View\Result\PageFactory
      */
     protected $_resultPageFactory;
 
-    /**      * @param \Magento\Framework\App\Action\Context $context */
+    /**
+     * HgwAbstract constructor.
+     *
+     * @param \Magento\Framework\App\Action\Context $context
+     * @param \Magento\Customer\Model\Session $customerSession
+     * @param \Magento\Checkout\Model\Session $checkoutSession
+     * @param \Magento\Sales\Model\OrderFactory $orderFactory
+     * @param \Magento\Framework\Url\Helper\Data $urlHelper
+     * @param \Psr\Log\LoggerInterface $logger
+     * @param \Magento\Quote\Api\CartManagementInterface $cartManagement
+     * @param \Magento\Quote\Api\CartRepositoryInterface $quoteObject
+     * @param \Magento\Framework\View\Result\PageFactory $resultPageFactory
+     * @param HeidelpayHelper $paymentHelper
+     * @param OrderSender $orderSender
+     * @param InvoiceSender $invoiceSender
+     * @param OrderCommentSender $orderCommentSender
+     * @param \Magento\Framework\Encryption\Encryptor $encryptor
+     * @param \Magento\Customer\Model\Url $customerUrl
+     */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
         \Magento\Customer\Model\Session $customerSession,
@@ -92,7 +110,6 @@ abstract class HgwAbstract extends \Magento\Framework\App\Action\Action
         \Magento\Customer\Model\Url $customerUrl
 
     ) {
-
         $this->_quoteObject = $quoteObject;
         $this->_customerSession = $customerSession;
         $this->_checkoutSession = $checkoutSession;
@@ -109,7 +126,6 @@ abstract class HgwAbstract extends \Magento\Framework\App\Action\Action
         $this->_invoiceSender = $invoiceSender;
         parent::__construct($context);
     }
-
 
     /**
      * Return checkout session object
@@ -133,6 +149,4 @@ abstract class HgwAbstract extends \Magento\Framework\App\Action\Action
         }
         return $this->_quote;
     }
-
-
 }

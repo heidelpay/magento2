@@ -223,7 +223,6 @@
                     </field>
                     <field id="title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Title</label>
-                        <comment>Currently there is no back channel, so you have to manually match on money received</comment>
                         <config_path>payment/hgwpp/title</config_path>
                     </field>
                     <field id="channel" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -265,7 +264,6 @@
                     </field>
                     <field id="title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Title</label>
-                        <comment>Currently there is no back channel, so you have to manually match on money received</comment>
                         <config_path>payment/hgwgp/title</config_path>
                     </field>
                     <field id="channel" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -307,7 +305,6 @@
                     </field>
                     <field id="title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Title</label>
-                        <comment>Currently there is no back channel, so you have to manually match on money received</comment>
                         <config_path>payment/hgwdd/title</config_path>
                     </field>
                     <field id="channel" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -317,6 +314,11 @@
                     <field id="sort_order" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Sort Order</label>
                         <config_path>payment/hgwdd/sort_order</config_path>
+                    </field>
+                    <field id="recognition" translate="label" type="select" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Recognition</label>
+                        <source_model>Heidelpay\Gateway\Model\Config\Source\Recognition</source_model>
+                        <config_path>payment/hgwdd/recognition</config_path>
                     </field>
                     <field id="allowspecific" translate="label" type="allowspecific" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Payment from Applicable Countries</label>

@@ -8,7 +8,6 @@
 "HGWGP","<img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAAXNSR0IArs4c6QAAADBQTFRFODg43d3dt7e3KCgoREREU1NTAQEBEhIS////scfeeXl57OzsqKioXV1dk5OTnZ2dfmcBJgAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9sJDgsIBJoD8v4AAABKSURBVAjXY5gJBQwzOsCgE53RCmM0AxknQIwGIMOiOyxBA8TgcFson9YCZIRzdHT0JQAZZSA1y4CMIhCjDaQGxOjtxGkFkAFzBgC9LkKOoh4LJgAAAABJRU5ErkJggg==' style='margin-right: 5px'/>giropay"
 "HGWDD","<img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAAXNSR0IArs4c6QAAADBQTFRFODg43d3dt7e3KCgoREREU1NTAQEBEhIS////scfeeXl57OzsqKioXV1dk5OTnZ2dfmcBJgAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9sJDgsIBJoD8v4AAABKSURBVAjXY5gJBQwzOsCgE53RCmM0AxknQIwGIMOiOyxBA8TgcFson9YCZIRzdHT0JQAZZSA1y4CMIhCjDaQGxOjtxGkFkAFzBgC9LkKOoh4LJgAAAABJRU5ErkJggg==' style='margin-right: 5px'/>Lastschrift"
 
-
 "HGW_ABOUT_US","Die Heidelberger Payment GmbH, kurz: heidelpay, ist ein führendes, von der BaFin zugelassenes und beaufsichtigtes Zahlungsinstitut für Online-Paymentverfahren, welches das komplette Leistungsspektrum in Sachen elektronische Zahlungsabwicklung abdeckt: vom Processing der Transaktionen über die Vergabe der Akzeptanzstellenverträge bis hin zum Monitoring und Risk Management.<br/><br/>Mehr Informationen finden Sie auf <a href='https://www.heidelpay.de/inc/magento?lead=Magento2' target='_blank'>www.heidelpay.de</a>"
 
 "Sandbox Mode","Testsystem"
@@ -19,6 +18,10 @@
 "Insert 0 to disable limit.","Tragen Sie 0 ein um das Limit zu deaktivieren."
 "If this is enabled the card will be charged immediately. Otherwise the amount will just be authorised.","Wenn diese Einstellung auf Ja steht, wird die Karte sofort belastet. Ansonsten wird der Betrag nur reserviert."
 "An unexpected error occurred. Please contact us to get further information.","Es ist ein Fehler aufgetreten. Bitte kontaktieren Sie uns f&uuml;r weitere Informationen."
+
+"Never","Nie"
+"Same Shipping Address","Selbe Lieferadresse"
+"Always","Immer"
 
 "Please confirm your payment:","Bitte f&uuml;hren Sie nun die Zahlung durch:"
 "pay now","Jetzt bezahlen"
@@ -42,6 +45,7 @@
 "Amount or currency missmatch : %1","Abweichender Betrag oder W&auml;hrung : %1" 
 "Payment information","Zahlungsinformationen"
 "Please transfer the amount of <strong>%1 %2</strong> to the following account<br /><br />Holder: %3<br/>IBAN: %4<br/>BIC: %5<br/><br/><i>Please use only this identification number as the descriptor :</i><br/><strong>%6</strong>","Bitte &uuml;berweisen Sie uns den Betrag von  <strong>%1 %2</strong> auf folgendes Konto:<br/><br/>Inhaber: %3<br/>IBAN: %4<br/>BIC: %5<br/><br/><i>Geben Sie als Verwendungszweck bitte ausschlie&szlig;lich diese Identifikationsnummer an:</i><br/><strong>%6</strong>"
+"The amount of <strong>%1 %2</strong> will be debited from this account within the next days:<br /><br />IBAN: %3<br /><br /><i>The booking contains the mandate reference ID: %4<br >and the creditor identifier: %5</i><br /><br />Please ensure that there will be sufficient funds on the corresponding account.","Der Betrag von <strong>%1 %2</strong> wird in den nächsten Tagen von folgendem Konto abgebucht:<br /><br />IBAN: %3<br /><br /><i>Die Abbuchung enthält die Mandatsreferenz-ID: %4<br />und die Gläubiger ID: %5</i><br /><br />Bitte sorgen Sie für ausreichende Deckung auf dem entsprechenden Konto."
 
 "HPError-100.100.101","Bitte &uuml;berpr&uuml;fen Sie Ihre Eingaben"
 "HPError-100.100.303","Die Karte ist abgelaufen"
@@ -57,4 +61,3 @@
 "HPError-800.100.168","Bitte w&auml;hlen Sie eine andere Zahlart"
 "HPError-800.100.171","Bitte w&auml;hlen Sie eine andere Zahlart"
 "HPError-800.300.101","Bitte w&auml;hlen Sie eine andere Zahlart"
-

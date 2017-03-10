@@ -2,6 +2,11 @@
 /**
  * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
+ *
+ * TODO: Inject addtional payment data, when config allows it.
+ * TODO: - never: don't fill values for iban & owner
+ * TODO: - same_shipping_address: fill values when shipping hash matches the stored one
+ * TODO: - always: always fill values when additional payment data set exists for the customer
  */
 -->
 <div class="payment-method" data-bind="css: {'_active': (getCode() == isChecked())}">

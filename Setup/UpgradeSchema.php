@@ -26,8 +26,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
         $upgrade->startSetup();
 
         // Version 17.3.1 Upgrade
-        if (version_compare($module->getVersion(), '17.3.1') < 0) {
-            $this->run170301Upgrade($upgrade);
+        if (version_compare($module->getVersion(), '17.3.10') < 0) {
+            $this->run170310Upgrade($upgrade);
         }
 
         $upgrade->endSetup();
@@ -40,7 +40,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
      *
      * @param SchemaSetupInterface $upgrade
      */
-    private function run170301Upgrade(SchemaSetupInterface $upgrade)
+    private function run170310Upgrade(SchemaSetupInterface $upgrade)
     {
         $tablerealname = 'heidelpay_payment_information';
         $tablename = $upgrade->getTable($tablerealname);
@@ -64,7 +64,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 ->addColumn('paymentmethod', \Magento\Framework\DB\Ddl\Table::TYPE_TEXT, 10, [
                     'nullable' => false
                 ])
-                ->addColumn('shipping_hash', \Magento\Framework\DB\Ddl\Table::TYPE_TEXT, 50, [
+                ->addColumn('shipping_hash', \Magento\Framework\DB\Ddl\Table::TYPE_TEXT, 256, [
                     'nullable' => false,
                 ])
                 ->addColumn('additional_data', \Magento\Framework\DB\Ddl\Table::TYPE_BLOB, null, [

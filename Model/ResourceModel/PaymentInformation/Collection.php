@@ -41,14 +41,16 @@ class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\Ab
     /**
      * Loads payment information by certain parameters.
      *
-     * @param \Magento\Quote\Model\Quote $quote
+     * @param integer $storeId
+     * @param string $customerEmail
+     * @param string $paymentMethod
      * @return \Magento\Framework\DataObject
      */
-    public function loadByCustomerInformation($quote)
+    public function loadByCustomerInformation($storeId, $customerEmail, $paymentMethod)
     {
-        return $this->addStoreFilter($quote->getStoreId())
-            ->addCustomerEmailFilter($quote->getCustomer()->getEmail())
-            ->addPaymentMethodFilter($quote->getPayment()->getMethod())
+        return $this->addStoreFilter($storeId)
+            ->addCustomerEmailFilter($customerEmail)
+            ->addPaymentMethodFilter($paymentMethod)
             ->load()
             ->getLastItem();
     }

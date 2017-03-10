@@ -14,6 +14,10 @@
 "If this is enabled the heidelpay sandbox will be used. Otherwise the real payment system will be used.","If this is enabled the heidelpay sandbox will be used. Otherwise the real payment system will be used."
 "An unexpected error occurred. Please contact us to get further information.","An unexpected error occurred. Please contact us to get further information."
 
+"Never","Never"
+"Same Shipping Address","Same Shipping Address"
+"Always","Always"
+
 "Credit Card","Credit Card"
 "Debit Card","Debit Card"
 "Direct Debit","Direct Debit"

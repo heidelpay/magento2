@@ -60,7 +60,9 @@ define(
                     // write additional information to heidelpay
                     // when the payment method is direct debit...
                     if ( paymentData.method == 'hgwdd' ) {
-                        var newUrl = urlBuilder.createUrl('/hgw', {});
+                        var newUrl = customer.isLoggedIn()
+                            ? urlBuilder.createUrl('/hgw/set-payment-info', {})
+                            : urlBuilder.createUrl('/hgw/guest/set-payment-info', {});
 
                         // heidelpay Payload
                         var hgwPayload = {
