@@ -141,8 +141,6 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
                 ->getMethodInstance()
                 ->additionalPaymentInformation($data);
 
-            $this->_logger->debug('Additional Payment Information : ' . $additionalPaymentInformation);
-
             $this->_checkoutSession->setHeidelpayInfo($additionalPaymentInformation);
 
             $this->_logger->debug('Heidelpay redirect to success page');

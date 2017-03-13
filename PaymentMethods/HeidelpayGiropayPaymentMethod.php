@@ -23,6 +23,9 @@ class HeidelpayGiropayPaymentMethod extends HeidelpayAbstractPaymentMethod
     /** @var string heidelpay Gateway Paymentcode */
     protected $_code = 'hgwgp';
 
+    /** @var bool */
+    protected $_canAuthorize = true;
+
     /**
      * HeidelpayGiropayPaymentMethod constructor.
      *

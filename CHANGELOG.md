@@ -1,6 +1,6 @@
 # Release Notes - heidelpay Payment Gateway for Magento 2
 
-## v17.3.10
+## v17.3.13
 
 ### Added
 - Direct Debit Payment method
