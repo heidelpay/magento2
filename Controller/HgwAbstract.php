@@ -1,5 +1,6 @@
 <?php
 namespace Heidelpay\Gateway\Controller;
+
 /**
  * Abstract controller class
  *
@@ -14,86 +15,102 @@ namespace Heidelpay\Gateway\Controller;
  */
 
 use Heidelpay\Gateway\Helper\Payment AS HeidelpayHelper;
-use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderCommentSender;
 use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
 
 abstract class HgwAbstract extends \Magento\Framework\App\Action\Action
 {
-	protected $resultPageFactory;
-	protected $logger;
-	
-	/**
-	 * @var \Magento\Customer\Model\Session
-	 */
-	protected $_checkoutSession;
-	
-	/**
-	 * @var \Magento\Quote\Model\Quote
-	 */
-	protected $_quote = false;
-	
-	/**
-	 * @var \Magento\Sales\Model\OrderFactory
-	 */
-	protected $_orderFactory;
-	
-	protected $_encryptor;
-	
-	protected $_logger;
-	
-	protected $_paymentHelper;
-	
-	protected $_quoteObject;
-	
-	/*
-	 * \Magento\Quote\Api\CartManagementInterface
-	 */
-	protected $_cartManagement;
-	
-	/*
-	 * \Magento\Sales\Model\Order\Email\Sender\OrderSender;
-	 */
-	protected $_orderSender;
-	
-	/*
-	 * \Magento\Sales\Model\Order\Email\Sender\OrderCommentSender;
-	 */
-	protected $_orderCommentSender;
-	
-	/*
-	 * 
-	 */
-	
-	protected $_invoiceSender;
-	
-	/*
-	 * \Magento\Framework\View\Result\PageFactory
-	 */
-	protected $_resultPageFactory;
+    protected $resultPageFactory;
+    protected $logger;
 
-	/**      * @param \Magento\Framework\App\Action\Context $context      */
-public function __construct(
+    /**
+     * @var \Magento\Customer\Model\Session
+     */
+    protected $_checkoutSession;
+
+    /**
+     * @var \Magento\Quote\Model\Quote
+     */
+    protected $_quote = false;
+
+    /**
+     * @var \Magento\Sales\Model\OrderFactory
+     */
+    protected $_orderFactory;
+
+    protected $_encryptor;
+
+    protected $_logger;
+
+    protected $_paymentHelper;
+
+    protected $_quoteObject;
+
+    /**
+     * @var \Magento\Quote\Api\CartManagementInterface
+     */
+    protected $_cartManagement;
+
+    /**
+     * @var \Magento\Sales\Model\Order\Email\Sender\OrderSender;
+     */
+    protected $_orderSender;
+
+    /**
+     * @var \Magento\Sales\Model\Order\Email\Sender\OrderCommentSender;
+     */
+    protected $_orderCommentSender;
+
+    /*
+     *
+     */
+
+    protected $_invoiceSender;
+
+    /**
+     * @var \Magento\Framework\View\Result\PageFactory
+     */
+    protected $_resultPageFactory;
+
+    /**
+     * HgwAbstract constructor.
+     *
+     * @param \Magento\Framework\App\Action\Context $context
+     * @param \Magento\Customer\Model\Session $customerSession
+     * @param \Magento\Checkout\Model\Session $checkoutSession
+     * @param \Magento\Sales\Model\OrderFactory $orderFactory
+     * @param \Magento\Framework\Url\Helper\Data $urlHelper
+     * @param \Psr\Log\LoggerInterface $logger
+     * @param \Magento\Quote\Api\CartManagementInterface $cartManagement
+     * @param \Magento\Quote\Api\CartRepositoryInterface $quoteObject
+     * @param \Magento\Framework\View\Result\PageFactory $resultPageFactory
+     * @param HeidelpayHelper $paymentHelper
+     * @param OrderSender $orderSender
+     * @param InvoiceSender $invoiceSender
+     * @param OrderCommentSender $orderCommentSender
+     * @param \Magento\Framework\Encryption\Encryptor $encryptor
+     * @param \Magento\Customer\Model\Url $customerUrl
+     */
+    public function __construct(
         \Magento\Framework\App\Action\Context $context,
         \Magento\Customer\Model\Session $customerSession,
         \Magento\Checkout\Model\Session $checkoutSession,
         \Magento\Sales\Model\OrderFactory $orderFactory,
         \Magento\Framework\Url\Helper\Data $urlHelper,
-		\Psr\Log\LoggerInterface $logger,
-		\Magento\Quote\Api\CartManagementInterface $cartManagement,
-		\Magento\Quote\Api\CartRepositoryInterface $quoteObject,
-		\Magento\Framework\View\Result\PageFactory $resultPageFactory,
-		HeidelpayHelper $paymentHelper,
-		OrderSender $orderSender,
-		InvoiceSender $invoiceSender,
-		OrderCommentSender $orderCommentSender,
-		\Magento\Framework\Encryption\Encryptor $encryptor,
+        \Psr\Log\LoggerInterface $logger,
+        \Magento\Quote\Api\CartManagementInterface $cartManagement,
+        \Magento\Quote\Api\CartRepositoryInterface $quoteObject,
+        \Magento\Framework\View\Result\PageFactory $resultPageFactory,
+        HeidelpayHelper $paymentHelper,
+        OrderSender $orderSender,
+        InvoiceSender $invoiceSender,
+        OrderCommentSender $orderCommentSender,
+        \Magento\Framework\Encryption\Encryptor $encryptor,
         \Magento\Customer\Model\Url $customerUrl
-		
+
     ) {
-	
-    	$this->_quoteObject = $quoteObject;
+        $this->_quoteObject = $quoteObject;
         $this->_customerSession = $customerSession;
         $this->_checkoutSession = $checkoutSession;
         $this->_orderFactory = $orderFactory;
@@ -106,33 +123,30 @@ public function __construct(
         $this->_orderSender = $orderSender;
         $this->_orderCommentSender = $orderCommentSender;
         $this->_resultPageFactory = $resultPageFactory;
-        $this->_invoiceSender = $invoiceSender ;
+        $this->_invoiceSender = $invoiceSender;
         parent::__construct($context);
     }
-	
-	
-	/**
-	 * Return checkout session object
-	 *
-	 * @return \Magento\Checkout\Model\Session
-	 */
-	protected function getCheckout()
-	{
-		return $this->_checkoutSession;
-	}
-	
-	/**
-	 * Return checkout quote object
-	 *
-	 * @return \Magento\Quote\Model\Quote
-	 */
-	protected function getQuote()
-	{
-		if (!$this->_quote) {
-			$this->_quote = $this->getCheckout()->getQuote();
-		}
-		return $this->_quote;
-	}
-	
 
+    /**
+     * Return checkout session object
+     *
+     * @return \Magento\Checkout\Model\Session
+     */
+    protected function getCheckout()
+    {
+        return $this->_checkoutSession;
+    }
+
+    /**
+     * Return checkout quote object
+     *
+     * @return \Magento\Quote\Model\Quote
+     */
+    protected function getQuote()
+    {
+        if (!$this->_quote) {
+            $this->_quote = $this->getCheckout()->getQuote();
+        }
+        return $this->_quote;
+    }
 }

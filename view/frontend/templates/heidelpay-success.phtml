@@ -1,6 +1,6 @@
 <?php
 /**
- * This template will extend the checkout success template and will add payment information for the customer 
+ * This template will extend the checkout success template and will add payment information for the customer
  *
  *
  * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
@@ -11,15 +11,24 @@
  * @package  Heidelpay
  * @subpackage Magento2
  * @category Magento2
- * @var $block  \Heidelpay\Gateway\Block\Checkout\Success 
+ * @var $block  \Heidelpay\Gateway\Block\Checkout\Success
  * */
-	$additionalPaymentInformation = $block->getHeidelpayInfo();
-	if ( $additionalPaymentInformation !== false ) {
-	?>
-<!-- Heidelpay success payment information -->
-		<div class="heidelpay-additional-payment-information">
-			<h3 class="heidelpay-additional-payment-information-title"><?php echo __ ( 'Payment information' );?></h3>
-			<p><?php echo $additionalPaymentInformation ?></p>
-		</div>
-<!-- End Heidelpay success payment informations -->
-<?php };?>
+$additionalPaymentInformation = $block->getHeidelpayInfo();
+if ($additionalPaymentInformation !== false) {
+    ?>
+    <!-- Heidelpay success payment information -->
+    <div class="heidelpay-additional-payment-information">
+        <h3 class="heidelpay-additional-payment-information-title"><?php echo __('Payment information'); ?></h3>
+        <p><?php echo $additionalPaymentInformation ?></p>
+    </div>
+    <!-- End Heidelpay success payment informations -->
+<?php }; ?>
+<!-- Clear minicart START -->
+<script>
+    require([
+        'Magento_Customer/js/customer-data'
+    ], function(customerData) {
+        customerData.invalidate(['cart']);
+    })
+</script>
+<!-- Clear minicart END -->

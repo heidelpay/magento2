@@ -12,18 +12,22 @@
 		"magento/module-payment" : "<100.2.0",
 		"magento/module-backend" : "<100.2.0",
 		"magento/framework" : "<100.2.0",
-		"heidelpay/php-api" : "17.1.17"
+		"heidelpay/php-api" : "17.3.2"
+	},
+	"require-dev" : {
+		"magento-ecg/coding-standard" : "2.0",
+		"heidelpay/phpdocumentor" : "2.9.1",
+		"friendsofphp/php-cs-fixer" : "2.1.0"
 	},
 	"suggest" : {
 		"magento/module-checkout-agreements" : "<100.2.0"
 	},
 	"repositories" : [{
 			"type" : "composer",
-			"url" : "https://dev.heidelpay.de/packages"
+			"url" : "https://repo.magento.com/"
 		}
 	],
 	"type" : "magento2-module",
-	"version" : "17.1.25",
 	"license" : "Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.",
 	"autoload" : {
 		"files" : [
@@ -37,17 +41,15 @@
 		"email" : "support@heidelpay.de"
 	},
 	"homepage" : "https://dev.heidelpay.de",
-	"authors" : [
-        {
+	"authors" : [{
 			"name" : "Jens Richter",
 			"email" : "development@heidelpay.de",
 			"homepage" : "https://dev.heidelpay.de/magento2"
-		},
-        {
-            "name": "Stephano Vogel",
-            "email": "development@heidelpay.de",
-            "homepage": "https://dev.heidelpay.de/magento2"
-        }
+		}, {
+			"name" : "Stephano Vogel",
+			"email" : "development@heidelpay.de",
+			"homepage" : "https://dev.heidelpay.de/magento2"
+		}
 	],
 	"keywords" : [
 		"magento",
@@ -55,5 +57,10 @@
 		"payment",
 		"php",
 		"payment-gateway"
-	]
+	],
+	"require-dev" : {
+		"magento-ecg/coding-standard" : "2.0",
+		"heidelpay/phpdocumentor" : "2.9.1",
+		"friendsofphp/php-cs-fixer" : "2.1.0"
+	}
 }
