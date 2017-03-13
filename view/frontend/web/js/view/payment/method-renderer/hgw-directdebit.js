@@ -7,9 +7,10 @@ define(
         'mage/storage',
         'Magento_Checkout/js/model/payment/additional-validators',
         'Magento_Customer/js/model/customer',
+        'Magento_Customer/js/customer-data',
         'Magento_Checkout/js/model/quote'
     ],
-    function ($, Component, placeOrderAction, urlBuilder, storage, additionalValidators, customer, quote) {
+    function ($, Component, placeOrderAction, urlBuilder, storage, additionalValidators, customer, customerData, quote) {
         'use strict';
 
         return Component.extend({
@@ -27,6 +28,7 @@ define(
                 if (customer.isLoggedIn()) {
                     // if we have a shipping address, go on
                     if( quote.shippingAddress() !== null ) {
+                        var parent = this;
                         var serviceUrl = urlBuilder.createUrl('/hgw/get-payment-info', {});
                         var hgwPayload = {
                             quoteId: quote.getQuoteId(),
@@ -36,13 +38,27 @@ define(
                         storage.post(
                             serviceUrl, JSON.stringify(hgwPayload)
                         ).done(
-                            function(e, data) {
-                                console.log(e);
-                                console.log(data);
+                            function(data) {
+                                var info = JSON.parse(data);
+
+                                // set iban and account holder, if result is not empty.
+                                if( info !== null ) {
+                                    parent.hgwIban(info.hgw_iban);
+                                    parent.hgwOwner(info.hgw_holder);
+                                }
                             }
                         );
                     }
                 }
+
+                return this;
+            },
+
+            initObservable: function() {
+                this._super()
+                    .observe([
+                        'hgwIban', 'hgwOwner'
+                    ]);
 
                 return this;
             },
@@ -55,8 +71,8 @@ define(
                 return {
                     'method': this.item.method,
                     'additional_data': {
-                        'hgw_iban': this.hgwIban,
-                        'hgw_owner': this.hgwOwner
+                        'hgw_iban': this.hgwIban(),
+                        'hgw_owner': this.hgwOwner()
                     }
                 };
             },
@@ -84,6 +100,7 @@ define(
                 }
                 return false;
             }
+
         });
     }
 );

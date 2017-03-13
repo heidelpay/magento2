@@ -26,12 +26,12 @@ interface PaymentInterface
      * if the recognition is allowed and customer payment data is stored for
      * the requested payment method.
      *
-     * Returns an array of payment data, if information is available.
+     * Returns a json presentation of payment data, if information is available.
      * Else, it just returns null.
      *
      * @param integer $quoteId
      * @param string $paymentMethod
-     * @return string[] | null
+     * @return string
      */
     public function getAdditionalPaymentInformation($quoteId, $paymentMethod);
 

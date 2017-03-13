@@ -2,9 +2,8 @@
 
 namespace Heidelpay\Gateway\Model;
 
-use Heidelpay\Gateway\Model\PaymentInformationInterface as HeidelpayPaymentInformationInterface;
+use Heidelpay\Gateway\Api\Data\PaymentInformationInterface as HeidelpayPaymentInformationInterface;
 use Magento\Framework\Model\AbstractModel;
-use Magento\Store\Api\Data\StoreInterface as MageApiDataStoreInterface;
 
 /**
  * PaymentInformation
@@ -24,9 +23,6 @@ use Magento\Store\Api\Data\StoreInterface as MageApiDataStoreInterface;
  */
 class PaymentInformation extends AbstractModel implements HeidelpayPaymentInformationInterface
 {
-    /** @var \Magento\Store\Model\StoreFactory */
-    protected $storeFactory;
-
     /** @var \Magento\Framework\Encryption\EncryptorInterface */
     protected $encryptor;
 
@@ -37,7 +33,6 @@ class PaymentInformation extends AbstractModel implements HeidelpayPaymentInform
      * @param \Magento\Framework\Registry $registry
      * @param \Heidelpay\Gateway\Model\ResourceModel\PaymentInformation|null $resource
      * @param \Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\Collection|null $resourceCollection
-     * @param \Magento\Store\Model\StoreFactory $storeFactory
      * @param \Magento\Framework\Encryption\EncryptorInterface $encryptor
      * @param array $data
      */
@@ -46,13 +41,11 @@ class PaymentInformation extends AbstractModel implements HeidelpayPaymentInform
         \Magento\Framework\Registry $registry,
         \Heidelpay\Gateway\Model\ResourceModel\PaymentInformation $resource = null,
         \Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\Collection $resourceCollection = null,
-        \Magento\Store\Model\StoreFactory $storeFactory,
         \Magento\Framework\Encryption\EncryptorInterface $encryptor,
         array $data = []
     ) {
         parent::__construct($context, $registry, $resource, $resourceCollection, $data);
 
-        $this->storeFactory = $storeFactory;
         $this->encryptor = $encryptor;
     }
 
@@ -77,22 +70,16 @@ class PaymentInformation extends AbstractModel implements HeidelpayPaymentInform
      */
     public function getStore()
     {
-        return $this->storeFactory->create()->load($this->getData(self::STORE_ID));
+        return $this->getData(self::STORE_ID);
     }
 
     /**
      * @inheritdoc
      */
-    public function setStore($store)
+    public function setStoreId($storeId)
     {
-        $id = null;
-        if ($store instanceof MageApiDataStoreInterface) {
-            $id = $store->getId();
-        } elseif (is_numeric($store)) {
-            $id = $store;
-        }
+        $this->setData(self::STORE_ID, $storeId);
 
-        $this->setData(self::STORE_ID, $id);
         return $this;
     }
 

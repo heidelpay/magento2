@@ -92,7 +92,7 @@ class Payment implements PaymentInterface
 
         // if recognition is set to 'never', we don't return any data.
         if ($allowRecognition == Recognition::RECOGNITION_NEVER) {
-            return $result;
+            $result = null;
         }
 
         // get the customer payment information by given data from the request.
@@ -120,7 +120,7 @@ class Payment implements PaymentInterface
             }
         }
 
-        return $result;
+        return json_encode($result);
     }
 
     /**
@@ -245,12 +245,12 @@ class Payment implements PaymentInterface
      * @param \Magento\Quote\Model\Quote $quote
      * @param array $additionalData
      * @param string $paymentRef
-     * @return \Heidelpay\Gateway\Model\PaymentInformationInterface
+     * @return \Heidelpay\Gateway\Api\Data\PaymentInformationInterface
      */
     private function savePaymentInformation($paymentInformation, $quote, $additionalData, $paymentRef = null)
     {
         return $paymentInformation
-            ->setStore($quote->getStoreId())
+            ->setStoreId($quote->getStoreId())
             ->setCustomerEmail($quote->getCustomer()->getEmail())
             ->setPaymentMethod($quote->getPayment()->getMethod())
             ->setShippingHash($this->createShippingHash($quote->getShippingAddress()))
