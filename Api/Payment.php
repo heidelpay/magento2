@@ -120,6 +120,13 @@ class Payment implements PaymentInterface
             }
         }
 
+        // if we have no data at all, set the account owner to the billing address name.
+        if ($result === null) {
+            $result = [
+                'hgw_holder' => $quote->getBillingAddress()->getName()
+            ];
+        }
+
         return json_encode($result);
     }
 

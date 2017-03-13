@@ -53,7 +53,6 @@ class Index extends \Heidelpay\Gateway\Controller\HgwAbstract
 
             $resultPage = $this->_resultPageFactory->create();
             $resultPage->getConfig()->getTitle()->prepend(__('Please confirm your payment:'));
-            //$resultPage->setHgwCode($payment->_code);
             $resultPage->getLayout()->getBlock('heidelpay_gateway')->setHgwUrl($data['FRONTEND_PAYMENT_FRAME_URL']);
             $resultPage->getLayout()->getBlock('heidelpay_gateway')->setHgwCode($payment->getCode());
 
@@ -62,12 +61,12 @@ class Index extends \Heidelpay\Gateway\Controller\HgwAbstract
 
         $error_code = (array_key_exists('PROCESSING_RETURN_CODE', $data)) ? $data['PROCESSING_RETURN_CODE'] : null;
         $this->_logger->error('Heidelpay init error : ' . $data['PROCESSING_RETURN']);
-        $message = $message = $this->_paymentHelper->handleError($error_code);
+        $message = $this->_paymentHelper->handleError($error_code);
         $this->messageManager->addErrorMessage(
             $message
         );
 
-        $this->_redirect('checkout/cart/', array('_secure' => true));
+        $this->_redirect('checkout/cart/', ['_secure' => true]);
 
         return;
     }

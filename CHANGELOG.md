@@ -8,11 +8,12 @@
 - Recognition option for Direct Debit payment
 
 ### Changed
+- updated heidelpay php-api version to 17.3.2
 - heidelpay payment methods cannot be selected anymore when creating orders in the Admin Backend
 - Exact Magento Shop and heidelpay Module versions are now being sent to the heidelpay payment instead of hardcoded versions 
 
 ### Fixed
-- Fixed an issue where the minicart wasn't cleared after the successful checkout
+- The minicart (on the top right) will now be cleared after the successful checkout
 
 ### Removed
 - Unused Customer Model and it's table definition
