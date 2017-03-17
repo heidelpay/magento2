@@ -231,6 +231,10 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         return $this->_scopeConfig->getValue($path, StoreScopeInterface::SCOPE_STORE, $storeId);
     }
 
+    /**
+     * @param \Magento\Quote\Model\Quote $quote
+     * @return array
+     */
     public function getHeidelpayUrl($quote)
     {
         $config = $this->getMainConfig($this->_code, $this->getStore());
@@ -269,7 +273,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         $this->_heidelpayPaymentMethod->getRequest()->basketData(
             $quote->getId(),                                        // Reference Id of your application
             $this->_paymentHelper->format($quote->getGrandTotal()), // Amount of this request
-            $quote->getBaseCurrencyCode(),                          // Currency code of this request
+            $quote->getQuoteCurrencyCode(),                         // Currency code of this request
             $this->_encryptor->exportKeys()                         // A secret passphrase from your application
         );
 

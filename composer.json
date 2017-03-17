@@ -15,7 +15,7 @@
 		"heidelpay/php-api" : "17.3.2"
 	},
 	"require-dev" : {
-		"magento-ecg/coding-standard" : "2.0",
+		"magento/marketplace-eqp" : "2.0",
 		"heidelpay/phpdocumentor" : "2.9.1",
 		"friendsofphp/php-cs-fixer" : "2.1.0"
 	},
@@ -57,10 +57,5 @@
 		"payment",
 		"php",
 		"payment-gateway"
-	],
-	"require-dev" : {
-		"magento-ecg/coding-standard" : "2.0",
-		"heidelpay/phpdocumentor" : "2.9.1",
-		"friendsofphp/php-cs-fixer" : "2.1.0"
-	}
+	]
 }

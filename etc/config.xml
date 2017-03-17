@@ -88,6 +88,18 @@
                 <max_order_total>0</max_order_total>
                 <model>Heidelpay\Gateway\PaymentMethods\HeidelpayDirectDebitPaymentMethod</model>
             </hgwdd>
+            <hgwdds>
+                <active>0</active>
+                <payment_action>authorize</payment_action>
+                <title><![CDATA[Direct Debit Secured]]></title>
+                <channel>31HA07BC81856CAD6D8E0B3A3100FBA3</channel>
+                <allowspecific>0</allowspecific>
+                <recognition>never</recognition>
+                <specificcountry>DE,AT,CH</specificcountry>
+                <min_order_total>0</min_order_total>
+                <max_order_total>0</max_order_total>
+                <model>Heidelpay\Gateway\PaymentMethods\HeidelpayDirectDebitSecuredPaymentMethod</model>
+            </hgwdds>
         </payment>
     </default>
 </config>

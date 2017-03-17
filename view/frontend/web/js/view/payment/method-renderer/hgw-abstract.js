@@ -8,8 +8,26 @@ define(
     function ($, Component, placeOrderAction, additionalValidators) {
         'use strict';
         return Component.extend({
+
+            /**
+             * Property that indicates, if the payment method is storing
+             * additional data.
+             */
+            savesAdditionalData: false,
+
             defaults: {
                 template: 'Heidelpay_Gateway/payment/heidelpay-form'
+            },
+
+            /**
+             * Indicates if the payment method is storing addtional
+             * information for the payment.
+             *
+             * @returns {boolean}
+             */
+            isSavingAdditionalData: function() {
+                //if (this.savesAdditionalData)
+                return this.savesAdditionalData;
             },
 
             /**
@@ -26,7 +44,12 @@ define(
 
                 if (this.validate() && additionalValidators.validate()) {
                     this.isPlaceOrderActionAllowed(false);
-                    placeOrder = placeOrderAction(this.getData(), this.redirectAfterPlaceOrder, this.messageContainer);
+                    placeOrder = placeOrderAction(
+                        this.getData(),
+                        this.redirectAfterPlaceOrder,
+                        this.messageContainer,
+                        this.isSavingAdditionalData()
+                    );
 
                     $.when(placeOrder).fail(function () {
                         self.isPlaceOrderActionAllowed(true);

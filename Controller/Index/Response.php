@@ -188,6 +188,12 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
             $data['ACCOUNT_IBAN'] = $request->getPOST('ACCOUNT_IBAN');
             $data['ACCOUNT_IDENTIFICATION'] = $request->getPOST('ACCOUNT_IDENTIFICATION');
             $data['IDENTIFICATION_CREDITOR_ID'] = $request->getPOST('IDENTIFICATION_CREDITOR_ID');
+
+            // ... in case of secured (B2) direct debit
+            if (!empty($request->getParam('NAME_SALUTATION')) && !empty($request->getParam('NAME_BIRTHDATE'))) {
+                $data['NAME_SALUTATION'] = $request->getParam('NAME_SALUTATION');
+                $data['NAME_BIRTHDATE'] = $request->getParam('NAME_BIRTHDATE');
+            }
         }
 
         // initialize the Response object with different data.
