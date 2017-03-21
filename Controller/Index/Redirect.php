@@ -163,16 +163,11 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
 
         $session->getQuote()->setIsActive(true)->save();
 
-        $error_code = ($data !== null && array_key_exists('PROCESSING_RETURN_CODE', $data))
-            ? $data['PROCESSING_RETURN_CODE']
-            : null;
+        $this->_logger->error(
+            'Heidelpay redirect with error to basket. ' . $this->heidelpayResponse->getError()['message']
+        );
 
-        $error_message = ($data !== null && array_key_exists('PROCESSING_RETURN', $data))
-            ? $data['PROCESSING_RETURN']
-            : '';
-
-        $this->_logger->error('Heidelpay redirect with error to basket. ' . $error_message);
-        $message = $this->_paymentHelper->handleError($error_code);
+        $message = $this->_paymentHelper->handleError($this->heidelpayResponse->getError()['code']);
         $this->messageManager->addErrorMessage($message);
 
         return $this->_redirect('checkout/cart/', ['_secure' => true]);

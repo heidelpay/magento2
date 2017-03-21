@@ -140,7 +140,7 @@ class HeidelpayDirectDebitSecuredPaymentMethod extends HeidelpayAbstractPaymentM
             . '<br /><br />IBAN: %3<br /><br /><i>The booking contains the mandate reference ID: %4'
             . '<br >and the creditor identifier: %5</i><br /><br />'
             . 'Please ensure that there will be sufficient funds on the corresponding account.',
-            $response['PRESENTATION_AMOUNT'],
+            $this->_paymentHelper->format($response['PRESENTATION_AMOUNT']),
             $response['PRESENTATION_CURRENCY'],
             $response['ACCOUNT_IBAN'],
             $response['ACCOUNT_IDENTIFICATION'],

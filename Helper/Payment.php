@@ -2,6 +2,7 @@
 
 namespace Heidelpay\Gateway\Helper;
 
+use Heidelpay\CustomerMessages\CustomerMessage;
 use Magento\Framework\HTTP\ZendClientFactory;
 use Magento\Payment\Model\Method\Logger;
 use Magento\Sales\Model\Order\Payment\Transaction;
@@ -36,24 +37,24 @@ class Payment extends \Magento\Framework\App\Helper\AbstractHelper
     /** @var \Magento\Framework\DB\TransactionFactory */
     protected $transactionFactory;
 
-    /** @var \Heidelpay\CustomerMessages\CustomerMessage */
-    protected $customerMessage;
+    /** @var \Magento\Framework\Locale\Resolver */
+    protected $localeResolver;
 
     /**
      * @param ZendClientFactory $httpClientFactory
      * @param Logger $logger
      * @param \Magento\Framework\DB\TransactionFactory $transactionFactory
-     * @param \Heidelpay\CustomerMessages\CustomerMessage $customerMessage
      */
     public function __construct(
         ZendClientFactory $httpClientFactory,
         Logger $logger,
         \Magento\Framework\DB\TransactionFactory $transactionFactory,
-        \Heidelpay\CustomerMessages\CustomerMessage $customerMessage
+        \Magento\Framework\Locale\Resolver $localeResolver
     ) {
         $this->httpClientFactory = $httpClientFactory;
         $this->log = $logger;
         $this->transactionFactory = $transactionFactory;
+        $this->localeResolver = $localeResolver;
     }
 
     public function splitPaymentCode($PAYMENT_CODE)
@@ -172,26 +173,14 @@ class Payment extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
-     * @param string $default
-     * @return string
-     */
-    public function getLang($default = 'en')
-    {
-        $locale = explode('_', Mage::app()->getLocale()->getLocaleCode());
-        if (!empty($locale)) {
-            return strtoupper($locale[0]);
-        }
-        return strtoupper($default); //TOBO falses Module
-    }
-
-    /**
      * helper to generate customer payment error messages
      *
-     * @param null|mixed $errorCode
+     * @param string|null $errorCode
      * @return string
      */
     public function handleError($errorCode = null)
     {
-        return $this->customerMessage->getMessage($errorCode);
+        $customerMessage = new CustomerMessage($this->localeResolver->getLocale());
+        return $customerMessage->getMessage($errorCode);
     }
 }
