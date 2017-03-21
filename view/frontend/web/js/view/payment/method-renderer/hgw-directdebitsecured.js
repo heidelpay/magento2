@@ -1,5 +1,6 @@
 define(
     [
+        'ko',
         'jquery',
         'Heidelpay_Gateway/js/view/payment/method-renderer/hgw-abstract',
         'Heidelpay_Gateway/js/action/place-order',
@@ -10,7 +11,7 @@ define(
         'Magento_Checkout/js/model/quote',
         'moment'
     ],
-    function ($, Component, placeOrderAction, urlBuilder, storage, additionalValidators, customer, quote, moment) {
+    function (ko, $, Component, placeOrderAction, urlBuilder, storage, additionalValidators, customer, quote, moment) {
         'use strict';
 
         return Component.extend({
@@ -39,6 +40,21 @@ define(
                     this.years.push(i);
                 }
 
+                return this;
+            },
+
+            initObservable: function () {
+                this._super()
+                    .observe([
+                        'hgwIban', 'hgwHolder', 'hgwSalutation',
+                        'hgwDobYear', 'hgwDobMonth', 'hgwDobDay',
+                        'years'
+                    ]);
+
+                return this;
+            },
+
+            getAdditionalPaymentInformation: function() {
                 // load addtional customer information (recognition), if the user isn't a guest.
                 if (customer.isLoggedIn()) {
                     // if we have a shipping address, go on
@@ -69,6 +85,8 @@ define(
 
                                     if (info.hasOwnProperty('hgw_birthdate') && info.hgw_birthdate !== null) {
                                         var date = moment(info.hgw_birthdate, 'YYYY-MM-DD');
+
+                                        // TODO: month = 0 -> no month is selected?
                                         parent.hgwDobDay(date.date());
                                         parent.hgwDobMonth(date.month());
                                         parent.hgwDobYear(date.year());
@@ -78,19 +96,6 @@ define(
                         );
                     }
                 }
-
-                return this;
-            },
-
-            initObservable: function () {
-                this._super()
-                    .observe([
-                        'hgwIban', 'hgwHolder', 'hgwSalutation',
-                        'hgwDobYear', 'hgwDobMonth', 'hgwDobDay',
-                        'years'
-                    ]);
-
-                return this;
             },
 
             getCode: function () {
@@ -123,6 +128,7 @@ define(
             validate: function () {
                 var form = $('#hgw-directdebit-secured-form');
 
+                // TODO: IBAN validation
                 return form.validation() && form.validation('isValid');
             }
         });

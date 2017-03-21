@@ -3,10 +3,13 @@ define(
         'jquery',
         'Magento_Checkout/js/view/payment/default',
         'Heidelpay_Gateway/js/action/place-order',
-        'Magento_Checkout/js/model/payment/additional-validators'
+        'Magento_Checkout/js/model/payment/additional-validators',
+        'Magento_Checkout/js/action/select-payment-method',
+        'Magento_Checkout/js/checkout-data'
     ],
-    function ($, Component, placeOrderAction, additionalValidators) {
+    function ($, Component, placeOrderAction, additionalValidators, selectPaymentMethodAction, checkoutData) {
         'use strict';
+
         return Component.extend({
 
             /**
@@ -26,9 +29,16 @@ define(
              * @returns {boolean}
              */
             isSavingAdditionalData: function() {
-                //if (this.savesAdditionalData)
                 return this.savesAdditionalData;
             },
+
+            /**
+             * Function to load additional payment data if the payment method requires/offers it.
+             *
+             * This method needs to be overloaded by the payment renderer components, if
+             * additional information is needed.
+             */
+            getAdditionalPaymentInformation: function() {},
 
             /**
              * Redirect to hgw controller
@@ -57,6 +67,23 @@ define(
                     return true;
                 }
                 return false;
+            },
+
+            /**
+             * Extends the parent selectPaymentMethod function.
+             *
+             * @return {Boolean}
+             */
+            selectPaymentMethod: function () {
+                // call to the function which pulls additional information for a payment method, if needed.
+                this.getAdditionalPaymentInformation();
+
+                // from here, the body matches the default selectPaymentMethod function.
+
+                selectPaymentMethodAction(this.getData());
+                checkoutData.setSelectedPaymentMethod(this.item.method);
+
+                return true;
             }
         });
     }

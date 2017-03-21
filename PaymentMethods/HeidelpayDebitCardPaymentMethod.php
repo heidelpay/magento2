@@ -110,6 +110,7 @@ class HeidelpayDebitCardPaymentMethod extends HeidelpayAbstractPaymentMethod
     /**
      * Initial Request to heidelpay payment server to get the form / iframe url
      * {@inheritDoc}
+     *
      * @see \Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod::getHeidelpayUrl()
      */
     public function getHeidelpayUrl($quote)
@@ -131,12 +132,6 @@ class HeidelpayDebitCardPaymentMethod extends HeidelpayAbstractPaymentMethod
         // Set payment type to debit
         $this->_heidelpayPaymentMethod->debit($paymentFrameOrigin, $preventAsyncRedirect, $cssPath);
 
-        // Prepare and send request to heidelpay
-        $response = $this->_heidelpayPaymentMethod->getRequest()->send(
-            $this->_heidelpayPaymentMethod->getPaymentUrl(),
-            $this->_heidelpayPaymentMethod->getRequest()->convertToArray()
-        );
-
-        return $response[0];
+        return $this->_heidelpayPaymentMethod->getResponse();
     }
 }

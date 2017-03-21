@@ -233,7 +233,6 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
 
     /**
      * @param \Magento\Quote\Model\Quote $quote
-     * @return array
      */
     public function getHeidelpayUrl($quote)
     {
@@ -288,18 +287,6 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
             'SHOPMODULE.VERSION',
             'Heidelpay Gateway ' . $this->moduleResource->getDataVersion('Heidelpay_Gateway')
         );
-
-        /** Force PhpApi to just generate the request instead of sending it directly */
-        $this->_heidelpayPaymentMethod->_dryRun = true;
-
-        $this->_heidelpayPaymentMethod->authorize();
-
-        $response = $this->_heidelpayPaymentMethod->getRequest()->send(
-            $this->_heidelpayPaymentMethod->getPaymentUrl(),
-            $this->_heidelpayPaymentMethod->getRequest()->convertToArray()
-        );
-
-        return $response;
     }
 
     /**

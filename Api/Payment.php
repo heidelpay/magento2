@@ -94,7 +94,7 @@ class Payment implements PaymentInterface
 
         // if recognition is set to 'never', we don't return any data.
         if ($allowRecognition == Recognition::RECOGNITION_NEVER) {
-            $result = null;
+            return json_encode(null);
         }
 
         // get the customer payment information by given data from the request.

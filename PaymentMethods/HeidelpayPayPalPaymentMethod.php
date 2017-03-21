@@ -104,18 +104,9 @@ class HeidelpayPayPalPaymentMethod extends HeidelpayAbstractPaymentMethod
     {
         parent::getHeidelpayUrl($quote);
 
-        // force PhpApi to just generate the request instead of sending it directly
-        $this->_heidelpayPaymentMethod->_dryRun = true;
-
         // set payment type to debit
         $this->_heidelpayPaymentMethod->debit();
 
-        // send request to heidelpay
-        $response = $this->_heidelpayPaymentMethod->getRequest()->send(
-            $this->_heidelpayPaymentMethod->getPaymentUrl(),
-            $this->_heidelpayPaymentMethod->getRequest()->convertToArray()
-        );
-
-        return $response[0];
+        return $this->_heidelpayPaymentMethod->getResponse();
     }
 }

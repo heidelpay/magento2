@@ -80,8 +80,7 @@ class HeidelpayDirectDebitSecuredPaymentMethod extends HeidelpayAbstractPaymentM
     }
 
     /**
-     * @param \Magento\Quote\Model\Quote $quote
-     * @return mixed
+     * @inheritdoc
      */
     public function getHeidelpayUrl($quote)
     {
@@ -98,9 +97,6 @@ class HeidelpayDirectDebitSecuredPaymentMethod extends HeidelpayAbstractPaymentM
 
         // make an initial request to the heidelpay payment.
         parent::getHeidelpayUrl($quote);
-
-        // Force PhpApi to just generate the request instead of sending it directly
-        $this->_heidelpayPaymentMethod->_dryRun = true;
 
         // add IBAN and Bank account owner to the request.
         if (isset($paymentInfo->getAdditionalData()->hgw_iban)) {
@@ -127,13 +123,7 @@ class HeidelpayDirectDebitSecuredPaymentMethod extends HeidelpayAbstractPaymentM
         // Set payment type to debit
         $this->_heidelpayPaymentMethod->debit();
 
-        // Prepare and send request to heidelpay
-        $response = $this->_heidelpayPaymentMethod->getRequest()->send(
-            $this->_heidelpayPaymentMethod->getPaymentUrl(),
-            $this->_heidelpayPaymentMethod->getRequest()->convertToArray()
-        );
-
-        return $response[0];
+        return $this->_heidelpayPaymentMethod->getResponse();
     }
 
     /**
@@ -156,5 +146,30 @@ class HeidelpayDirectDebitSecuredPaymentMethod extends HeidelpayAbstractPaymentM
             $response['ACCOUNT_IDENTIFICATION'],
             $response['IDENTIFICATION_CREDITOR_ID']
         );
+    }
+
+    /**
+     * Determines if the payment method will be displayed at the checkout.
+     * For B2C methods, the payment method should not be displayed.
+     *
+     * Else, refer to the parent isActive method.
+     *
+     * @inheritdoc
+     */
+    public function isAvailable(\Magento\Quote\Api\Data\CartInterface $quote = null)
+    {
+        // if the payment method is not set to be used at all, return false
+        if (!$this->isActive($quote ? $quote->getStoreId() : null)) {
+            return false;
+        }
+
+        // in B2C payment methods, we don't want companies to be involved.
+        // so, if the address contains a company, return false.
+        if ($quote->getBillingAddress()->getCompany() !== null) {
+            return false;
+        }
+
+        // process the parent isAvailable method
+        return parent::isAvailable($quote);
     }
 }

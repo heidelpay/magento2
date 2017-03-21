@@ -7,6 +7,7 @@
 
 ### Changed
 - Input fields for heidelpay payment methods will now be validated before placing the order.
+- B2C payment methods cannot be used when a company is given.
 
 ### Fixed
 - Fixed issue #11: heidelpay Payment Gateway now uses the currency from the customer quote instead of the system default.

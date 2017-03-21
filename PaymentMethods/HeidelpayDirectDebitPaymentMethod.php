@@ -80,8 +80,10 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
     }
 
     /**
+     * Fires the initial request to the heidelpay payment provider.
+     *
      * @param \Magento\Quote\Model\Quote $quote
-     * @return mixed
+     * @return \Heidelpay\PhpApi\Response
      */
     public function getHeidelpayUrl($quote)
     {
@@ -96,11 +98,9 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
             $quote->getPayment()->getMethod()
         );
 
-        // make an initial request to the heidelpay payment.
+        // set some parameters inside the Abstract Payment method helper which are used for all requests,
+        // e.g. authentification, customer data, ...
         parent::getHeidelpayUrl($quote);
-
-        // Force PhpApi to just generate the request instead of sending it directly
-        $this->_heidelpayPaymentMethod->_dryRun = true;
 
         // add IBAN and Bank account owner to the request.
         $this->_heidelpayPaymentMethod
@@ -108,16 +108,11 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
             ->set('iban', $paymentInfo->getAdditionalData()->hgw_iban)
             ->set('holder', $paymentInfo->getAdditionalData()->hgw_holder);
 
-        // Set payment type to debit
+        // send the init request with the debit method.
         $this->_heidelpayPaymentMethod->debit();
 
-        // Prepare and send request to heidelpay
-        $response = $this->_heidelpayPaymentMethod->getRequest()->send(
-            $this->_heidelpayPaymentMethod->getPaymentUrl(),
-            $this->_heidelpayPaymentMethod->getRequest()->convertToArray()
-        );
-
-        return $response[0];
+        // return the response object
+        return $this->_heidelpayPaymentMethod->getResponse();
     }
 
     /**

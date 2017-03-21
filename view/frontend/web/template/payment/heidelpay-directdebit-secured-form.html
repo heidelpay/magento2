@@ -28,11 +28,11 @@
             <fieldset class="fieldset payment method" data-bind='attr: {id: "payment_form_" + getCode()}'>
                 <!-- Salutation Input Field -->
                 <div class="field required">
-                    <label for="hgw_salutation" class="label">
+                    <label for="hgwdds_salutation" class="label">
                         <span><!-- ko i18n: 'Salutation'--><!-- /ko --></span>
                     </label>
                     <select name="payment[hgw_salutation]"
-                            id="hgw_salutation"
+                            id="hgwdds_salutation"
                             data-validate="{required:true}"
                             data-bind='attr: {title: $t("Salutation")}, value: hgwSalutation'
                     >
@@ -42,12 +42,12 @@
                 </div>
                 <!-- Account Holder Input Field -->
                 <div class="field required">
-                    <label for="hgw_holder" class="label">
+                    <label for="hgwdds_holder" class="label">
                         <span><!-- ko i18n: 'Bank Account Holder'--><!-- /ko --></span>
                     </label>
                     <div class="control">
                         <input type="text"
-                               id="hgw_holder"
+                               id="hgwdds_holder"
                                name="payment[hgw_holder]"
                                data-validate="{required:true}"
                                data-bind='
@@ -58,12 +58,12 @@
                 </div>
                 <!-- IBAN Input Field -->
                 <div class="field required">
-                    <label for="hgw_iban" class="label">
+                    <label for="hgwdds_iban" class="label">
                         <span><!-- ko i18n: 'IBAN'--><!-- /ko --></span>
                     </label>
                     <div class="control">
                         <input type="text"
-                               id="hgw_iban"
+                               id="hgwdds_iban"
                                name="payment[hgw_iban]"
                                data-validate="{required: true}"
                                data-bind='
@@ -74,17 +74,17 @@
                 </div>
                 <!-- Date of birth input fields -->
                 <div class="field required">
-                    <label for="hgw_birthdate_day" class="label">
+                    <label for="hgwdds_birthdate" class="label">
                         <span><!-- ko i18n: 'Date of Birth' --><!-- /ko --></span>
                     </label>
                     <div class="control">
                         <fieldset class="fieldset">
                             <div class="fields">
                                 <div class="field required" style="float: left; margin-right: 10px;">
-                                    <label for="hgw_birthdate_day" class="label">
+                                    <label for="hgwdds_birthdate_day" class="label">
                                         <span><!-- ko i18n: 'Day' --><!-- /ko --></span>
                                     </label>
-                                    <select name="payment[hgw_birthdate_day]" id="hgw_birthdate_day"
+                                    <select name="payment[hgw_birthdate_day]" id="hgwdds_birthdate_day"
                                             data-bind="attr: {title: $t('Day')}, value: hgwDobDay"
                                             data-validate="{required: true}"
                                     >
@@ -123,10 +123,10 @@
                                     </select>
                                 </div>
                                 <div class="field required" style="float: left; margin-right: 10px;">
-                                    <label for="hgw_birthdate_month" class="label">
+                                    <label for="hgwdds_birthdate_month" class="label">
                                         <span><!-- ko i18n: 'Month' --><!-- /ko --></span>
                                     </label>
-                                    <select name="payment[hgw_birthdate_month]" id="hgw_birthdate_month"
+                                    <select name="payment[hgw_birthdate_month]" id="hgwdds_birthdate_month"
                                             data-bind="attr: {title: $t('Month')}, value: hgwDobMonth"
                                             data-validate="{required: true}"
                                     >
@@ -146,10 +146,10 @@
                                     </select>
                                 </div>
                                 <div class="field required" style="float: left;">
-                                    <label for="hgw_birthdate_year" class="label">
+                                    <label for="hgwdds_birthdate_year" class="label">
                                         <span><!-- ko i18n: 'Year' --><!-- /ko --></span>
                                     </label>
-                                    <select name="payment[hgw_birthdate_year]" id="hgw_birthdate_year"
+                                    <select name="payment[hgw_birthdate_year]" id="hgwdds_birthdate_year"
                                             data-bind="attr: {title: $t('Year')}, value: hgwDobYear, options: years"
                                             data-validate="{required: true}"
                                     >
@@ -157,6 +157,11 @@
                                 </div>
                             </div>
                         </fieldset>
+
+                        <input type="hidden" name="payment[hgw_birthdate]"
+                               id="hgwdds_birthdate"
+                               data-bind="value: getBirthdate"
+                        />
                     </div>
                 </div>
             </fieldset>

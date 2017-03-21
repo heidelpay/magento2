@@ -29,6 +29,20 @@ define(
             initialize: function () {
                 this._super();
 
+                return this;
+            },
+
+            initObservable: function() {
+                this._super()
+                    .observe([
+                        'hgwIban', 'hgwHolder'
+                    ]);
+
+                return this;
+            },
+
+
+            getAdditionalPaymentInformation: function() {
                 // recognition: only when there is a logged in customer
                 if (customer.isLoggedIn()) {
                     // if we have a shipping address, go on
@@ -55,17 +69,6 @@ define(
                         );
                     }
                 }
-
-                return this;
-            },
-
-            initObservable: function() {
-                this._super()
-                    .observe([
-                        'hgwIban', 'hgwHolder'
-                    ]);
-
-                return this;
             },
 
             getCode: function () {
