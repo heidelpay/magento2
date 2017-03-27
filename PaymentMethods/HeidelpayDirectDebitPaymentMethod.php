@@ -94,7 +94,7 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
         /** @var \Heidelpay\Gateway\Model\PaymentInformation $paymentInfo */
         $paymentInfo = $paymentInfoCollection->loadByCustomerInformation(
             $quote->getStoreId(),
-            $quote->getCustomerEmail(),
+            $quote->getBillingAddress()->getEmail(),
             $quote->getPayment()->getMethod()
         );
 
@@ -103,10 +103,17 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
         parent::getHeidelpayUrl($quote);
 
         // add IBAN and Bank account owner to the request.
-        $this->_heidelpayPaymentMethod
-            ->getRequest()->getAccount()
-            ->set('iban', $paymentInfo->getAdditionalData()->hgw_iban)
-            ->set('holder', $paymentInfo->getAdditionalData()->hgw_holder);
+        if (isset($paymentInfo->getAdditionalData()->hgw_iban)) {
+            $this->_heidelpayPaymentMethod
+                ->getRequest()->getAccount()
+                ->set('iban', $paymentInfo->getAdditionalData()->hgw_iban);
+        }
+
+        if (isset($paymentInfo->getAdditionalData()->hgw_holder)) {
+            $this->_heidelpayPaymentMethod
+                ->getRequest()->getAccount()
+                ->set('holder', $paymentInfo->getAdditionalData()->hgw_holder);
+        }
 
         // send the init request with the debit method.
         $this->_heidelpayPaymentMethod->debit();

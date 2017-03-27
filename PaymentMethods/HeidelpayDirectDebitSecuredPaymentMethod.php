@@ -91,7 +91,7 @@ class HeidelpayDirectDebitSecuredPaymentMethod extends HeidelpayAbstractPaymentM
         /** @var \Heidelpay\Gateway\Model\PaymentInformation $paymentInfo */
         $paymentInfo = $paymentInfoCollection->loadByCustomerInformation(
             $quote->getStoreId(),
-            $quote->getCustomerEmail(),
+            $quote->getBillingAddress()->getEmail(),
             $quote->getPayment()->getMethod()
         );
 
@@ -158,11 +158,6 @@ class HeidelpayDirectDebitSecuredPaymentMethod extends HeidelpayAbstractPaymentM
      */
     public function isAvailable(\Magento\Quote\Api\Data\CartInterface $quote = null)
     {
-        // if the payment method is not set to be used at all, return false
-        if (!$this->isActive($quote ? $quote->getStoreId() : null)) {
-            return false;
-        }
-
         // in B2C payment methods, we don't want companies to be involved.
         // so, if the address contains a company, return false.
         if ($quote->getBillingAddress()->getCompany() !== null) {

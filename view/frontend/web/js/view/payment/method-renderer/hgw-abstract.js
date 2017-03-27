@@ -5,10 +5,21 @@ define(
         'Heidelpay_Gateway/js/action/place-order',
         'Magento_Checkout/js/model/payment/additional-validators',
         'Magento_Checkout/js/action/select-payment-method',
-        'Magento_Checkout/js/checkout-data'
+        'Magento_Checkout/js/checkout-data',
+        'moment'
     ],
-    function ($, Component, placeOrderAction, additionalValidators, selectPaymentMethodAction, checkoutData) {
+    function ($, Component, placeOrderAction, additionalValidators, selectPaymentMethodAction, checkoutData, moment) {
         'use strict';
+
+        var self = this;
+
+        // add IBAN validator
+        $.validator.addMethod(
+            'validate-iban', function (value) {
+                var pattern = /[A-Z]{2}[0-9]{13,29}/i;
+                return (pattern.test(value));
+            }, $.mage.__('The given IBAN is invalid.')
+        );
 
         return Component.extend({
 
@@ -39,6 +50,13 @@ define(
              * additional information is needed.
              */
             getAdditionalPaymentInformation: function() {},
+
+            /**
+             * Function to receive the customer's birthdate.
+             *
+             * This method needs to be overloaded by the payment renderer component, if needed.
+             */
+            getBirthdate: function() {},
 
             /**
              * Redirect to hgw controller

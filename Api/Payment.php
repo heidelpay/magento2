@@ -147,7 +147,7 @@ class Payment implements PaymentInterface
 
         // save the information with the given quote and additional data.
         // if there is nothing stored, we'll return false...
-        if (!$this->savePaymentInformation($quote, $method, $additionalData)) {
+        if (!$this->savePaymentInformation($quote, $method, $quote->getCustomerEmail(), $additionalData)) {
             return json_encode(false);
         }
 
@@ -176,7 +176,8 @@ class Payment implements PaymentInterface
 
         // save the information with the given quote and additional data.
         // if there is nothing stored, we'll return false...
-        if (!$this->savePaymentInformation($quote, $method, $additionalData)) {
+        // - since guest email is stored in the billing information, we have to pull it from there.
+        if (!$this->savePaymentInformation($quote, $method, $quote->getBillingAddress()->getEmail(), $additionalData)) {
             return json_encode(false);
         }
 
@@ -248,12 +249,21 @@ class Payment implements PaymentInterface
      *
      * @param \Magento\Quote\Model\Quote $quote
      * @param string $method
+     * @param string $email
      * @param array $additionalData
      * @param string $paymentRef
      * @return \Heidelpay\Gateway\Api\Data\PaymentInformationInterface
      */
-    private function savePaymentInformation($quote, $method, $additionalData, $paymentRef = null)
+    private function savePaymentInformation($quote, $method, $email, $additionalData, $paymentRef = null)
     {
+        // make some additional data changes, if neccessary
+        array_walk($additionalData, function (&$value, $key) {
+            // if somehow the country code in the IBAN is lowercase, convert it to uppercase.
+            if ($key == 'hgw_iban') {
+                $value = strtoupper($value);
+            }
+        });
+
         // create a new instance for the payment information collection.
         $paymentInfoCollection = $this->paymentInformationCollectionFactory->create();
 
@@ -261,7 +271,7 @@ class Payment implements PaymentInterface
         /** @var \Heidelpay\Gateway\Model\PaymentInformation $paymentInfo */
         $paymentInformation = $paymentInfoCollection->loadByCustomerInformation(
             $quote->getStoreId(),
-            $quote->getCustomerEmail(),
+            $email,
             $method
         );
 
@@ -270,11 +280,9 @@ class Payment implements PaymentInterface
             $paymentInformation = $this->paymentInformationFactory->create();
         }
 
-        // TODO: customerEmail is empty?
-
         return $paymentInformation
             ->setStoreId($quote->getStoreId())
-            ->setCustomerEmail($quote->getCustomerEmail())
+            ->setCustomerEmail($email)
             ->setPaymentMethod($method)
             ->setShippingHash($this->createShippingHash($quote->getShippingAddress()))
             ->setAdditionalData($additionalData)

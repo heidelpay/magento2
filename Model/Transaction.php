@@ -26,24 +26,12 @@ class Transaction extends \Magento\Framework\Model\AbstractModel
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
         array $data = []
     ) {
-        $this->_paymentData = $paymentData;
         parent::__construct($context, $registry, $resource, $resourceCollection, $data);
     }
 
     public function _construct()
     {
         $this->_init('Heidelpay\Gateway\Model\ResourceModel\Transaction');
-    }
-    
-    public function loadLastTransactionByQuoteId($modelId, $field = null)
-    {
-        $this->_beforeLoad($modelId, $field);
-        $this->_getResource()->loadLastTransactionByQuoteId($this, $modelId, $field);
-        $this->_afterLoad();
-        $this->setOrigData();
-        $this->_hasDataChanges = false;
-        //$this->updateStoredData();
-        return $this;
     }
 
     /**

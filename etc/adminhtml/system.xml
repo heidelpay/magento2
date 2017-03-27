@@ -67,7 +67,6 @@
                         <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
                         <config_path>payment/hgwcc/specificcountry</config_path>
                     </field>
-                    <!--
                     <field id="min_order_total" translate="label" type="text" sortOrder="98" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Minimum Order Total</label>
                         <config_path>payment/hgwcc/min_order_total</config_path>
@@ -77,7 +76,6 @@
                         <config_path>payment/hgwcc/max_order_total</config_path>
                         <comment>Insert 0 to disable limit.</comment>
                     </field>
-                     -->
                 </group>
                 <group id="hgwdc" translate="label" type="text" sortOrder="110" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>HGWDC</label>
@@ -114,7 +112,6 @@
                         <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
                         <config_path>payment/hgwdc/specificcountry</config_path>
                     </field>
-                    <!--
                     <field id="min_order_total" translate="label" type="text" sortOrder="98" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Minimum Order Total</label>
                         <config_path>payment/hgwdc/min_order_total</config_path>
@@ -124,7 +121,6 @@
                         <config_path>payment/hgwdc/max_order_total</config_path>
                         <comment>Insert 0 to disable limit.</comment>
                     </field>
-                     -->
                     </group>
                     <group id="hgwsue" translate="label" type="text" sortOrder="140" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>HGWSUE</label>
@@ -155,7 +151,6 @@
                         <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
                         <config_path>payment/hgwsue/specificcountry</config_path>
                     </field>
-                    <!--
                     <field id="min_order_total" translate="label" type="text" sortOrder="98" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Minimum Order Total</label>
                         <config_path>payment/hgwsue/min_order_total</config_path>
@@ -165,7 +160,6 @@
                         <config_path>payment/hgwsue/max_order_total</config_path>
                         <comment>Insert 0 to disable limit.</comment>
                     </field>
-                     -->
                     </group>
                 <group id="hgwpal" translate="label" type="text" sortOrder="150" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>HGWPAL</label>
@@ -202,7 +196,6 @@
                         <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
                         <config_path>payment/hgwpal/specificcountry</config_path>
                     </field>
-                    <!--
                     <field id="min_order_total" translate="label" type="text" sortOrder="98" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Minimum Order Total</label>
                         <config_path>payment/hgwpal/min_order_total</config_path>
@@ -212,7 +205,6 @@
                         <config_path>payment/hgwpal/max_order_total</config_path>
                         <comment>Insert 0 to disable limit.</comment>
                     </field>
-                     -->
                 </group>
                 <group id="hgwpp" translate="label" type="text" sortOrder="160" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>HGWPP</label>
@@ -243,7 +235,6 @@
                         <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
                         <config_path>payment/hgwpp/specificcountry</config_path>
                     </field>
-                    <!--
                     <field id="min_order_total" translate="label" type="text" sortOrder="98" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Minimum Order Total</label>
                         <config_path>payment/hgwpp/min_order_total</config_path>
@@ -253,7 +244,6 @@
                         <config_path>payment/hgwpp/max_order_total</config_path>
                         <comment>Insert 0 to disable limit.</comment>
                     </field>
-                     -->
                 </group>
                 <group id="hgwgp" translate="label" type="text" sortOrder="170" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>HGWGP</label>
@@ -284,7 +274,6 @@
                         <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
                         <config_path>payment/hgwgp/specificcountry</config_path>
                     </field>
-                    <!--
                     <field id="min_order_total" translate="label" type="text" sortOrder="98" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Minimum Order Total</label>
                         <config_path>payment/hgwgp/min_order_total</config_path>
@@ -294,7 +283,6 @@
                         <config_path>payment/hgwgp/max_order_total</config_path>
                         <comment>Insert 0 to disable limit.</comment>
                     </field>
-                     -->
                 </group>
                 <group id="hgwdd" translate="label" type="text" sortOrder="180" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>HGWDD</label>
@@ -330,7 +318,6 @@
                         <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
                         <config_path>payment/hgwdd/specificcountry</config_path>
                     </field>
-                    <!--
                     <field id="min_order_total" translate="label" type="text" sortOrder="98" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Minimum Order Total</label>
                         <config_path>payment/hgwdd/min_order_total</config_path>
@@ -340,7 +327,6 @@
                         <config_path>payment/hgwdd/max_order_total</config_path>
                         <comment>Insert 0 to disable limit.</comment>
                     </field>
-                     -->
                 </group>
                 <group id="hgwdds" translate="label" type="text" sortOrder="190" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>HGWDDS</label>
@@ -376,7 +362,6 @@
                         <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
                         <config_path>payment/hgwdds/specificcountry</config_path>
                     </field>
-                    <!--
                     <field id="min_order_total" translate="label" type="text" sortOrder="98" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Minimum Order Total</label>
                         <config_path>payment/hgwdds/min_order_total</config_path>
@@ -386,7 +371,6 @@
                         <config_path>payment/hgwdds/max_order_total</config_path>
                         <comment>Insert 0 to disable limit.</comment>
                     </field>
-                     -->
                 </group>
             </group>
         </section>

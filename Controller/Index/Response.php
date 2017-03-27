@@ -44,6 +44,9 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
     /** @var \Heidelpay\PhpApi\Response The heidelpay response object */
     protected $heidelpayResponse;
 
+    /** @var \Heidelpay\Gateway\Model\TransactionFactory */
+    protected $transactionFactory;
+
     /** @var \Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory */
     protected $paymentInformationCollectionFactory;
 
@@ -69,6 +72,7 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
      * @param \Magento\Quote\Model\QuoteRepository $quoteRepository
      * @param \Heidelpay\PhpApi\Response $heidelpayResponse
      * @param PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
+     * @param \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory
      */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
@@ -89,7 +93,8 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
         \Magento\Framework\Controller\Result\RawFactory $rawResultFactory,
         \Magento\Quote\Model\QuoteRepository $quoteRepository,
         \Heidelpay\PhpApi\Response $heidelpayResponse,
-        PaymentInformationCollectionFactory $paymentInformationCollectionFactory
+        PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
+        \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory
     ) {
         parent::__construct($context, $customerSession, $checkoutSession, $orderFactory, $urlHelper, $logger,
             $cartManagement, $quoteObject, $resultPageFactory, $paymentHelper, $orderSender, $invoiceSender,
@@ -99,6 +104,7 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
         $this->quoteRepository = $quoteRepository;
         $this->heidelpayResponse = $heidelpayResponse;
         $this->paymentInformationCollectionFactory = $paymentInformationCollectionFactory;
+        $this->transactionFactory = $transactionFactory;
     }
 
     /**
@@ -108,6 +114,7 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
     {
         // initialize the Raw Response object from the factory.
         $result = $this->resultFactory->create();
+
         // we just want the response to return a plain url, so we set the header to text/plain.
         $result->setHeader('Content-Type', 'text/plain');
 
@@ -253,9 +260,7 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
                 $quote->getCustomerEmail(),
                 $quote->getPayment()->getMethod()
             );
-
-            $this->_logger->debug('Deleting payment information for guest ' . $quote->getCustomerEmail());
-
+            
             $paymentInfo->delete();
         }
 
@@ -268,19 +273,20 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
         $this->_logger->debug('Heidelpay respose url : ' . $url);
 
         try {
-            $model = $this->_objectManager->create('Heidelpay\Gateway\Model\Transaction');
-            $model->setData('payment_methode', $paymentMethod);
-            $model->setData('payment_type', $paymentType);
-            $model->setData('transactionid', $data['IDENTIFICATION_TRANSACTIONID']);
-            $model->setData('uniqeid', $data['IDENTIFICATION_UNIQUEID']);
-            $model->setData('shortid', $data['IDENTIFICATION_SHORTID']);
-            $model->setData('statuscode', $data['PROCESSING_STATUS_CODE']);
-            $model->setData('result', $data['PROCESSING_RESULT']);
-            $model->setData('return', $data['PROCESSING_RETURN']);
-            $model->setData('returncode', $data['PROCESSING_RETURN_CODE']);
-            $model->setData('jsonresponse', json_encode($data));
-            $model->setData('source', $data['SOURCE']);
-            $model->save();
+            // save the response details into the heidelpay Transactions table.
+            $transaction = $this->transactionFactory->create();
+            $transaction->setPaymentMethod($paymentMethod)
+                ->setPaymentType($paymentType)
+                ->setTransactionId($data['IDENTIFICATION_TRANSACTIONID'])
+                ->setUniqueId($data['IDENTIFICATION_UNIQUEID'])
+                ->setShortId($data['IDENTIFICATION_SHORTID'])
+                ->setStatusCode($data['PROCESSING_STATUS_CODE'])
+                ->setResult($data['PROCESSING_RESULT'])
+                ->setReturnMessage($data['PROCESSING_RETURN'])
+                ->setReturnCode($data['PROCESSING_RETURN_CODE'])
+                ->setJsonResponse(json_encode($data))
+                ->setSource($data['SOURCE'])
+                ->save();
         } catch (\Exception $e) {
             $this->_logger->error('Heidelpay Response save transaction error. ' . $e->getMessage());
         }

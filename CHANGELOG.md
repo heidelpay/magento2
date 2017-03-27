@@ -1,6 +1,6 @@
 # Release Notes - heidelpay Payment Gateway for Magento 2
 
-## v17.3.2x
+## v17.3.27
 
 ### Added
 - Direct Debit Secured (B2C) Payment method (DE, AT, CH)

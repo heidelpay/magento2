@@ -34,9 +34,10 @@ define(
 
             initialize: function () {
                 this._super();
+                this.getAdditionalPaymentInformation();
 
                 // init years select menu
-                for (var i = new Date().getFullYear() - 100; i <= new Date().getFullYear(); i++) {
+                for (var i = new Date().getFullYear() - 100; i <= (new Date().getFullYear() - 17); i++) {
                     this.years.push(i);
                 }
 
@@ -86,10 +87,14 @@ define(
                                     if (info.hasOwnProperty('hgw_birthdate') && info.hgw_birthdate !== null) {
                                         var date = moment(info.hgw_birthdate, 'YYYY-MM-DD');
 
-                                        // TODO: month = 0 -> no month is selected?
                                         parent.hgwDobDay(date.date());
                                         parent.hgwDobMonth(date.month());
                                         parent.hgwDobYear(date.year());
+
+                                        // workaround: if month is 'january', the month isn't selected.
+                                        if (date.month() == 0) {
+                                            $("#hgwdds_birthdate_month option:eq(1)").prop('selected', true);
+                                        }
                                     }
                                 }
                             }
@@ -128,7 +133,6 @@ define(
             validate: function () {
                 var form = $('#hgw-directdebit-secured-form');
 
-                // TODO: IBAN validation
                 return form.validation() && form.validation('isValid');
             }
         });

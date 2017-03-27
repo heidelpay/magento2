@@ -28,6 +28,7 @@ define(
 
             initialize: function () {
                 this._super();
+                this.getAdditionalPaymentInformation();
 
                 return this;
             },

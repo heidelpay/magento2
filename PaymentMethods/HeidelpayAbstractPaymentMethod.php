@@ -362,18 +362,16 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
     }
 
     /**
-     *  getUser extract customer information form magento order object
+     * extract customer information from magento order object
      *
-     * @param  $order object
+     * @param  \Magento\Quote\Api\Data\CartInterface $order object
      * @return array customer information
      */
     public function getUser($order)
     {
         $user = [];
         $billing = $order->getBillingAddress();
-        $email = ($order->getBillingAddress()->getEmail())
-            ? $order->getBillingAddress()->getEmail()
-            : $order->getCustomerEmail();
+        $email = $order->getBillingAddress()->getEmail();
 
         $billingStreet = '';
 
@@ -381,12 +379,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
             $billingStreet .= $street . ' ';
         }
 
-        $customerId = $order->getCustomerId();
-        $user['CRITERION.GUEST'] = 'false';
-
-        if ($customerId == 0) {
-            $user['CRITERION.GUEST'] = 'true';
-        }
+        $user['CRITERION.GUEST'] = $order->getCustomer()->getId() == 0 ? 'true' : 'false';
 
         $user['NAME.COMPANY'] = ($billing->getCompany() === false) ? null : trim($billing->getCompany());
         $user['NAME.GIVEN'] = trim($billing->getFirstname());

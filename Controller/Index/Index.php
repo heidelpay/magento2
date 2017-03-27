@@ -1,4 +1,5 @@
 <?php
+
 namespace Heidelpay\Gateway\Controller\Index;
 
 use Heidelpay\Gateway\Helper\Payment as HeidelpayHelper;

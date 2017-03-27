@@ -44,6 +44,7 @@ class Payment extends \Magento\Framework\App\Helper\AbstractHelper
      * @param ZendClientFactory $httpClientFactory
      * @param Logger $logger
      * @param \Magento\Framework\DB\TransactionFactory $transactionFactory
+     * @param \Magento\Framework\Locale\Resolver $localeResolver
      */
     public function __construct(
         ZendClientFactory $httpClientFactory,
@@ -62,11 +63,9 @@ class Payment extends \Magento\Framework\App\Helper\AbstractHelper
         return preg_split('/\./', $PAYMENT_CODE);
     }
 
-
     public function mapStatus($data, $order, $message = false)
     {
         $PaymentCode = $this->splitPaymentCode($data['PAYMENT_CODE']);
-        $totalypaid = false;
 
         $message = (!empty($message)) ? $message : $data['PROCESSING_RETURN'];
 
@@ -96,8 +95,9 @@ class Payment extends \Magento\Framework\App\Helper\AbstractHelper
                     ->addStatusHistoryComment($message, $status)
                     ->setIsCustomerNotified(false);
             }
-        } elseif (($PaymentCode[1] == 'CP' or $PaymentCode[1] == 'DB' or $PaymentCode[1] == 'FI' or $PaymentCode[1] == 'RC')
-            and ($data['PROCESSING_RESULT'] == 'ACK' and $data['PROCESSING_STATUS_CODE'] != 80)
+        } elseif ((
+                $PaymentCode[1] == 'CP' || $PaymentCode[1] == 'DB' || $PaymentCode[1] == 'FI' || $PaymentCode[1] == 'RC'
+            ) && ($data['PROCESSING_RESULT'] == 'ACK' && $data['PROCESSING_STATUS_CODE'] != 80)
         ) {
             $message = __('ShortId : %1', $data['IDENTIFICATION_SHORTID']);
 
@@ -105,27 +105,29 @@ class Payment extends \Magento\Framework\App\Helper\AbstractHelper
                 ->setParentTransactionId($order->getPayment()->getLastTransId())
                 ->setIsTransactionClosed(true);
 
-            if ($this->format($order->getGrandTotal()) == $data['PRESENTATION_AMOUNT'] and $order->getOrderCurrencyCode() == $data['PRESENTATION_CURRENCY']) {
+            if ($this->format($order->getGrandTotal()) == $data['PRESENTATION_AMOUNT']
+                && $order->getOrderCurrencyCode() == $data['PRESENTATION_CURRENCY']
+            ) {
                 $state = \Magento\Sales\Model\Order::STATE_PROCESSING;
                 $status = \Magento\Sales\Model\Order::STATE_PROCESSING;
 
                 $order->setState($state)
                     ->addStatusHistoryComment($message, $status)
                     ->setIsCustomerNotified(true);
-                $totalypaid = true;
             } else {
                 /*
                  * in case rc is ack and amount is to low/heigh or curreny missmatch
                  */
-                $message = __('Amount or currency missmatch : %1',
-                    $data['PRESENTATION_AMOUNT'] . ' ' . $data['PRESENTATION_CURRENCY']);
+                $message = __(
+                    'Amount or currency missmatch : %1',
+                    $data['PRESENTATION_AMOUNT'] . ' ' . $data['PRESENTATION_CURRENCY']
+                );
                 $state = \Magento\Sales\Model\Order::STATE_PAYMENT_REVIEW;
                 $status = \Magento\Sales\Model\Order::STATE_PAYMENT_REVIEW;
                 $order->setState($state)
                     ->addStatusHistoryComment($message, $status)
                     ->setIsCustomerNotified(true);
             }
-
 
             if ($order->canInvoice()) {
                 $invoice = $order->prepareInvoice();
