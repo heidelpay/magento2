@@ -307,6 +307,7 @@
                         <label>Recognition</label>
                         <source_model>Heidelpay\Gateway\Model\Config\Source\Recognition</source_model>
                         <config_path>payment/hgwdd/recognition</config_path>
+                        <comment>If set to 'always', stored payment data for the customer will be loaded/preselected at checkout. If set to 'same shipping address', this only applies when the customer uses the same shipping address.</comment>
                     </field>
                     <field id="allowspecific" translate="label" type="allowspecific" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Payment from Applicable Countries</label>
@@ -351,6 +352,7 @@
                         <label>Recognition</label>
                         <source_model>Heidelpay\Gateway\Model\Config\Source\Recognition</source_model>
                         <config_path>payment/hgwdds/recognition</config_path>
+                        <comment>If set to 'always', stored payment data for the customer will be loaded/preselected at checkout. If set to 'same shipping address', this only applies when the customer uses the same shipping address.</comment>
                     </field>
                     <field id="allowspecific" translate="label" type="allowspecific" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Payment from Applicable Countries</label>

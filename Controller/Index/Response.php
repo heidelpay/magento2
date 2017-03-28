@@ -221,7 +221,7 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
             try {
                 // get the quote by transactionid from the heidelpay response
                 /** @var \Magento\Quote\Model\Quote $quote */
-                $quote = $this->quoteRepository->get((int) ($data['IDENTIFICATION_TRANSACTIONID']));
+                $quote = $this->quoteRepository->get($data['IDENTIFICATION_TRANSACTIONID']);
                 $quote->collectTotals();
 
                 // in case of guest checkout, set some customer related data.
@@ -257,7 +257,7 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
             /** @var \Heidelpay\Gateway\Model\PaymentInformation $paymentInfo */
             $paymentInfo = $paymentInfoCollection->loadByCustomerInformation(
                 $quote->getStoreId(),
-                $quote->getCustomerEmail(),
+                $quote->getBillingAddress()->getEmail(),
                 $quote->getPayment()->getMethod()
             );
             
