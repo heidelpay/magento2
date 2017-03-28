@@ -7,9 +7,7 @@ use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation as PaymentInformati
 use Magento\Store\Api\Data\StoreInterface;
 
 /**
- * Summary
- *
- * Desc
+ * The Collection class for the Payment Information
  *
  * @license Use of this software requires acceptance of the License Agreement. See LICENSE file.
  * @copyright Copyright © 2016-present Heidelberger Payment GmbH. All rights reserved.

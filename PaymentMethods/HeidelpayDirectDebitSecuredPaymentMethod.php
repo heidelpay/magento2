@@ -19,16 +19,16 @@ use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory a
  * @subpackage magento2
  * @category magento2
  */
-class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
+class HeidelpayDirectDebitSecuredPaymentMethod extends HeidelpayAbstractPaymentMethod
 {
     /** @var string heidelpay Gateway Paymentcode */
-    protected $_code = 'hgwdd';
+    protected $_code = 'hgwdds';
 
     /** @var bool */
     protected $_canAuthorize = true;
 
     /**
-     * HeidelpayDirectDebitPaymentMethod constructor.
+     * HeidelpayDirectDebitSecurePaymentMethod constructor.
      *
      * @param \Magento\Framework\Model\Context $context
      * @param \Magento\Framework\Registry $registry
@@ -45,7 +45,7 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
      * @param \Magento\Framework\Module\ResourceInterface $moduleResource
      * @param \Heidelpay\Gateway\Helper\Payment $paymentHelper
      * @param PaymentInformationCollectionFactory $paymentInformationCollectionFactory
-     * @param \Heidelpay\PhpApi\PaymentMethods\DirectDebitPaymentMethod $directDebitPaymentMethod
+     * @param \Heidelpay\PhpApi\PaymentMethods\DirectDebitB2CSecuredPaymentMethod $directDebitB2CSecuredPaymentMethod
      * @param \Magento\Framework\Model\ResourceModel\AbstractResource|null $resource
      * @param \Magento\Framework\Data\Collection\AbstractDb|null $resourceCollection
      * @param array $data
@@ -66,7 +66,7 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
         \Magento\Framework\Module\ResourceInterface $moduleResource,
         \Heidelpay\Gateway\Helper\Payment $paymentHelper,
         PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
-        \Heidelpay\PhpApi\PaymentMethods\DirectDebitPaymentMethod $directDebitPaymentMethod,
+        \Heidelpay\PhpApi\PaymentMethods\DirectDebitB2CSecuredPaymentMethod $directDebitB2CSecuredPaymentMethod,
         \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
         array $data = []
@@ -75,15 +75,12 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
             $request, $urlinterface, $encryptor, $logger, $localeResolver, $productMetadata, $moduleResource,
             $paymentHelper, $paymentInformationCollectionFactory, $resource, $resourceCollection, $data);
 
-        // initialize the Direct Debit payment method
-        $this->_heidelpayPaymentMethod = $directDebitPaymentMethod;
+        // initialize the Direct Debit Secured payment method
+        $this->_heidelpayPaymentMethod = $directDebitB2CSecuredPaymentMethod;
     }
 
     /**
-     * Fires the initial request to the heidelpay payment provider.
-     *
-     * @param \Magento\Quote\Model\Quote $quote
-     * @return \Heidelpay\PhpApi\Response
+     * @inheritdoc
      */
     public function getHeidelpayUrl($quote)
     {
@@ -98,27 +95,34 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
             $quote->getPayment()->getMethod()
         );
 
-        // set some parameters inside the Abstract Payment method helper which are used for all requests,
-        // e.g. authentification, customer data, ...
+        // make an initial request to the heidelpay payment.
         parent::getHeidelpayUrl($quote);
 
         // add IBAN and Bank account owner to the request.
         if (isset($paymentInfo->getAdditionalData()->hgw_iban)) {
-            $this->_heidelpayPaymentMethod
-                ->getRequest()->getAccount()
+            $this->_heidelpayPaymentMethod->getRequest()->getAccount()
                 ->set('iban', $paymentInfo->getAdditionalData()->hgw_iban);
         }
 
         if (isset($paymentInfo->getAdditionalData()->hgw_holder)) {
-            $this->_heidelpayPaymentMethod
-                ->getRequest()->getAccount()
+            $this->_heidelpayPaymentMethod->getRequest()->getAccount()
                 ->set('holder', $paymentInfo->getAdditionalData()->hgw_holder);
         }
 
-        // send the init request with the debit method.
+        // add salutation and birthdate to the request
+        if (isset($paymentInfo->getAdditionalData()->hgw_salutation)) {
+            $this->_heidelpayPaymentMethod->getRequest()->getName()
+                ->set('salutation', $paymentInfo->getAdditionalData()->hgw_salutation);
+        }
+
+        if (isset($paymentInfo->getAdditionalData()->hgw_birthdate)) {
+            $this->_heidelpayPaymentMethod->getRequest()->getName()
+                ->set('birthdate', $paymentInfo->getAdditionalData()->hgw_birthdate);
+        }
+
+        // Set payment type to debit
         $this->_heidelpayPaymentMethod->debit();
 
-        // return the response object
         return $this->_heidelpayPaymentMethod->getResponse();
     }
 
@@ -142,5 +146,25 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
             $response['ACCOUNT_IDENTIFICATION'],
             $response['IDENTIFICATION_CREDITOR_ID']
         );
+    }
+
+    /**
+     * Determines if the payment method will be displayed at the checkout.
+     * For B2C methods, the payment method should not be displayed.
+     *
+     * Else, refer to the parent isActive method.
+     *
+     * @inheritdoc
+     */
+    public function isAvailable(\Magento\Quote\Api\Data\CartInterface $quote = null)
+    {
+        // in B2C payment methods, we don't want companies to be involved.
+        // so, if the address contains a company, return false.
+        if ($quote->getBillingAddress()->getCompany() !== null) {
+            return false;
+        }
+
+        // process the parent isAvailable method
+        return parent::isAvailable($quote);
     }
 }

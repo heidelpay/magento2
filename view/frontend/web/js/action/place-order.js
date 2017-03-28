@@ -13,7 +13,7 @@ define(
         'use strict';
         var agreementsConfig = window.checkoutConfig.checkoutAgreements;
 
-        return function (paymentData, redirectOnSuccess, messageContainer) {
+        return function (paymentData, redirectOnSuccess, messageContainer, saveAdditionalData) {
             var serviceUrl,
                 payload;
 
@@ -57,9 +57,8 @@ define(
                 serviceUrl, JSON.stringify(payload)
             ).done(
                 function () {
-                    // write additional information to heidelpay
-                    // when the payment method is direct debit...
-                    if ( paymentData.method == 'hgwdd' ) {
+                    // write additional information to heidelpay when the payment method requires it.
+                    if ( saveAdditionalData === true ) {
                         var newUrl = customer.isLoggedIn()
                             ? urlBuilder.createUrl('/hgw/set-payment-info', {})
                             : urlBuilder.createUrl('/hgw/guest/set-payment-info', {});
@@ -67,8 +66,8 @@ define(
                         // heidelpay Payload
                         var hgwPayload = {
                             cartId: quote.getQuoteId(),
-                            hgwIban: paymentData.additional_data.hgw_iban,
-                            hgwOwner: paymentData.additional_data.hgw_owner
+                            additionalData: paymentData.additional_data,
+                            method: paymentData.method
                         };
 
                         storage.post(newUrl, JSON.stringify(hgwPayload))

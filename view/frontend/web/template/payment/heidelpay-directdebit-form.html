@@ -26,28 +26,30 @@
         </div>
         <form id="hgw-directdebit-form" class="form form-hgw-directdebit" data-role="hgw-directdebit-form">
             <fieldset class="fieldset payment method" data-bind='attr: {id: "payment_form_" + getCode()}'>
-                <div class="field field-number required">
-                    <label for="hgw_owner" class="label">
-                        <span><!-- ko i18n: 'HGW_OWNER'--><!-- /ko --></span>
+                <div class="field required">
+                    <label for="hgw_holder" class="label">
+                        <span><!-- ko i18n: 'Bank Account Holder'--><!-- /ko --></span>
                     </label>
                     <div class="control">
                         <input type="text"
-                               id="hgw_owner"
-                               name="payment[hgw_owner]"
+                               id="hgw_holder"
+                               name="payment[hgw_holder]"
                                data-validate="{required:true}"
                                data-bind='
-                                attr: {title: $t("OWNER")},
-                                value: hgwOwner'
+                                attr: {title: $t("Bank Account Holder")},
+                                value: hgwHolder'
                                class="input-text"/>
                     </div>
+                </div>
+                <div class="field required">
                     <label for="hgw_iban" class="label">
-                        <span><!-- ko i18n: 'HGW_IBAN'--><!-- /ko --></span>
+                        <span><!-- ko i18n: 'IBAN'--><!-- /ko --></span>
                     </label>
                     <div class="control">
                         <input type="text"
                                id="hgw_iban"
                                name="payment[hgw_iban]"
-                               data-validate="{required:true}"
+                               data-validate="{required:true, 'validate-iban': true}"
                                data-bind='
                                 attr: {title: $t("IBAN")},
                                 value: hgwIban'

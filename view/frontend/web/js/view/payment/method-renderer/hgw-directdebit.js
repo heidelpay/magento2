@@ -1,29 +1,49 @@
 define(
     [
         'jquery',
-        'Magento_Checkout/js/view/payment/default',
+        'Heidelpay_Gateway/js/view/payment/method-renderer/hgw-abstract',
         'Heidelpay_Gateway/js/action/place-order',
         'Magento_Checkout/js/model/url-builder',
         'mage/storage',
         'Magento_Checkout/js/model/payment/additional-validators',
         'Magento_Customer/js/model/customer',
-        'Magento_Customer/js/customer-data',
         'Magento_Checkout/js/model/quote'
     ],
-    function ($, Component, placeOrderAction, urlBuilder, storage, additionalValidators, customer, customerData, quote) {
+    function ($, Component, placeOrderAction, urlBuilder, storage, additionalValidators, customer, quote) {
         'use strict';
 
         return Component.extend({
 
+            /**
+             * Property that indicates, if the payment method is storing
+             * additional data.
+             */
+            savesAdditionalData: true,
+
             defaults: {
                 template: 'Heidelpay_Gateway/payment/heidelpay-directdebit-form',
                 hgwIban: '',
-                hgwOwner: ''
+                hgwHolder: ''
             },
 
             initialize: function () {
                 this._super();
+                this.getAdditionalPaymentInformation();
 
+                return this;
+            },
+
+            initObservable: function() {
+                this._super()
+                    .observe([
+                        'hgwIban', 'hgwHolder'
+                    ]);
+
+                return this;
+            },
+
+
+            getAdditionalPaymentInformation: function() {
                 // recognition: only when there is a logged in customer
                 if (customer.isLoggedIn()) {
                     // if we have a shipping address, go on
@@ -44,23 +64,12 @@ define(
                                 // set iban and account holder, if result is not empty.
                                 if( info !== null ) {
                                     parent.hgwIban(info.hgw_iban);
-                                    parent.hgwOwner(info.hgw_holder);
+                                    parent.hgwHolder(info.hgw_holder);
                                 }
                             }
                         );
                     }
                 }
-
-                return this;
-            },
-
-            initObservable: function() {
-                this._super()
-                    .observe([
-                        'hgwIban', 'hgwOwner'
-                    ]);
-
-                return this;
             },
 
             getCode: function () {
@@ -72,35 +81,16 @@ define(
                     'method': this.item.method,
                     'additional_data': {
                         'hgw_iban': this.hgwIban(),
-                        'hgw_owner': this.hgwOwner()
+                        'hgw_holder': this.hgwHolder()
                     }
                 };
             },
 
-            /**
-             * Redirect to hgw controller
-             * Override magento placePayment function
-             */
-            placeOrder: function (data, event) {
-                var self = this,
-                    placeOrder;
+            validate: function() {
+                var form = $('#hgw-directdebit-form');
 
-                if (event) {
-                    event.preventDefault();
-                }
-
-                if (this.validate() && additionalValidators.validate()) {
-                    this.isPlaceOrderActionAllowed(false);
-                    placeOrder = placeOrderAction(this.getData(), this.redirectAfterPlaceOrder, this.messageContainer);
-
-                    $.when(placeOrder).fail(function () {
-                        self.isPlaceOrderActionAllowed(true);
-                    }).done(this.afterPlaceOrder.bind(this));
-                    return true;
-                }
-                return false;
+                return form.validation() && form.validation('isValid');
             }
-
         });
     }
 );

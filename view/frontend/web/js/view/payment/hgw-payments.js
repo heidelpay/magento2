@@ -36,6 +36,10 @@ define(
             {
                 type: 'hgwdd',
                 component: 'Heidelpay_Gateway/js/view/payment/method-renderer/hgw-directdebit'
+            },
+            {
+                type: 'hgwdds',
+                component: 'Heidelpay_Gateway/js/view/payment/method-renderer/hgw-directdebitsecured'
             }
         );
         return Component.extend({});
