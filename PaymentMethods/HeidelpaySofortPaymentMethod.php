@@ -104,18 +104,9 @@ class HeidelpaySofortPaymentMethod extends HeidelpayAbstractPaymentMethod
     {
         parent::getHeidelpayUrl($quote);
 
-        // force PhpApi to just generate the request instead of sending it directly
-        $this->_heidelpayPaymentMethod->_dryRun = true;
-
         // set payment type to authorize
         $this->_heidelpayPaymentMethod->authorize();
 
-        // prepare and send request to heidelpay
-        $response = $this->_heidelpayPaymentMethod->getRequest()->send(
-            $this->_heidelpayPaymentMethod->getPaymentUrl(),
-            $this->_heidelpayPaymentMethod->getRequest()->convertToArray()
-        );
-
-        return $response[0];
+        return $this->_heidelpayPaymentMethod->getResponse();
     }
 }

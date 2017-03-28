@@ -47,6 +47,9 @@
                                                                         <item name="hgwdd" xsi:type="array">
                                                                             <item name="isBillingAddressRequired" xsi:type="boolean">true</item>
                                                                         </item>
+                                                                        <item name="hgwdds" xsi:type="array">
+                                                                            <item name="isBillingAddressRequired" xsi:type="boolean">false</item>
+                                                                        </item>
                                                                     </item>
                                                                 </item>
                                                             </item>

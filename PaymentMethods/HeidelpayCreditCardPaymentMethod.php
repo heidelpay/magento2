@@ -119,9 +119,6 @@ class HeidelpayCreditCardPaymentMethod extends HeidelpayAbstractPaymentMethod
         // do the initial request to the heidelpay payment platform.
         parent::getHeidelpayUrl($quote);
 
-        // Force PhpApi to just generate the request instead of sending it directly
-        $this->_heidelpayPaymentMethod->_dryRun = true;
-
         $url = explode('/', $this->urlBuilder->getUrl('/', ['_secure' => true]));
         $paymentFrameOrigin = $url[0] . '//' . $url[2];
         $preventAsyncRedirect = 'FALSE';
@@ -134,12 +131,6 @@ class HeidelpayCreditCardPaymentMethod extends HeidelpayAbstractPaymentMethod
         // Set payment type to debit
         $this->_heidelpayPaymentMethod->debit($paymentFrameOrigin, $preventAsyncRedirect, $cssPath);
 
-        // Prepare and send request to heidelpay
-        $response = $this->_heidelpayPaymentMethod->getRequest()->send(
-            $this->_heidelpayPaymentMethod->getPaymentUrl(),
-            $this->_heidelpayPaymentMethod->getRequest()->convertToArray()
-        );
-
-        return $response[0];
+        return $this->_heidelpayPaymentMethod->getResponse();
     }
 }

@@ -36,22 +36,22 @@ interface PaymentInterface
     public function getAdditionalPaymentInformation($quoteId, $paymentMethod);
 
     /**
-     * Method for storing additional payment data for customers
+     * Method for storing additional payment data for customers.
      *
      * @param int $cartId
-     * @param string $hgwIban
-     * @param string $hgwOwner
-     * @return boolean
+     * @param string $method The payment method code
+     * @param mixed $additionalData
+     * @return string
      */
-    public function saveDirectDebitInfo($cartId, $hgwIban, $hgwOwner);
+    public function saveAdditionalPaymentInfo($cartId, $method, $additionalData);
 
     /**
-     * Method for storing additional payment data for guest customers
+     * Method for storing additional payment data for guest customers.
      *
      * @param string $cartId
-     * @param string $hgwIban
-     * @param string $hgwOwner
-     * @return boolean
+     * @param string $method The payment method code
+     * @param mixed $additionalData
+     * @return string
      */
-    public function saveGuestDirectDebitInfo($cartId, $hgwIban, $hgwOwner);
+    public function saveGuestAdditionalPaymentInfo($cartId, $method, $additionalData);
 }

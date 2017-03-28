@@ -12,10 +12,11 @@
 		"magento/module-payment" : "<100.2.0",
 		"magento/module-backend" : "<100.2.0",
 		"magento/framework" : "<100.2.0",
-		"heidelpay/php-api" : "17.3.2"
+		"heidelpay/php-api" : "17.3.2",
+		"heidelpay/php-customer-messages": "~17.2.3"
 	},
 	"require-dev" : {
-		"magento-ecg/coding-standard" : "2.0",
+		"magento/marketplace-eqp" : "2.0",
 		"heidelpay/phpdocumentor" : "2.9.1",
 		"friendsofphp/php-cs-fixer" : "2.1.0"
 	},
@@ -57,10 +58,5 @@
 		"payment",
 		"php",
 		"payment-gateway"
-	],
-	"require-dev" : {
-		"magento-ecg/coding-standard" : "2.0",
-		"heidelpay/phpdocumentor" : "2.9.1",
-		"friendsofphp/php-cs-fixer" : "2.1.0"
-	}
+	]
 }

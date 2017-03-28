@@ -66,8 +66,10 @@ class Payment implements PaymentInterface
     ) {
         $this->quoteRepository = $quoteRepository;
         $this->quoteIdMaskFactory = $quoteIdMaskFactory;
+
         $this->paymentInformationFactory = $paymentInformationFactory;
         $this->paymentInformationCollectionFactory = $paymentInformationCollectionFactory;
+
         $this->encryptor = $encryptor;
         $this->logger = $logger;
         $this->scopeConfig = $scopeConfig;
@@ -92,7 +94,7 @@ class Payment implements PaymentInterface
 
         // if recognition is set to 'never', we don't return any data.
         if ($allowRecognition == Recognition::RECOGNITION_NEVER) {
-            $result = null;
+            return json_encode(null);
         }
 
         // get the customer payment information by given data from the request.
@@ -120,11 +122,10 @@ class Payment implements PaymentInterface
             }
         }
 
-        // if we have no data at all, set the account owner to the billing address name.
+        // if we have no data at all, set additional data that could be making it
+        // a bit easier for the customer, by helping him to fill some fields.
         if ($result === null) {
-            $result = [
-                'hgw_holder' => $quote->getBillingAddress()->getName()
-            ];
+            $result = $this->getAdditionalDataForPaymentMethod($paymentMethod, $quote);
         }
 
         return json_encode($result);
@@ -133,58 +134,32 @@ class Payment implements PaymentInterface
     /**
      * @inheritdoc
      */
-    public function saveDirectDebitInfo($cartId, $hgwIban, $hgwHolder)
+    public function saveAdditionalPaymentInfo($cartId, $method, $additionalData)
     {
-        $additionalData = [
-            'hgw_iban' => $hgwIban,
-            'hgw_holder' => $hgwHolder
-        ];
-
         // get the quote information by cart id
         $quote = $this->quoteRepository->get($cartId);
 
-        // create a new instance for the payment information collection.
-        $paymentInfoCollection = $this->paymentInformationCollectionFactory->create();
-
-        // load payment information by the customer's quote.
-        /** @var \Heidelpay\Gateway\Model\PaymentInformation $paymentInfo */
-        $paymentInfo = $paymentInfoCollection->loadByCustomerInformation(
-            $quote->getStoreId(),
-            $quote->getCustomerEmail(),
-            $quote->getPayment()->getMethod()
-        );
-
-        // if there is no payment information data set, we create a new one...
-        if ($paymentInfo->isEmpty()) {
-            // create a new instance for the payment information data.
-            $paymentInfoFactory = $this->paymentInformationFactory->create();
-
-            // save the payment information
-            if ($this->savePaymentInformation($paymentInfoFactory, $quote, $additionalData)) {
-                return true;
-            }
-
-            return false;
+        // if the quote is empty, there is no relation that
+        // we can work with... so we return false.
+        if ($quote->isEmpty()) {
+            return json_encode(false);
         }
 
-        // ... else, we update the data and save the model.
-        if ($this->savePaymentInformation($paymentInfo, $quote, $additionalData)) {
-            return true;
+        // save the information with the given quote and additional data.
+        // if there is nothing stored, we'll return false...
+        if (!$this->savePaymentInformation($quote, $method, $quote->getCustomerEmail(), $additionalData)) {
+            return json_encode(false);
         }
 
-        return false;
+        // ... if it was successful, we return true.
+        return json_encode(true);
     }
 
     /**
      * @inheritdoc
      */
-    public function saveGuestDirectDebitInfo($cartId, $hgwIban, $hgwHolder)
+    public function saveGuestAdditionalPaymentInfo($cartId, $method, $additionalData)
     {
-        $additionalData = [
-            'hgw_iban' => $hgwIban,
-            'hgw_holder' => $hgwHolder
-        ];
-
         // get the real quote id by guest cart id (masked random string serves as guest cart id)
         /** @var \Magento\Quote\Model\QuoteIdMask $quoteIdMask */
         $quoteIdMask = $this->quoteIdMaskFactory->create()->load($cartId, 'masked_id');
@@ -193,36 +168,21 @@ class Payment implements PaymentInterface
         // get the quote information by cart id
         $quote = $this->quoteRepository->get($quoteId);
 
-        // create a new instance for the payment information collection.
-        $paymentInfoCollection = $this->paymentInformationCollectionFactory->create();
-
-        // load payment information by the customer's quote.
-        /** @var \Heidelpay\Gateway\Model\PaymentInformation $paymentInfo */
-        $paymentInfo = $paymentInfoCollection->loadByCustomerInformation(
-            $quote->getStoreId(),
-            $quote->getCustomerEmail(),
-            $quote->getPayment()->getMethod()
-        );
-
-        // if there is no payment information data set, we create a new one...
-        if ($paymentInfo->isEmpty()) {
-            // create a new instance for the payment information data.
-            $paymentInfoFactory = $this->paymentInformationFactory->create();
-
-            // save the payment information
-            if ($this->savePaymentInformation($paymentInfoFactory, $quote, $additionalData)) {
-                return true;
-            }
-
-            return false;
+        // if the quote is empty, there is no relation that
+        // we can work with... so we return false.
+        if ($quote->isEmpty()) {
+            return json_encode(false);
         }
 
-        // ... else, we update the data and save the model.
-        if ($this->savePaymentInformation($paymentInfo, $quote, $additionalData)) {
-            return true;
+        // save the information with the given quote and additional data.
+        // if there is nothing stored, we'll return false...
+        // - since guest email is stored in the billing information, we have to pull it from there.
+        if (!$this->savePaymentInformation($quote, $method, $quote->getBillingAddress()->getEmail(), $additionalData)) {
+            return json_encode(false);
         }
 
-        return false;
+        // ... if it was successful, we return true.
+        return json_encode(true);
     }
 
     /**
@@ -246,20 +206,84 @@ class Payment implements PaymentInterface
     }
 
     /**
+     * Returns information for a given payment method, if there is
+     * no additional data stored yet. This is just for making it
+     * the customer a bit easier, because he is not in need
+     * of entering every needed data again for a given
+     * payment method.
+     * For example, the bank account holder in Direct Debits
+     * tends to be the same person as the one mentioned in
+     * the Billing address.
+     *
+     * @param string $method
+     * @param \Magento\Quote\Model\Quote $quote
+     * @return array|null
+     */
+    private function getAdditionalDataForPaymentMethod($method, $quote)
+    {
+        $result = [];
+
+        switch ($method) {
+            case 'hgwdd':
+                $result['hgw_holder'] = $quote->getBillingAddress()->getName();     // full billing name
+                break;
+
+            case 'hgwdds':
+                $result['hgw_birthdate'] = $quote->getCustomer()->getDob();         // date of birth
+                $result['hgw_holder'] = $quote->getBillingAddress()->getName();     // full billing name
+                break;
+
+            default:
+                $result = null;
+                break;
+        }
+
+        return $result;
+    }
+
+    /**
      * Saves the payment information into the database.
      *
-     * @param \Heidelpay\Gateway\Model\PaymentInformation $paymentInformation
+     * If a data set with the given information exists, it will just
+     * be updated. Else, a new data set will be created.
+     *
      * @param \Magento\Quote\Model\Quote $quote
+     * @param string $method
+     * @param string $email
      * @param array $additionalData
      * @param string $paymentRef
      * @return \Heidelpay\Gateway\Api\Data\PaymentInformationInterface
      */
-    private function savePaymentInformation($paymentInformation, $quote, $additionalData, $paymentRef = null)
+    private function savePaymentInformation($quote, $method, $email, $additionalData, $paymentRef = null)
     {
+        // make some additional data changes, if neccessary
+        array_walk($additionalData, function (&$value, $key) {
+            // if somehow the country code in the IBAN is lowercase, convert it to uppercase.
+            if ($key == 'hgw_iban') {
+                $value = strtoupper($value);
+            }
+        });
+
+        // create a new instance for the payment information collection.
+        $paymentInfoCollection = $this->paymentInformationCollectionFactory->create();
+
+        // load payment information by the customer's quote.
+        /** @var \Heidelpay\Gateway\Model\PaymentInformation $paymentInfo */
+        $paymentInformation = $paymentInfoCollection->loadByCustomerInformation(
+            $quote->getStoreId(),
+            $email,
+            $method
+        );
+
+        // if there is no payment information data set, we create a new one...
+        if ($paymentInformation->isEmpty()) {
+            $paymentInformation = $this->paymentInformationFactory->create();
+        }
+
         return $paymentInformation
             ->setStoreId($quote->getStoreId())
-            ->setCustomerEmail($quote->getCustomer()->getEmail())
-            ->setPaymentMethod($quote->getPayment()->getMethod())
+            ->setCustomerEmail($email)
+            ->setPaymentMethod($method)
             ->setShippingHash($this->createShippingHash($quote->getShippingAddress()))
             ->setAdditionalData($additionalData)
             ->setHeidelpayPaymentReference($paymentRef)

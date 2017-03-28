@@ -48,7 +48,7 @@ abstract class HgwAbstract extends \Magento\Framework\App\Action\Action
     protected $_quoteObject;
 
     /**
-     * @var \Magento\Quote\Api\CartManagementInterface
+     * @var \Magento\Quote\Model\QuoteManagement
      */
     protected $_cartManagement;
 

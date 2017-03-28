@@ -1,0 +1,190 @@
+<!--
+/**
+ * Copyright © 2016 Magento. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<div class="payment-method" data-bind="css: {'_active': (getCode() == isChecked())}">
+    <div class="payment-method-title field choice">
+        <input type="radio"
+               name="payment[method]"
+               class="radio"
+               data-bind="attr: {'id': getCode()}, value: getCode(), checked: isChecked, click: selectPaymentMethod, visible: isRadioButtonVisible()"/>
+        <label data-bind="attr: {'for': getCode()}" class="label">
+            <span data-bind="text: getTitle()"></span>
+        </label>
+    </div>
+
+    <div class="payment-method-content">
+        <!-- ko foreach: getRegion('messages') -->
+        <!-- ko template: getTemplate() --><!-- /ko -->
+        <!--/ko-->
+        <div class="payment-method-billing-address">
+            <!-- ko foreach: $parent.getRegion(getBillingAddressFormName()) -->
+            <!-- ko template: getTemplate() --><!-- /ko -->
+            <!--/ko-->
+        </div>
+        <form id="hgw-directdebit-secured-form" class="form form-hgw-directdebit-secured" data-role="hgw-directdebit-form-secured">
+            <fieldset class="fieldset payment method" data-bind='attr: {id: "payment_form_" + getCode()}'>
+                <!-- Salutation Input Field -->
+                <div class="field required">
+                    <label for="hgwdds_salutation" class="label">
+                        <span><!-- ko i18n: 'Salutation'--><!-- /ko --></span>
+                    </label>
+                    <select name="payment[hgw_salutation]"
+                            id="hgwdds_salutation"
+                            data-validate="{required:true}"
+                            data-bind='attr: {title: $t("Salutation")}, value: hgwSalutation'
+                    >
+                        <option value="MR"><!-- ko i18n: 'Mr.'--><!-- /ko --></option>
+                        <option value="MRS"><!-- ko i18n: 'Mrs.'--><!-- /ko --></option>
+                    </select>
+                </div>
+                <!-- Account Holder Input Field -->
+                <div class="field required">
+                    <label for="hgwdds_holder" class="label">
+                        <span><!-- ko i18n: 'Bank Account Holder'--><!-- /ko --></span>
+                    </label>
+                    <div class="control">
+                        <input type="text"
+                               id="hgwdds_holder"
+                               name="payment[hgw_holder]"
+                               data-validate="{required:true}"
+                               data-bind='
+                                attr: {title: $t("Bank Account Holder")},
+                                value: hgwHolder'
+                               class="input-text"/>
+                    </div>
+                </div>
+                <!-- IBAN Input Field -->
+                <div class="field required">
+                    <label for="hgwdds_iban" class="label">
+                        <span><!-- ko i18n: 'IBAN'--><!-- /ko --></span>
+                    </label>
+                    <div class="control">
+                        <input type="text"
+                               id="hgwdds_iban"
+                               name="payment[hgw_iban]"
+                               data-validate="{required: true, 'validate-iban': true}"
+                               data-bind='
+                                attr: {title: $t("IBAN")},
+                                value: hgwIban'
+                               class="input-text"/>
+                    </div>
+                </div>
+                <!-- Date of birth input fields -->
+                <div class="field required">
+                    <label for="hgwdds_birthdate" class="label">
+                        <span><!-- ko i18n: 'Date of Birth' --><!-- /ko --></span>
+                    </label>
+                    <div class="control">
+                        <fieldset class="fieldset">
+                            <div class="fields">
+                                <div class="field required" style="float: left; margin-right: 10px;">
+                                    <label for="hgwdds_birthdate_day" class="label">
+                                        <span><!-- ko i18n: 'Day' --><!-- /ko --></span>
+                                    </label>
+                                    <select name="payment[hgw_birthdate_day]" id="hgwdds_birthdate_day"
+                                            data-bind="attr: {title: $t('Day')}, value: hgwDobDay"
+                                            data-validate="{required: true}"
+                                    >
+                                        <option value="" selected disabled></option>
+                                        <option value="1">01</option>
+                                        <option value="2">02</option>
+                                        <option value="3">03</option>
+                                        <option value="4">04</option>
+                                        <option value="5">05</option>
+                                        <option value="6">06</option>
+                                        <option value="7">07</option>
+                                        <option value="8">08</option>
+                                        <option value="9">09</option>
+                                        <option value="10">10</option>
+                                        <option value="11">11</option>
+                                        <option value="12">12</option>
+                                        <option value="13">13</option>
+                                        <option value="14">14</option>
+                                        <option value="15">15</option>
+                                        <option value="16">16</option>
+                                        <option value="17">17</option>
+                                        <option value="18">18</option>
+                                        <option value="19">19</option>
+                                        <option value="20">20</option>
+                                        <option value="21">21</option>
+                                        <option value="22">22</option>
+                                        <option value="23">23</option>
+                                        <option value="24">24</option>
+                                        <option value="25">25</option>
+                                        <option value="26">26</option>
+                                        <option value="27">27</option>
+                                        <option value="28">28</option>
+                                        <option value="29">29</option>
+                                        <option value="30">30</option>
+                                        <option value="31">31</option>
+                                    </select>
+                                </div>
+                                <div class="field required" style="float: left; margin-right: 10px;">
+                                    <label for="hgwdds_birthdate_month" class="label">
+                                        <span><!-- ko i18n: 'Month' --><!-- /ko --></span>
+                                    </label>
+                                    <select name="payment[hgw_birthdate_month]" id="hgwdds_birthdate_month"
+                                            data-bind="attr: {title: $t('Month')}, value: hgwDobMonth"
+                                            data-validate="{required: true}"
+                                    >
+                                        <option value="" disabled></option>
+                                        <option value="0"><!-- ko i18n: 'January' --><!-- /ko --></option>
+                                        <option value="1"><!-- ko i18n: 'February' --><!-- /ko --></option>
+                                        <option value="2"><!-- ko i18n: 'March' --><!-- /ko --></option>
+                                        <option value="3"><!-- ko i18n: 'April' --><!-- /ko --></option>
+                                        <option value="4"><!-- ko i18n: 'May' --><!-- /ko --></option>
+                                        <option value="5"><!-- ko i18n: 'June' --><!-- /ko --></option>
+                                        <option value="6"><!-- ko i18n: 'July' --><!-- /ko --></option>
+                                        <option value="7"><!-- ko i18n: 'August' --><!-- /ko --></option>
+                                        <option value="8"><!-- ko i18n: 'September' --><!-- /ko --></option>
+                                        <option value="9"><!-- ko i18n: 'October' --><!-- /ko --></option>
+                                        <option value="10"><!-- ko i18n: 'November' --><!-- /ko --></option>
+                                        <option value="11"><!-- ko i18n: 'December' --><!-- /ko --></option>
+                                    </select>
+                                </div>
+                                <div class="field required" style="float: left;">
+                                    <label for="hgwdds_birthdate_year" class="label">
+                                        <span><!-- ko i18n: 'Year' --><!-- /ko --></span>
+                                    </label>
+                                    <select name="payment[hgw_birthdate_year]" id="hgwdds_birthdate_year"
+                                            data-bind="attr: {title: $t('Year')}, value: hgwDobYear, options: years"
+                                            data-validate="{required: true}"
+                                    >
+                                    </select>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <input type="hidden" name="payment[hgw_birthdate]"
+                               id="hgwdds_birthdate"
+                               data-bind="value: getBirthdate"
+                        />
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+        <div class="checkout-agreements-block">
+            <!-- ko foreach: $parent.getRegion('before-place-order') -->
+            <!-- ko template: getTemplate() --><!-- /ko -->
+            <!--/ko-->
+        </div>
+        <div class="actions-toolbar" id="review-buttons-container">
+            <div class="primary">
+                <button class="action primary checkout"
+                        type="submit"
+                        data-bind="
+                        click: placeOrder,
+                        attr: {title: $t('Place Order')},
+                        enable: (getCode() == isChecked()),
+                        css: {disabled: !isPlaceOrderActionAllowed()}
+                        "
+                        data-role="review-save">
+                    <span data-bind="i18n: 'Place Order'"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
