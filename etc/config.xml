@@ -16,7 +16,6 @@
                 <title><![CDATA[Prepayment]]></title>
                 <channel>31HA07BC8142C5A171749A60D979B6E4</channel>
                 <allowspecific>0</allowspecific>
-                <specificcountry></specificcountry>
                 <min_order_total>0</min_order_total>
                 <max_order_total>0</max_order_total>
                 <model>Heidelpay\Gateway\PaymentMethods\HeidelpayPrepaymentPaymentMethod</model>
@@ -27,7 +26,6 @@
                 <title><![CDATA[Credit card]]></title>
                 <channel>31HA07BC8142C5A171744F3D6D155865</channel>
                 <allowspecific>0</allowspecific>
-                <specificcountry></specificcountry>
                 <min_order_total>0</min_order_total>
                 <max_order_total>0</max_order_total>
                 <model>Heidelpay\Gateway\PaymentMethods\HeidelpayCreditCardPaymentMethod</model>
@@ -38,7 +36,6 @@
                 <title><![CDATA[Debit card]]></title>
                 <channel>31HA07BC8142C5A171744F3D6D155865</channel>
                 <allowspecific>0</allowspecific>
-                <specificcountry></specificcountry>
                 <min_order_total>0</min_order_total>
                 <max_order_total>0</max_order_total>
                 <model>Heidelpay\Gateway\PaymentMethods\HeidelpayDebitCardPaymentMethod</model>
@@ -60,7 +57,6 @@
                 <title><![CDATA[PayPal]]></title>
                 <channel>31HA07BC8142C5A171749A60D979B6E4</channel>
                 <allowspecific>0</allowspecific>
-                <specificcountry></specificcountry>
                 <min_order_total>0</min_order_total>
                 <max_order_total>0</max_order_total>
                 <model>Heidelpay\Gateway\PaymentMethods\HeidelpayPayPalPaymentMethod</model>
@@ -83,7 +79,6 @@
                 <channel>31HA07BC8142C5A171749A60D979B6E4</channel>
                 <allowspecific>0</allowspecific>
                 <recognition>never</recognition>
-                <specificcountry></specificcountry>
                 <min_order_total>0</min_order_total>
                 <max_order_total>0</max_order_total>
                 <model>Heidelpay\Gateway\PaymentMethods\HeidelpayDirectDebitPaymentMethod</model>
@@ -91,7 +86,7 @@
             <hgwdds>
                 <active>0</active>
                 <payment_action>authorize</payment_action>
-                <title><![CDATA[Direct Debit Secured]]></title>
+                <title><![CDATA[Secured Direct Debit]]></title>
                 <channel>31HA07BC81856CAD6D8E0B3A3100FBA3</channel>
                 <allowspecific>0</allowspecific>
                 <recognition>never</recognition>
@@ -100,6 +95,18 @@
                 <max_order_total>0</max_order_total>
                 <model>Heidelpay\Gateway\PaymentMethods\HeidelpayDirectDebitSecuredPaymentMethod</model>
             </hgwdds>
+            <hgwivs>
+                <active>0</active>
+                <payment_action>authorize</payment_action>
+                <title><![CDATA[Secured Invoice]]></title>
+                <channel>31HA07BC8142C5A171749A60D979B6E4</channel>
+                <allowspecific>0</allowspecific>
+                <recognition>never</recognition>
+                <specificcountry>DE,AT,CH</specificcountry>
+                <min_order_total>0</min_order_total>
+                <max_order_total>0</max_order_total>
+                <model>Heidelpay\Gateway\PaymentMethods\HeidelpayInvoiceSecuredPaymentMethod</model>
+            </hgwivs>
         </payment>
     </default>
 </config>

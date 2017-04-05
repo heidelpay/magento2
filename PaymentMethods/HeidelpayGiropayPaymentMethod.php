@@ -70,9 +70,26 @@ class HeidelpayGiropayPaymentMethod extends HeidelpayAbstractPaymentMethod
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
         array $data = []
     ) {
-        parent::__construct($context, $registry, $extensionFactory, $customAttributeFactory, $paymentData, $scopeConfig,
-            $request, $urlinterface, $encryptor, $logger, $localeResolver, $productMetadata, $moduleResource,
-            $paymentHelper, $paymentInformationCollectionFactory, $resource, $resourceCollection, $data);
+        parent::__construct(
+            $context,
+            $registry,
+            $extensionFactory,
+            $customAttributeFactory,
+            $paymentData,
+            $scopeConfig,
+            $request,
+            $urlinterface,
+            $encryptor,
+            $logger,
+            $localeResolver,
+            $productMetadata,
+            $moduleResource,
+            $paymentHelper,
+            $paymentInformationCollectionFactory,
+            $resource,
+            $resourceCollection,
+            $data
+        );
 
         $this->_heidelpayPaymentMethod = $giropayPaymentMethod;
     }
@@ -82,9 +99,10 @@ class HeidelpayGiropayPaymentMethod extends HeidelpayAbstractPaymentMethod
      */
     public function getHeidelpayUrl($quote)
     {
+        // set initial data for the request
         parent::getHeidelpayUrl($quote);
 
-        // set payment type to debit
+        // send the authorize request
         $this->_heidelpayPaymentMethod->authorize();
 
         return $this->_heidelpayPaymentMethod->getResponse();

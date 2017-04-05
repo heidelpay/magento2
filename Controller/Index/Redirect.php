@@ -75,12 +75,25 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
         \Heidelpay\PhpApi\Response $heidelpayResponse,
         \Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory $transactionCollectionFactory
     ) {
-        parent::__construct($context, $customerSession, $checkoutSession, $orderFactory, $urlHelper, $logger,
-            $cartManagement, $quoteObject, $resultPageFactory, $paymentHelper, $orderSender, $invoiceSender,
-            $orderCommentSender, $encryptor, $customerUrl);
+        parent::__construct(
+            $context,
+            $customerSession,
+            $checkoutSession,
+            $orderFactory,
+            $urlHelper,
+            $logger,
+            $cartManagement,
+            $quoteObject,
+            $resultPageFactory,
+            $paymentHelper,
+            $orderSender,
+            $invoiceSender,
+            $orderCommentSender,
+            $encryptor,
+            $customerUrl
+        );
 
         $this->heidelpayResponse = $heidelpayResponse;
-
         $this->transactionCollectionFactory = $transactionCollectionFactory;
     }
 
@@ -99,7 +112,7 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
 
         try {
             /** @var \Heidelpay\Gateway\Model\Transaction $transaction */
-            $transaction = $this->transactionCollectionFactory->create()->loadByTransactionId($quoteId);
+            $transaction = $this->transactionCollectionFactory->create()->loadByQuoteId($quoteId);
             $data = $transaction->getJsonResponse();
 
             $this->_logger->debug('Heidelpay redirect data ' . json_encode($data));
@@ -118,6 +131,7 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
 
             try {
                 $order = $this->_orderFactory->create()->loadByAttribute('quote_id', $quoteId);
+
                 /** Sende Invoice main to customer */
                 $this->_orderSender->send($order);
             } catch (\Exception $e) {

@@ -1,6 +1,5 @@
 define(
     [
-        'ko',
         'jquery',
         'Heidelpay_Gateway/js/view/payment/method-renderer/hgw-abstract',
         'Heidelpay_Gateway/js/action/place-order',
@@ -11,10 +10,11 @@ define(
         'Magento_Checkout/js/model/quote',
         'moment'
     ],
-    function (ko, $, Component, placeOrderAction, urlBuilder, storage, additionalValidators, customer, quote, moment) {
+    function ($, Component, placeOrderAction, urlBuilder, storage, additionalValidators, customer, quote, moment) {
         'use strict';
 
         return Component.extend({
+
             /**
              * Property that indicates, if the payment method is storing
              * additional data.
@@ -22,13 +22,11 @@ define(
             savesAdditionalData: true,
 
             defaults: {
-                template: 'Heidelpay_Gateway/payment/heidelpay-directdebit-secured-form',
-                hgwIban: '',
-                hgwHolder: '',
-                hgwSalutation: '',
+                template: 'Heidelpay_Gateway/payment/heidelpay-invoice-secured-form',
                 hgwDobYear: '',
                 hgwDobMonth: '',
                 hgwDobDay: '',
+                hgwSalutation: '',
                 years: [null]
             },
 
@@ -44,22 +42,19 @@ define(
                 return this;
             },
 
-            initObservable: function () {
+            initObservable: function() {
                 this._super()
-                    .observe([
-                        'hgwIban', 'hgwHolder', 'hgwSalutation',
-                        'hgwDobYear', 'hgwDobMonth', 'hgwDobDay',
-                        'years'
-                    ]);
+                    .observe(['hgwSalutation', 'hgwDobYear', 'hgwDobMonth', 'hgwDobDay', 'years']);
 
                 return this;
             },
 
+
             getAdditionalPaymentInformation: function() {
-                // load addtional customer information (recognition), if the user isn't a guest.
+                // recognition: only when there is a logged in customer
                 if (customer.isLoggedIn()) {
                     // if we have a shipping address, go on
-                    if (quote.shippingAddress() !== null) {
+                    if( quote.shippingAddress() !== null ) {
                         var parent = this;
                         var serviceUrl = urlBuilder.createUrl('/hgw/get-payment-info', {});
                         var hgwPayload = {
@@ -70,17 +65,11 @@ define(
                         storage.post(
                             serviceUrl, JSON.stringify(hgwPayload)
                         ).done(
-                            function (data) {
+                            function(data) {
                                 var info = JSON.parse(data);
 
-                                // set information to fill fields, if present.
-                                if (info !== null) {
-                                    if (info.hasOwnProperty('hgw_iban'))
-                                        parent.hgwIban(info.hgw_iban);
-
-                                    if (info.hasOwnProperty('hgw_holder'))
-                                        parent.hgwHolder(info.hgw_holder);
-
+                                // set salutation and birthdate, if set.
+                                if( info !== null ) {
                                     if (info.hasOwnProperty('hgw_salutation'))
                                         parent.hgwSalutation(info.hgw_salutation);
 
@@ -93,7 +82,7 @@ define(
 
                                         // workaround: if month is 'january', the month isn't selected.
                                         if (date.month() === 0) {
-                                            $("#hgwdds_birthdate_month option:eq(1)").prop('selected', true);
+                                            $("#hgwivs_birthdate_month option:eq(1)").prop('selected', true);
                                         }
                                     }
                                 }
@@ -104,7 +93,7 @@ define(
             },
 
             getCode: function () {
-                return 'hgwdds';
+                return 'hgwivs';
             },
 
             getData: function () {
@@ -112,8 +101,6 @@ define(
                     'method': this.item.method,
                     'additional_data': {
                         'hgw_birthdate': this.getBirthdate(),
-                        'hgw_iban': this.hgwIban(),
-                        'hgw_holder': this.hgwHolder(),
                         'hgw_salutation': this.hgwSalutation()
                     }
                 };
@@ -130,8 +117,8 @@ define(
                 ).format('YYYY-MM-DD');
             },
 
-            validate: function () {
-                var form = $('#hgw-directdebit-secured-form');
+            validate: function() {
+                var form = $('#hgw-invoice-secured-form');
 
                 return form.validation() && form.validation('isValid');
             }

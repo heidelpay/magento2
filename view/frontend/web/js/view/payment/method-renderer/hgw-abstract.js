@@ -8,15 +8,13 @@ define(
         'Magento_Checkout/js/checkout-data',
         'moment'
     ],
-    function ($, Component, placeOrderAction, additionalValidators, selectPaymentMethodAction, checkoutData, moment) {
+    function ($, Component, placeOrderAction, additionalValidators, selectPaymentMethodAction, checkoutData) {
         'use strict';
-
-        var self = this;
 
         // add IBAN validator
         $.validator.addMethod(
             'validate-iban', function (value) {
-                var pattern = /[A-Z]{2}[0-9]{13,29}/i;
+                var pattern = /^[A-Z]{2}[0-9]{13,29}$/i;
                 return (pattern.test(value));
             }, $.mage.__('The given IBAN is invalid.')
         );

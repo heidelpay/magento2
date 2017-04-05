@@ -154,7 +154,7 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
             $result->setContents(
                 $this->_url->getUrl('hgw/index/redirect', [
                     '_forced_secure' => true,
-                    '_store_to_url' => true,
+                    '_scope_to_url' => true,
                     '_nosid' => true
                 ])
             );
@@ -171,6 +171,8 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
         $data['IDENTIFICATION_SHORTID'] = $request->getPOST('IDENTIFICATION_SHORTID');
         $data['IDENTIFICATION_SHOPPERID'] = (int)$request->getPOST('IDENTIFICATION_SHOPPERID');
         $data['CRITERION_GUEST'] = $request->getPOST('CRITERION_GUEST');
+
+        //$data['CRITERION_PUSH_URL'] = 'http://qa.heidelpay.intern/stephano/pushtest/';
 
         /**
          * information
@@ -197,6 +199,19 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
             $data['IDENTIFICATION_CREDITOR_ID'] = $request->getPOST('IDENTIFICATION_CREDITOR_ID');
 
             // ... in case of secured (B2) direct debit
+            if (!empty($request->getParam('NAME_SALUTATION')) && !empty($request->getParam('NAME_BIRTHDATE'))) {
+                $data['NAME_SALUTATION'] = $request->getParam('NAME_SALUTATION');
+                $data['NAME_BIRTHDATE'] = $request->getParam('NAME_BIRTHDATE');
+            }
+        }
+
+        // Invoice
+        if ($data['PAYMENT_CODE'] == 'IV.PA') {
+            $data['CONNECTOR_ACCOUNT_HOLDER'] = $request->getPOST('CONNECTOR_ACCOUNT_HOLDER');
+            $data['CONNECTOR_ACCOUNT_IBAN'] = $request->getPOST('CONNECTOR_ACCOUNT_IBAN');
+            $data['CONNECTOR_ACCOUNT_BIC'] = $request->getPOST('CONNECTOR_ACCOUNT_BIC');
+
+            // Invoice B2C
             if (!empty($request->getParam('NAME_SALUTATION')) && !empty($request->getParam('NAME_BIRTHDATE'))) {
                 $data['NAME_SALUTATION'] = $request->getParam('NAME_SALUTATION');
                 $data['NAME_BIRTHDATE'] = $request->getParam('NAME_BIRTHDATE');
@@ -266,7 +281,7 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
 
         $url = $this->_url->getUrl('hgw/index/redirect', [
             '_forced_secure' => true,
-            '_store_to_url' => true,
+            '_scope_to_url' => true,
             '_nosid' => true
         ]);
 

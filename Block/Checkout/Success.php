@@ -18,13 +18,16 @@ namespace Heidelpay\Gateway\Block\Checkout;
  */
 class Success extends \Magento\Checkout\Block\Onepage\Success
 {
+    /**
+     * @return \Magento\Framework\Phrase|null
+     */
     public function getHeidelpayInfo()
     {
-        $info = ($this->_checkoutSession->getHeidelpayInfo() !== false)
-            ? $this->_checkoutSession->getHeidelpayInfo()
-            : false;
+        // get the heidelpay additional information
+        $info = $this->_checkoutSession->getHeidelpayInfo();
 
-        $this->_checkoutSession->setHeidelpayInfo(false);
+        // clear the additional information
+        $this->_checkoutSession->setHeidelpayInfo(null);
 
         return $info;
     }

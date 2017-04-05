@@ -40,6 +40,10 @@ define(
             {
                 type: 'hgwdds',
                 component: 'Heidelpay_Gateway/js/view/payment/method-renderer/hgw-directdebitsecured'
+            },
+            {
+                type: 'hgwivs',
+                component: 'Heidelpay_Gateway/js/view/payment/method-renderer/hgw-invoicesecured'
             }
         );
         return Component.extend({});
