@@ -293,8 +293,14 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
             'Heidelpay Gateway ' . $this->moduleResource->getDataVersion('Heidelpay_Gateway')
         );
 
+        // add a push url to the criterion object for future push responses from heidelpay
         $this->_heidelpayPaymentMethod->getRequest()->getCriterion()->set(
-            'PUSH_URL', 'http://qa.heidelpay.intern/stephano/pushtest/'
+            'PUSH_URL',
+            $this->urlBuilder->getUrl('hgw/index/push', [
+                '_forced_secure' => true,
+                '_scope_to_url' => true,
+                '_nosid' => true
+            ])
         );
     }
 

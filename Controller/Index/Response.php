@@ -132,9 +132,8 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
         $secret = $this->_encryptor->exportKeys();
         $identificationTransactionId = $this->heidelpayResponse->getIdentification()->getTransactionId();
 
-        $this->_logger->debug('Heidelpay response postdata : ' . print_r($this->heidelpayResponse, true));
-        $this->_logger->debug('Heidelpay $secret: ' . $secret);
-        $this->_logger->debug('Heidelpay $identificationTransactionId: ' . $identificationTransactionId);
+        $this->_logger->debug('Heidelpay secret: ' . $secret);
+        $this->_logger->debug('Heidelpay identificationTransactionId: ' . $identificationTransactionId);
 
         // validate Hash to prevent manipulation
         try {
@@ -171,8 +170,6 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
         $data['IDENTIFICATION_SHORTID'] = $request->getPOST('IDENTIFICATION_SHORTID');
         $data['IDENTIFICATION_SHOPPERID'] = (int)$request->getPOST('IDENTIFICATION_SHOPPERID');
         $data['CRITERION_GUEST'] = $request->getPOST('CRITERION_GUEST');
-
-        //$data['CRITERION_PUSH_URL'] = 'http://qa.heidelpay.intern/stephano/pushtest/';
 
         /**
          * information
@@ -275,7 +272,7 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
                 $quote->getBillingAddress()->getEmail(),
                 $quote->getPayment()->getMethod()
             );
-            
+
             $paymentInfo->delete();
         }
 
