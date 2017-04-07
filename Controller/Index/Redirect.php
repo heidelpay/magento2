@@ -103,7 +103,7 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
         $quoteId = $session->getQuoteId();
 
         if (empty($quoteId)) {
-            $this->_logger->debug('Heidelpay call redirect with empty quoteId');
+            $this->_logger->warning('Heidelpay - Redirect: Called with empty quoteId');
 
             return $this->_redirect('checkout/cart/', ['_secure' => true]);
         }
@@ -114,17 +114,31 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
             /** @var \Heidelpay\Gateway\Model\Transaction $transaction */
             $transaction = $this->transactionCollectionFactory->create()->loadByQuoteId($quoteId);
             $data = $transaction->getJsonResponse();
-
-            $this->_logger->debug('Heidelpay redirect data ' . json_encode($data));
         } catch (\Exception $e) {
-            $this->_logger->error('Heidelpay Redirect load transactions fail. ' . $e->getMessage());
+            $this->_logger->error('Heidelpay - Redirect: Load transaction fail. ' . $e->getMessage());
+        }
+
+        // if our data is still null, we got no transaction data - so nothing to work with.
+        // - redirect the user back to the checkout cart.
+        if ($data === null) {
+            $this->_logger->error(
+                'Heidelpay - Redirect: Empty transaction data->jsonResponse. (no data was stored in Response?)'
+            );
+
+            // display the customer-friendly message for the customer
+            $this->messageManager->addErrorMessage(
+                __("An unexpected error occurred. Please contact us to get further information.")
+            );
+
+            return $this->_redirect('checkout/cart/', ['_secure' => true]);
         }
 
         // initialize the Response object with data from the transaction.
         $this->heidelpayResponse = $this->heidelpayResponse->splitArray($data);
 
-        if ($data !== null && $this->heidelpayResponse->isSuccess()) {
-            // set Parameters for success page
+        // set Parameters for success page
+        if ($this->heidelpayResponse->isSuccess()) {
+            // lock the quote
             $session->getQuote()->setIsActive(false)->save();
 
             $order = null;
@@ -132,13 +146,15 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
             try {
                 $order = $this->_orderFactory->create()->loadByAttribute('quote_id', $quoteId);
 
-                /** Sende Invoice main to customer */
+                // send order confirmation to the customer
                 $this->_orderSender->send($order);
             } catch (\Exception $e) {
-                $this->_logger->error('Cannot create order or send invoice e-mail. ' . $e->getMessage());
+                $this->_logger->error(
+                    'Heidelpay - Redirect: Cannot receive order or send order confirmation E-Mail. ' . $e->getMessage()
+                );
             }
 
-            /** Sende Invoice main to customer */
+            // send invoice(s) to the customer
             if (!$order->canInvoice()) {
                 $invoices = $order->getInvoiceCollection();
 
@@ -149,12 +165,11 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
 
             $session->clearHelperData();
 
-            /* set QouteIds */
+            // set QouteIds
             $session->setLastQuoteId($quoteId)
                 ->setLastSuccessQuoteId($quoteId);
-            //->clearHelperData();
 
-            /* set OrderIds */
+            // set OrderIds
             $session->setLastOrderId($order->getId())
                 ->setLastRealOrderId($order->getIncrementId())
                 ->setLastOrderStatus($order->getStatus());
@@ -165,18 +180,21 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
 
             $this->_checkoutSession->setHeidelpayInfo($additionalPaymentInformation);
 
-            $this->_logger->debug('Heidelpay redirect to success page');
+            $this->_logger->debug('Heidelpay - Redirect: Redirecting to success page...');
             return $this->_redirect('checkout/onepage/success', ['_secure' => true]);
         }
 
+        // unlock the quote in case of error
         $session->getQuote()->setIsActive(true)->save();
 
         $this->_logger->error(
-            'Heidelpay redirect with error to basket. ' . $this->heidelpayResponse->getError()['message']
+            'Heidelpay - Redirect: Redirect with error to cart: ' . $this->heidelpayResponse->getError()['message']
         );
 
-        $message = $this->_paymentHelper->handleError($this->heidelpayResponse->getError()['code']);
-        $this->messageManager->addErrorMessage($message);
+        // display the customer-friendly message for the customer
+        $this->messageManager->addErrorMessage(
+            $this->_paymentHelper->handleError($this->heidelpayResponse->getError()['code'])
+        );
 
         return $this->_redirect('checkout/cart/', ['_secure' => true]);
     }
