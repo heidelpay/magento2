@@ -3,7 +3,7 @@
 namespace Heidelpay\Gateway\Controller\Adminhtml\Order\Shipment;
 
 use Heidelpay\PhpApi\TransactionTypes\FinalizeTransactionType;
-use Magento\Quote\Model\QuoteRepository;
+use Magento\Sales\Model\Order;
 
 /**
  * Save Controller
@@ -118,7 +118,7 @@ class Save extends \Magento\Shipping\Controller\Adminhtml\Order\Shipment\Save
                 $paymentConfig['TRANSACTION.MODE']
             );
 
-            // set the basket data (for amount and currency and a secret hash to prevent fraud)
+            // set the basket data (for amount and currency and a secret hash for fraud checking)
             $heidelpayMethod->getRequest()->basketData(
                 $order->getQuoteId(),
                 $this->paymentHelper->format($order->getGrandTotal()),
@@ -133,13 +133,23 @@ class Save extends \Magento\Shipping\Controller\Adminhtml\Order\Shipment\Save
             // if the response isn't successful, redirect back to the order view.
             if (!$heidelpayMethod->getResponse()->isSuccess()) {
                 $this->messageManager->addErrorMessage(
-                    __('Heidelpay Error at sending Finalize Request. The Shipment was not created. Error Message: ')
+                    __('Heidelpay Error at sending Finalize Request. The Shipment was not created.')
+                    . ' Error Message: ' . $heidelpayMethod->getResponse()->getError()['message']
+                );
+
+                $this->logger->error(
+                    'Heidelpay - Shipment Creation: Failure when sending finalize request. Error Message: '
                     . json_encode($heidelpayMethod->getResponse()->getError())
                 );
 
                 $this->_redirect('*/*/new', ['order_id' => $this->getRequest()->getParam('order_id')]);
                 return;
             }
+
+            // set order status to "pending payment"
+            $order->setStatus(Order::STATE_PENDING_PAYMENT)
+                ->addStatusHistoryComment('heidelpay - Finalizing Order', Order::STATE_PENDING_PAYMENT)
+                ->save();
 
             $this->messageManager->addSuccessMessage(__('Shipping Notification has been sent to Heidelpay.'));
         }

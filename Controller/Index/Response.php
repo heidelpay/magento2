@@ -97,9 +97,23 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
         PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
         \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory
     ) {
-        parent::__construct($context, $customerSession, $checkoutSession, $orderFactory, $urlHelper, $logger,
-            $cartManagement, $quoteObject, $resultPageFactory, $paymentHelper, $orderSender, $invoiceSender,
-            $orderCommentSender, $encryptor, $customerUrl);
+        parent::__construct(
+            $context,
+            $customerSession,
+            $checkoutSession,
+            $orderFactory,
+            $urlHelper,
+            $logger,
+            $cartManagement,
+            $quoteObject,
+            $resultPageFactory,
+            $paymentHelper,
+            $orderSender,
+            $invoiceSender,
+            $orderCommentSender,
+            $encryptor,
+            $customerUrl
+        );
 
         $this->resultFactory = $rawResultFactory;
         $this->quoteRepository = $quoteRepository;
@@ -185,6 +199,8 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
         /** @var \Magento\Quote\Model\Quote $quote */
         $quote = null;
 
+        $data = $this->getRequest()->getParams();
+
         if ($this->heidelpayResponse->isSuccess()) {
             try {
                 // get the quote by transactionid from the heidelpay response
@@ -211,7 +227,7 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
             $data['ORDER_ID'] = $order->getIncrementId();
 
             $this->_paymentHelper->mapStatus(
-                $this->getRequest()->getParams(),
+                $data,
                 $order
             );
 
@@ -232,7 +248,9 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
                 $quote->getPayment()->getMethod()
             );
 
-            $paymentInfo->delete();
+            if (!$paymentInfo->isEmpty()) {
+                $paymentInfo->delete();
+            }
         }
 
         $this->_logger->debug('Heidelpay - Response: redirectUrl is ' . $redirectUrl);
@@ -253,7 +271,7 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
                 ->setResult($this->heidelpayResponse->getProcessing()->getResult())
                 ->setReturnMessage($this->heidelpayResponse->getProcessing()->getReturn())
                 ->setReturnCode($this->heidelpayResponse->getProcessing()->getReturnCode())
-                ->setJsonResponse(json_encode($this->getRequest()->getParams()))
+                ->setJsonResponse(json_encode($data))
                 ->setSource('RESPONSE')
                 ->save();
         } catch (\Exception $e) {

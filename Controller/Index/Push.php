@@ -2,6 +2,10 @@
 
 namespace Heidelpay\Gateway\Controller\Index;
 
+use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
+use Magento\Sales\Api\TransactionRepositoryInterface;
+use Magento\Sales\Model\Order;
+
 /**
  * heidelpay Push Controller
  *
@@ -20,9 +24,24 @@ namespace Heidelpay\Gateway\Controller\Index;
 class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
 {
     /**
+     * @var \Magento\Quote\Model\QuoteRepository
+     */
+    protected $quoteRepository;
+
+    /**
+     * @var \Magento\Sales\Api\Data\OrderInterface
+     */
+    protected $order;
+
+    /**
      * @var \Heidelpay\PhpApi\Push
      */
     protected $heidelpayPush;
+
+    /**
+     * @var HeidelpayTransactionCollectionFactory
+     */
+    protected $transactionCollectionFactory;
 
     /**
      * Push constructor.
@@ -42,7 +61,10 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
      * @param \Magento\Sales\Model\Order\Email\Sender\OrderCommentSender $orderCommentSender
      * @param \Magento\Framework\Encryption\Encryptor $encryptor
      * @param \Magento\Customer\Model\Url $customerUrl
+     * @param \Magento\Quote\Model\QuoteRepository $quoteRepository
+     * @param \Magento\Sales\Api\Data\OrderInterface $order
      * @param \Heidelpay\PhpApi\Push $heidelpayPush
+     * @param HeidelpayTransactionCollectionFactory $collectionFactory
      */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
@@ -60,7 +82,10 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
         \Magento\Sales\Model\Order\Email\Sender\OrderCommentSender $orderCommentSender,
         \Magento\Framework\Encryption\Encryptor $encryptor,
         \Magento\Customer\Model\Url $customerUrl,
-        \Heidelpay\PhpApi\Push $heidelpayPush
+        \Magento\Quote\Model\QuoteRepository $quoteRepository,
+        \Magento\Sales\Api\Data\OrderInterface $order,
+        \Heidelpay\PhpApi\Push $heidelpayPush,
+        HeidelpayTransactionCollectionFactory $collectionFactory
     ) {
         parent::__construct(
             $context,
@@ -80,27 +105,83 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
             $customerUrl
         );
 
+        $this->quoteRepository = $quoteRepository;
+        $this->order = $order;
+
         $this->heidelpayPush = $heidelpayPush;
+        $this->transactionCollectionFactory = $collectionFactory;
     }
 
     public function execute()
     {
-        if (!$this->getRequest()->isPost()) {
-            $this->_logger->debug('Response is not post.');
+        /** @var \Magento\Framework\App\Request\Http $request */
+        $request = $this->getRequest();
+
+        if (!$request->isPost()) {
+            $this->_logger->debug('Heidelpay - Push: Response is not post.');
             return;
         }
 
-        $rawXmlResponse = file_get_contents("php://input");
+        if ($request->getHeader('Content-Type') != 'application/xml') {
+            $this->_logger->debug('Heidelpay - Push: Content-Type is not "application/xml"');
+        }
+
+        if ($request->getHeader('X-Push-Timestamp') != '' && $request->getHeader('X-Push-Retries') != '') {
+            $this->_logger->debug('Heidelpay - Push: Timestamp: "' . $request->getHeader('X-Push-Timestamp') . '"');
+            $this->_logger->debug('Heidelpay - Push: Retries: "' . $request->getHeader('X-Push-Retries') . '"');
+        }
 
         try {
-            $this->heidelpayPush->setRawResponse($rawXmlResponse);
+            // getContent returns php://input, if no other content is set.
+            $this->heidelpayPush->setRawResponse($request->getContent());
         } catch (\Exception $e) {
             $this->_logger->critical(
-                'Heidelpay - Push: Cannot parse XML Push Request into Response object. Exception message: '
+                'Heidelpay - Push: Cannot parse XML Push Request into Response object. '
                 . $e->getMessage()
             );
         }
 
         $this->_logger->debug('Push Response: ' . print_r($this->heidelpayPush->getResponse(), true));
+
+        // in case of invoice receipts, we process the push message
+        if ($this->heidelpayPush->getResponse()->getPayment()->getCode() == 'IV.RC') {
+
+            // only when the Response is ACK.
+            if ($this->heidelpayPush->getResponse()->isSuccess()) {
+                // load the reference quote to receive the quote information.
+                $quote = $this->quoteRepository->get(
+                    $this->heidelpayPush->getResponse()->getIdentification()->getTransactionId()
+                );
+
+                // load the order by quote.
+                /** @var \Magento\Sales\Model\Order $order */
+                $order = $this->order->loadByIncrementIdAndStoreId($quote->getReservedOrderId(), $quote->getStoreId());
+
+                $totalDue = $order->getTotalDue();
+                $paidAmount = (float)$this->heidelpayPush->getResponse()->getPresentation()->getAmount();
+                $dueLeft = (float)($totalDue - $paidAmount);
+
+                $state = Order::STATE_COMPLETE;
+                $comment = 'heidelpay - Purchase complete';
+
+                // if payment is not complete
+                if ($dueLeft > 0.00) {
+                    $state = Order::STATE_PAYMENT_REVIEW;
+                    $comment = 'heidelpay - Partly paid ('
+                        . $this->_paymentHelper->format(
+                            $this->heidelpayPush->getResponse()->getPresentation()->getAmount()
+                        )
+                        . ' ' . $this->heidelpayPush->getResponse()->getPresentation()->getCurrency() . ')';
+                }
+
+                $order->setTotalPaid($order->getTotalPaid() + $paidAmount)
+                    ->setState($state)
+                    ->addStatusHistoryComment($comment, $state);
+
+                // TODO: Child transactions for each Capture
+
+                $order->save();
+            }
+        }
     }
 }

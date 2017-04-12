@@ -36,6 +36,6 @@ class AuthorizeCommand extends \Magento\Sales\Model\Order\Payment\State\Authoriz
             ->setState(Order::STATE_NEW)
             ->setIsCustomerNotified(false);
 
-        return __('Heidelpay save order');
+        return __('heidelpay - Saving order');
     }
 }
