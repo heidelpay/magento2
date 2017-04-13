@@ -12,7 +12,7 @@ use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory a
  * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
  * @copyright Copyright © 2016-present Heidelberger Payment GmbH. All rights reserved.
  * @link https://dev.heidelpay.de/magento
- * @author Jens Richter
+ * @author Stephano Vogel
  *
  * @package heidelpay
  * @subpackage magento2

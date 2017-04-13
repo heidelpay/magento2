@@ -3,9 +3,9 @@
 ## v17.4.13
 
 ### Added
-- Invoice and Secured Invoice (B2C) Payment Methods (DE, AT, CH)
-- Sending Finalize notifications to heidelpay when Shipment is created (Invoice Methods only)
-- Added Push functionality
+- Secured Invoice (B2C) Payment Method (DE, AT, CH)
+- Sending Finalize notifications to heidelpay when Shipment is created (Secured Invoice only)
+- Added Push functionality to e.g. receive REC requests for Prepayment and Invoice payment methods
 
 ### Changed
 - Invoices now contain information about payments (e.g. where to send the amount, in case of Prepayment, Invoice)

@@ -157,9 +157,8 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
                 /** @var \Magento\Sales\Model\Order $order */
                 $order = $this->order->loadByIncrementIdAndStoreId($quote->getReservedOrderId(), $quote->getStoreId());
 
-                $totalDue = $order->getTotalDue();
                 $paidAmount = (float)$this->heidelpayPush->getResponse()->getPresentation()->getAmount();
-                $dueLeft = (float)($totalDue - $paidAmount);
+                $dueLeft = (float)($order->getTotalDue() - $paidAmount);
 
                 $state = Order::STATE_COMPLETE;
                 $comment = 'heidelpay - Purchase complete';
@@ -177,8 +176,6 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
                 $order->setTotalPaid($order->getTotalPaid() + $paidAmount)
                     ->setState($state)
                     ->addStatusHistoryComment($comment, $state);
-
-                // TODO: Child transactions for each Capture
 
                 $order->save();
             }

@@ -57,6 +57,21 @@ define(
             getBirthdate: function() {},
 
             /**
+             * Function to receive the customer's full name.
+             */
+            getFullName: function() {
+                var name = '';
+
+                name += window.customerData.firstname;
+                if (window.customerData.middlename !== null) {
+                    name +=  ' ' + window.customerData.middlename;
+                }
+                name += ' ' + window.customerData.lastname;
+
+                return name;
+            },
+
+            /**
              * Redirect to hgw controller
              * Override magento placepayment function
              */
