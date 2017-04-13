@@ -3,7 +3,7 @@
 namespace Heidelpay\Gateway\Controller\Index;
 
 use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
-use Magento\Sales\Api\TransactionRepositoryInterface;
+use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Order;
 
 /**
@@ -145,7 +145,6 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
 
         // in case of invoice receipts, we process the push message
         if ($this->heidelpayPush->getResponse()->getPayment()->getCode() == 'IV.RC') {
-
             // only when the Response is ACK.
             if ($this->heidelpayPush->getResponse()->isSuccess()) {
                 // load the reference quote to receive the quote information.
@@ -171,6 +170,14 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
                             $this->heidelpayPush->getResponse()->getPresentation()->getAmount()
                         )
                         . ' ' . $this->heidelpayPush->getResponse()->getPresentation()->getCurrency() . ')';
+                }
+
+                // set the invoice states to 'paid', if no due is left.
+                if ($dueLeft <= 0.00) {
+                    /** @var \Magento\Sales\Model\Order\Invoice $invoice */
+                    foreach ($order->getInvoiceCollection() as $invoice) {
+                        $invoice->setState(Invoice::STATE_PAID)->save();
+                    }
                 }
 
                 $order->setTotalPaid($order->getTotalPaid() + $paidAmount)

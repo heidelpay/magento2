@@ -12,7 +12,7 @@ use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory a
  * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
  * @copyright Copyright © 2016-present Heidelberger Payment GmbH. All rights reserved.
  * @link https://dev.heidelpay.de/magento
- * @author Stephano Vogel
+ * @author Jens Richter
  *
  * @package heidelpay
  * @subpackage magento2
@@ -162,7 +162,8 @@ class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMetho
     public function additionalPaymentInformation($response)
     {
         return __(
-            'Please transfer the amount of <strong>%1 %2</strong> to the following account<br /><br />'
+            'Please transfer the amount of <strong>%1 %2</strong> '
+            . 'to the following account after your order has arrived:<br /><br />'
             . 'Holder: %3<br/>IBAN: %4<br/>BIC: %5<br/><br/><i>'
             . 'Please use only this identification number as the descriptor :</i><br/><strong>%6</strong>',
             $this->_paymentHelper->format($response['PRESENTATION_AMOUNT']),
