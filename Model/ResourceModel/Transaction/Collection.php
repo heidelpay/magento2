@@ -25,7 +25,18 @@ class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\Ab
     }
 
     /**
+     * @param $quoteId
+     *
+     * @return \Magento\Framework\DataObject
+     */
+    public function loadByQuoteId($quoteId)
+    {
+        return $this->addQuoteIdFilter($quoteId)->load()->getLastItem();
+    }
+
+    /**
      * @param $transactionId
+     *
      * @return \Magento\Framework\DataObject
      */
     public function loadByTransactionId($transactionId)
@@ -36,12 +47,19 @@ class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\Ab
     /**
      * Adds a filter for the customer/guest e-mail address
      *
-     * @param string $transactionId
+     * @param string $quoteId
+     *
      * @return $this
      */
+    private function addQuoteIdFilter($quoteId)
+    {
+        $this->addFieldToFilter('transactionid', $quoteId);
+        return $this;
+    }
+
     private function addTransactionIdFilter($transactionId)
     {
-        $this->addFieldToFilter('transactionid', $transactionId);
+        $this->addFieldToFilter('uniqeid', $transactionId);
         return $this;
     }
 }

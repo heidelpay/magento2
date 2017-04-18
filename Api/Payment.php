@@ -188,10 +188,10 @@ class Payment implements PaymentInterface
     /**
      * Create a shipping hash.
      *
-     * @param \Magento\Quote\Model\Quote\Address $address
+     * @param \Magento\Quote\Api\Data\AddressInterface $address
      * @return string
      */
-    private function createShippingHash(\Magento\Quote\Model\Quote\Address $address)
+    private function createShippingHash(\Magento\Quote\Api\Data\AddressInterface $address)
     {
         return $this->encryptor->hash(
             implode('', [
@@ -231,6 +231,10 @@ class Payment implements PaymentInterface
             case 'hgwdds':
                 $result['hgw_birthdate'] = $quote->getCustomer()->getDob();         // date of birth
                 $result['hgw_holder'] = $quote->getBillingAddress()->getName();     // full billing name
+                break;
+
+            case 'hgwivs':
+                $result['hgw_birthdate'] = $quote->getCustomer()->getDob();
                 break;
 
             default:

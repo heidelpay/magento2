@@ -71,9 +71,26 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
         array $data = []
     ) {
-        parent::__construct($context, $registry, $extensionFactory, $customAttributeFactory, $paymentData, $scopeConfig,
-            $request, $urlinterface, $encryptor, $logger, $localeResolver, $productMetadata, $moduleResource,
-            $paymentHelper, $paymentInformationCollectionFactory, $resource, $resourceCollection, $data);
+        parent::__construct(
+            $context,
+            $registry,
+            $extensionFactory,
+            $customAttributeFactory,
+            $paymentData,
+            $scopeConfig,
+            $request,
+            $urlinterface,
+            $encryptor,
+            $logger,
+            $localeResolver,
+            $productMetadata,
+            $moduleResource,
+            $paymentHelper,
+            $paymentInformationCollectionFactory,
+            $resource,
+            $resourceCollection,
+            $data
+        );
 
         // initialize the Direct Debit payment method
         $this->_heidelpayPaymentMethod = $directDebitPaymentMethod;
@@ -123,11 +140,7 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
     }
 
     /**
-     * Prints out a message with information for
-     * the customer about the direct debit.
-     *
-     * @param array $response
-     * @return \Magento\Framework\Phrase
+     * @inheritdoc
      */
     public function additionalPaymentInformation($response)
     {

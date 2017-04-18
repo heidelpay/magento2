@@ -88,9 +88,26 @@ class HeidelpayPrepaymentPaymentMethod extends HeidelpayAbstractPaymentMethod
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
         array $data = []
     ) {
-        parent::__construct($context, $registry, $extensionFactory, $customAttributeFactory, $paymentData, $scopeConfig,
-            $request, $urlinterface, $encryptor, $logger, $localeResolver, $productMetadata, $moduleResource,
-            $paymentHelper, $paymentInformationCollectionFactory, $resource, $resourceCollection, $data);
+        parent::__construct(
+            $context,
+            $registry,
+            $extensionFactory,
+            $customAttributeFactory,
+            $paymentData,
+            $scopeConfig,
+            $request,
+            $urlinterface,
+            $encryptor,
+            $logger,
+            $localeResolver,
+            $productMetadata,
+            $moduleResource,
+            $paymentHelper,
+            $paymentInformationCollectionFactory,
+            $resource,
+            $resourceCollection,
+            $data
+        );
 
         $this->_heidelpayPaymentMethod = $prepaymentPaymentMethod;
     }
@@ -111,12 +128,7 @@ class HeidelpayPrepaymentPaymentMethod extends HeidelpayAbstractPaymentMethod
     }
 
     /**
-     * Additional payment information
-     *
-     * This function will return a text message used to show payment information
-     * to your customer on the checkout success page
-     * @param array $response
-     * @return string|boolean payment information or false
+     * @inheritdoc
      */
     public function additionalPaymentInformation($response)
     {
@@ -124,12 +136,39 @@ class HeidelpayPrepaymentPaymentMethod extends HeidelpayAbstractPaymentMethod
             'Please transfer the amount of <strong>%1 %2</strong> to the following account<br /><br />'
             . 'Holder: %3<br/>IBAN: %4<br/>BIC: %5<br/><br/><i>'
             . 'Please use only this identification number as the descriptor :</i><br/><strong>%6</strong>',
-            $response['PRESENTATION_AMOUNT'],
+            $this->_paymentHelper->format($response['PRESENTATION_AMOUNT']),
             $response['PRESENTATION_CURRENCY'],
             $response['CONNECTOR_ACCOUNT_HOLDER'],
             $response['CONNECTOR_ACCOUNT_IBAN'],
             $response['CONNECTOR_ACCOUNT_BIC'],
             $response['IDENTIFICATION_SHORTID']
         );
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function pendingTransactionProcessing($data, &$order, $message = null)
+    {
+        $order->getPayment()->setTransactionId($data['IDENTIFICATION_UNIQUEID']);
+        $order->getPayment()->setIsTransactionClosed(false);
+        $order->getPayment()->addTransaction(\Magento\Sales\Model\Order\Payment\Transaction::TYPE_AUTH, null, true);
+
+        $order->setState(\Magento\Sales\Model\Order::STATE_PENDING_PAYMENT)
+            ->addStatusHistoryComment($message, \Magento\Sales\Model\Order::STATE_PENDING_PAYMENT)
+            ->setIsCustomerNotified(true);
+
+        // payment is pending at the beginning, so we set the total paid sum to 0.
+        $order->setTotalPaid(0.00);
+
+        // if the order can be invoiced, create one and save it into a transaction.
+        if ($order->canInvoice()) {
+            $invoice = $order->prepareInvoice();
+            $invoice->setRequestedCaptureCase(\Magento\Sales\Model\Order\Invoice::CAPTURE_ONLINE)
+                ->setIsPaid(false)
+                ->register();
+
+            $this->_paymentHelper->saveTransaction($invoice);
+        }
     }
 }

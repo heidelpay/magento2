@@ -102,7 +102,7 @@ class Transaction extends \Magento\Framework\Model\AbstractModel
      */
     public function setUniqueId($uniqueId)
     {
-        $this->setData('uniqueid', $uniqueId);
+        $this->setData('uniqeid', $uniqueId);
         return $this;
     }
 

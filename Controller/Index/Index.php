@@ -77,7 +77,7 @@ class Index extends \Heidelpay\Gateway\Controller\HgwAbstract
 
         if ($response->isSuccess()) {
             // redirect to payment url, if it uses redirecting
-            if ($payment->activeRedirct() === true) {
+            if ($payment->activeRedirect() === true) {
                 return $this->_redirect($response->getPaymentFormUrl());
             }
 
