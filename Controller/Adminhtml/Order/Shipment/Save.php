@@ -85,14 +85,11 @@ class Save extends \Magento\Shipping\Controller\Adminhtml\Order\Shipment\Save
      * Save shipment
      * We can save only new shipment. Existing shipments are not editable
      */
-    public function execute()
+    public function beforeExecute()
     {
-        /** @var \Magento\Backend\Model\View\Result\Redirect $resultRedirect */
-        $resultRedirect = $this->resultRedirectFactory->create();
-
         if (!$this->_formKeyValidator->validate($this->getRequest()) || !$this->getRequest()->isPost()) {
             $this->messageManager->addErrorMessage(__('We can\'t save the shipment right now.'));
-            return $resultRedirect->setPath('sales/order/index');
+            $this->_redirect('sales/order/index');
         }
 
         // get the order to receive heidelpay payment method instance
@@ -143,7 +140,6 @@ class Save extends \Magento\Shipping\Controller\Adminhtml\Order\Shipment\Save
                 );
 
                 $this->_redirect('*/*/new', ['order_id' => $this->getRequest()->getParam('order_id')]);
-                return;
             }
 
             // set order status to "pending payment"
@@ -153,7 +149,5 @@ class Save extends \Magento\Shipping\Controller\Adminhtml\Order\Shipment\Save
 
             $this->messageManager->addSuccessMessage(__('Shipping Notification has been sent to Heidelpay.'));
         }
-
-        parent::execute();
     }
 }

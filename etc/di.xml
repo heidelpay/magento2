@@ -9,6 +9,9 @@
             <argument name="stateCommand" xsi:type="object">Heidelpay\Gateway\Model\Order\Payment\State\CaptureCommand</argument>
         </arguments>
     </type>
+    <type name="Magento\Shipping\Controller\Adminhtml\Order\Shipment\Save">
+        <plugin name="HeidelpayGatewayShipmentSaveController" type="Heidelpay\Gateway\Controller\Adminhtml\Order\Shipment\Save" sortOrder="1"/>
+    </type>
     <preference for="Heidelpay\Gateway\Api\PaymentInterface" type="Heidelpay\Gateway\Api\Payment" />
     <preference for="Heidelpay\Gateway\Api\Data\PaymentInformationInterface" type="Heidelpay\Gateway\Model\PaymentInformation" />
 </config>

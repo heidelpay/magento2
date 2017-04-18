@@ -38,7 +38,7 @@ All versions greater than 16.10.17 are based on the heidelpay php-api. (https://
 
 ### Install the heidelpay Magento 2 composer package
 
-```composer require "heidelpay/magento2:17.4.13"```
+```composer require "heidelpay/magento2:17.4.16"```
 
 ### Enable the extension in Magento 2
 
