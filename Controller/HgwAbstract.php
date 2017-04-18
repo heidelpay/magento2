@@ -1,24 +1,22 @@
 <?php
+
 namespace Heidelpay\Gateway\Controller;
 
-/**
- * Abstract controller class
- *
- * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
- * @copyright Copyright © 2016-present Heidelberger Payment GmbH. All rights reserved.
- * @link  https://dev.heidelpay.de/magento
- * @author  Jens Richter
- *
- * @package  Heidelpay
- * @subpackage Magento2
- * @category Magento2
- */
-
-use Heidelpay\Gateway\Helper\Payment AS HeidelpayHelper;
+use Heidelpay\Gateway\Helper\Payment as HeidelpayHelper;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderCommentSender;
 use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
 
+/**
+ * Abstract controller class
+ * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
+ * @copyright Copyright © 2016-present Heidelberger Payment GmbH. All rights reserved.
+ * @link  https://dev.heidelpay.de/magento
+ * @author  Jens Richter
+ * @package  Heidelpay
+ * @subpackage Magento2
+ * @category Magento2
+ */
 abstract class HgwAbstract extends \Magento\Framework\App\Action\Action
 {
     protected $resultPageFactory;
@@ -129,7 +127,6 @@ abstract class HgwAbstract extends \Magento\Framework\App\Action\Action
 
     /**
      * Return checkout session object
-     *
      * @return \Magento\Checkout\Model\Session
      */
     protected function getCheckout()
@@ -139,7 +136,6 @@ abstract class HgwAbstract extends \Magento\Framework\App\Action\Action
 
     /**
      * Return checkout quote object
-     *
      * @return \Magento\Quote\Model\Quote
      */
     protected function getQuote()

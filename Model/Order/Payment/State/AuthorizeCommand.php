@@ -32,13 +32,10 @@ class AuthorizeCommand extends \Magento\Sales\Model\Order\Payment\State\Authoriz
      */
     public function execute(OrderPaymentInterface $payment, $amount, OrderInterface $order)
     {
-        $state = Order::STATE_NEW;
-        
-        $message = __('Heidelpay save order');
-        
-        $order    ->setState($state)
-                ->setIsCustomerNotified(false);
+        $order->setStatus(Order::STATE_NEW)
+            ->setState(Order::STATE_NEW)
+            ->setIsCustomerNotified(false);
 
-        return $message;
+        return __('heidelpay - Saving order');
     }
 }

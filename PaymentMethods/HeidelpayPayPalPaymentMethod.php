@@ -88,9 +88,26 @@ class HeidelpayPayPalPaymentMethod extends HeidelpayAbstractPaymentMethod
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
         array $data = []
     ) {
-        parent::__construct($context, $registry, $extensionFactory, $customAttributeFactory, $paymentData, $scopeConfig,
-            $request, $urlinterface, $encryptor, $logger, $localeResolver, $productMetadata, $moduleResource,
-            $paymentHelper, $paymentInformationCollectionFactory, $resource, $resourceCollection, $data);
+        parent::__construct(
+            $context,
+            $registry,
+            $extensionFactory,
+            $customAttributeFactory,
+            $paymentData,
+            $scopeConfig,
+            $request,
+            $urlinterface,
+            $encryptor,
+            $logger,
+            $localeResolver,
+            $productMetadata,
+            $moduleResource,
+            $paymentHelper,
+            $paymentInformationCollectionFactory,
+            $resource,
+            $resourceCollection,
+            $data
+        );
 
         $this->_heidelpayPaymentMethod = $payPalPaymentMethod;
     }
@@ -102,9 +119,10 @@ class HeidelpayPayPalPaymentMethod extends HeidelpayAbstractPaymentMethod
      */
     public function getHeidelpayUrl($quote)
     {
+        // set initial data for the request
         parent::getHeidelpayUrl($quote);
 
-        // set payment type to debit
+        // send the debit request
         $this->_heidelpayPaymentMethod->debit();
 
         return $this->_heidelpayPaymentMethod->getResponse();

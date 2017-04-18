@@ -88,9 +88,26 @@ class HeidelpayCreditCardPaymentMethod extends HeidelpayAbstractPaymentMethod
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
         array $data = []
     ) {
-        parent::__construct($context, $registry, $extensionFactory, $customAttributeFactory, $paymentData, $scopeConfig,
-            $request, $urlinterface, $encryptor, $logger, $localeResolver, $productMetadata, $moduleResource,
-            $paymentHelper, $paymentInformationCollectionFactory, $resource, $resourceCollection, $data);
+        parent::__construct(
+            $context,
+            $registry,
+            $extensionFactory,
+            $customAttributeFactory,
+            $paymentData,
+            $scopeConfig,
+            $request,
+            $urlinterface,
+            $encryptor,
+            $logger,
+            $localeResolver,
+            $productMetadata,
+            $moduleResource,
+            $paymentHelper,
+            $paymentInformationCollectionFactory,
+            $resource,
+            $resourceCollection,
+            $data
+        );
 
         $this->_heidelpayPaymentMethod = $creditCardPaymentMethod;
     }
@@ -103,7 +120,7 @@ class HeidelpayCreditCardPaymentMethod extends HeidelpayAbstractPaymentMethod
      *
      * @return boolean
      */
-    public function activeRedirct()
+    public function activeRedirect()
     {
         return false;
     }
@@ -116,7 +133,7 @@ class HeidelpayCreditCardPaymentMethod extends HeidelpayAbstractPaymentMethod
      */
     public function getHeidelpayUrl($quote)
     {
-        // do the initial request to the heidelpay payment platform.
+        // set initial data for the request
         parent::getHeidelpayUrl($quote);
 
         $url = explode('/', $this->urlBuilder->getUrl('/', ['_secure' => true]));
@@ -128,7 +145,7 @@ class HeidelpayCreditCardPaymentMethod extends HeidelpayAbstractPaymentMethod
             $this->getStore()
         );
 
-        // Set payment type to debit
+        // send the debit request
         $this->_heidelpayPaymentMethod->debit($paymentFrameOrigin, $preventAsyncRedirect, $cssPath);
 
         return $this->_heidelpayPaymentMethod->getResponse();

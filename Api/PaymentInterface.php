@@ -40,7 +40,7 @@ interface PaymentInterface
      *
      * @param int $cartId
      * @param string $method The payment method code
-     * @param mixed $additionalData
+     * @param string[] $additionalData
      * @return string
      */
     public function saveAdditionalPaymentInfo($cartId, $method, $additionalData);
@@ -50,7 +50,7 @@ interface PaymentInterface
      *
      * @param string $cartId
      * @param string $method The payment method code
-     * @param mixed $additionalData
+     * @param string[] $additionalData
      * @return string
      */
     public function saveGuestAdditionalPaymentInfo($cartId, $method, $additionalData);

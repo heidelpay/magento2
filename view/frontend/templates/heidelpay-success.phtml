@@ -14,7 +14,7 @@
  * @var $block  \Heidelpay\Gateway\Block\Checkout\Success
  * */
 $additionalPaymentInformation = $block->getHeidelpayInfo();
-if ($additionalPaymentInformation !== false) {
+if ($additionalPaymentInformation !== null) {
     ?>
     <!-- Heidelpay success payment information -->
     <div class="heidelpay-additional-payment-information">

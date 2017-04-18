@@ -5,30 +5,53 @@ namespace Heidelpay\Gateway\PaymentMethods;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
 
 /**
- * Heidelpay Direct Debit
+ * Heidelpay prepayment payment method
  *
- * The heidelpay Direct Debit payment method.
+ * This is the payment class for heidelpay prepayment
  *
- * @license Use of this software requires acceptance of the License Agreement. See LICENSE file.
+ * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
  * @copyright Copyright © 2016-present Heidelberger Payment GmbH. All rights reserved.
- * @link https://dev.heidelpay.de/magento2
- *
- * @author Stephano Vogel
+ * @link https://dev.heidelpay.de/magento
+ * @author Jens Richter
  *
  * @package heidelpay
  * @subpackage magento2
  * @category magento2
  */
-class HeidelpayDirectDebitSecuredPaymentMethod extends HeidelpayAbstractPaymentMethod
+class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMethod
 {
-    /** @var string heidelpay Gateway Paymentcode */
-    protected $_code = 'hgwdds';
+    /**
+     * Payment Code
+     * @var string
+     */
+    const CODE = 'hgwivs';
 
-    /** @var bool */
+    /**
+     * Payment Code
+     * @var string
+     */
+    protected $_code = 'hgwivs';
+
+    /**
+     * Info Block Class (used for Order/Invoice details)
+     * @var string
+     */
+    protected $_infoBlockType = 'Heidelpay\Gateway\Block\Info\InvoiceSecured';
+
+    /**
+     * isGateway
+     * @var boolean
+     */
+    protected $_isGateway = true;
+
+    /**
+     * canAuthorize
+     * @var boolean
+     */
     protected $_canAuthorize = true;
 
     /**
-     * HeidelpayDirectDebitSecurePaymentMethod constructor.
+     * HeidelpayPrepaymentPaymentMethod constructor.
      *
      * @param \Magento\Framework\Model\Context $context
      * @param \Magento\Framework\Registry $registry
@@ -45,7 +68,7 @@ class HeidelpayDirectDebitSecuredPaymentMethod extends HeidelpayAbstractPaymentM
      * @param \Magento\Framework\Module\ResourceInterface $moduleResource
      * @param \Heidelpay\Gateway\Helper\Payment $paymentHelper
      * @param PaymentInformationCollectionFactory $paymentInformationCollectionFactory
-     * @param \Heidelpay\PhpApi\PaymentMethods\DirectDebitB2CSecuredPaymentMethod $directDebitB2CSecuredPaymentMethod
+     * @param \Heidelpay\PhpApi\PaymentMethods\InvoiceB2CSecuredPaymentMethod $invoiceB2CSecuredPaymentMethod
      * @param \Magento\Framework\Model\ResourceModel\AbstractResource|null $resource
      * @param \Magento\Framework\Data\Collection\AbstractDb|null $resourceCollection
      * @param array $data
@@ -66,7 +89,7 @@ class HeidelpayDirectDebitSecuredPaymentMethod extends HeidelpayAbstractPaymentM
         \Magento\Framework\Module\ResourceInterface $moduleResource,
         \Heidelpay\Gateway\Helper\Payment $paymentHelper,
         PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
-        \Heidelpay\PhpApi\PaymentMethods\DirectDebitB2CSecuredPaymentMethod $directDebitB2CSecuredPaymentMethod,
+        \Heidelpay\PhpApi\PaymentMethods\InvoiceB2CSecuredPaymentMethod $invoiceB2CSecuredPaymentMethod,
         \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
         array $data = []
@@ -92,12 +115,13 @@ class HeidelpayDirectDebitSecuredPaymentMethod extends HeidelpayAbstractPaymentM
             $data
         );
 
-        // initialize the Direct Debit Secured payment method
-        $this->_heidelpayPaymentMethod = $directDebitB2CSecuredPaymentMethod;
+        $this->_heidelpayPaymentMethod = $invoiceB2CSecuredPaymentMethod;
     }
 
     /**
-     * @inheritdoc
+     * Initial Request to heidelpay payment server to get the form / iframe url
+     * {@inheritDoc}
+     * @see \Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod::getHeidelpayUrl()
      */
     public function getHeidelpayUrl($quote)
     {
@@ -112,19 +136,8 @@ class HeidelpayDirectDebitSecuredPaymentMethod extends HeidelpayAbstractPaymentM
             $quote->getPayment()->getMethod()
         );
 
-        // make an initial request to the heidelpay payment.
+        // set initial data for the request
         parent::getHeidelpayUrl($quote);
-
-        // add IBAN and Bank account owner to the request.
-        if (isset($paymentInfo->getAdditionalData()->hgw_iban)) {
-            $this->_heidelpayPaymentMethod->getRequest()->getAccount()
-                ->set('iban', $paymentInfo->getAdditionalData()->hgw_iban);
-        }
-
-        if (isset($paymentInfo->getAdditionalData()->hgw_holder)) {
-            $this->_heidelpayPaymentMethod->getRequest()->getAccount()
-                ->set('holder', $paymentInfo->getAdditionalData()->hgw_holder);
-        }
 
         // add salutation and birthdate to the request
         if (isset($paymentInfo->getAdditionalData()->hgw_salutation)) {
@@ -137,8 +150,8 @@ class HeidelpayDirectDebitSecuredPaymentMethod extends HeidelpayAbstractPaymentM
                 ->set('birthdate', $paymentInfo->getAdditionalData()->hgw_birthdate);
         }
 
-        // Set payment type to debit
-        $this->_heidelpayPaymentMethod->debit();
+        // send the authorize request
+        $this->_heidelpayPaymentMethod->authorize();
 
         return $this->_heidelpayPaymentMethod->getResponse();
     }
@@ -149,15 +162,16 @@ class HeidelpayDirectDebitSecuredPaymentMethod extends HeidelpayAbstractPaymentM
     public function additionalPaymentInformation($response)
     {
         return __(
-            'The amount of <strong>%1 %2</strong> will be debited from this account within the next days:'
-            . '<br /><br />IBAN: %3<br /><br /><i>The booking contains the mandate reference ID: %4'
-            . '<br >and the creditor identifier: %5</i><br /><br />'
-            . 'Please ensure that there will be sufficient funds on the corresponding account.',
+            'Please transfer the amount of <strong>%1 %2</strong> '
+            . 'to the following account after your order has arrived:<br /><br />'
+            . 'Holder: %3<br/>IBAN: %4<br/>BIC: %5<br/><br/><i>'
+            . 'Please use only this identification number as the descriptor :</i><br/><strong>%6</strong>',
             $this->_paymentHelper->format($response['PRESENTATION_AMOUNT']),
             $response['PRESENTATION_CURRENCY'],
-            $response['ACCOUNT_IBAN'],
-            $response['ACCOUNT_IDENTIFICATION'],
-            $response['IDENTIFICATION_CREDITOR_ID']
+            $response['CONNECTOR_ACCOUNT_HOLDER'],
+            $response['CONNECTOR_ACCOUNT_IBAN'],
+            $response['CONNECTOR_ACCOUNT_BIC'],
+            $response['IDENTIFICATION_SHORTID']
         );
     }
 
@@ -179,5 +193,32 @@ class HeidelpayDirectDebitSecuredPaymentMethod extends HeidelpayAbstractPaymentM
 
         // process the parent isAvailable method
         return parent::isAvailable($quote);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function pendingTransactionProcessing($data, &$order, $message = null)
+    {
+        $order->getPayment()->setTransactionId($data['IDENTIFICATION_UNIQUEID']);
+        $order->getPayment()->setIsTransactionClosed(false);
+        $order->getPayment()->addTransaction(\Magento\Sales\Model\Order\Payment\Transaction::TYPE_AUTH, null, true);
+
+        $order->setState(\Magento\Sales\Model\Order::STATE_PROCESSING)
+            ->addStatusHistoryComment($message, \Magento\Sales\Model\Order::STATE_PROCESSING)
+            ->setIsCustomerNotified(true);
+
+        // payment is pending at the beginning, so we set the total paid sum to 0.
+        $order->setTotalPaid(0.00);
+
+        // if the order can be invoiced, create one and save it into a transaction.
+        if ($order->canInvoice()) {
+            $invoice = $order->prepareInvoice();
+            $invoice->setRequestedCaptureCase(\Magento\Sales\Model\Order\Invoice::CAPTURE_ONLINE)
+                ->setIsPaid(false)
+                ->register();
+
+            $this->_paymentHelper->saveTransaction($invoice);
+        }
     }
 }

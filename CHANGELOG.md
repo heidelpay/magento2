@@ -1,5 +1,16 @@
 # Release Notes - heidelpay Payment Gateway for Magento 2
 
+## v17.4.16
+
+### Added
+- Secured Invoice (B2C) Payment Method (DE, AT, CH)
+- Sending Finalize notifications to heidelpay when Shipment is created (Secured Invoice only)
+- Added Push functionality to e.g. receive REC requests for Prepayment and Invoice payment methods
+
+### Changed
+- Invoices now contain information about payments (e.g. where to send the amount, in case of Prepayment, Invoice)
+- When errors after sending the request or during the redirect are occuring, the customer will be redirected to the checkout/cart instead of seeing a blank page
+
 ## v17.3.28
 
 ### Added

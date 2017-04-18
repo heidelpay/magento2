@@ -1,0 +1,21 @@
+<?php
+/**
+ * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
+ * @copyright Copyright © 2016-present Heidelberger Payment GmbH. All rights reserved.
+ * @link https://dev.heidelpay.de/magento
+ * @author Stephano Vogel
+ */
+/**
+ * @var $block \Heidelpay\Gateway\Block\Info\InvoiceSecured
+ */
+?>
+<?php echo $block->escapeHtml($block->getMethod()->getTitle()); ?>
+    {{pdf_row_separator}}
+<?php echo __('Account Holder') . ': ' . $block->escapeHtml($block->getAccountHolder()); ?>
+    {{pdf_row_separator}}
+<?php echo __('IBAN') . ': ' . $block->escapeHtml($block->getAccountIban()); ?>
+    {{pdf_row_separator}}
+<?php echo __('BIC') . ': ' . $block->escapeHtml($block->getAccountBic()); ?>
+    {{pdf_row_separator}}
+<?php echo __('Reference') . ': ' . $block->escapeHtml($block->getIdentificationNumber()); ?>
+    {{pdf_row_separator}}

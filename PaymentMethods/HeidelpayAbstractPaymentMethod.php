@@ -3,6 +3,9 @@
 namespace Heidelpay\Gateway\PaymentMethods;
 
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
+use Magento\Sales\Model\Order;
+use Magento\Sales\Model\Order\Invoice;
+use Magento\Sales\Model\Order\Payment\Transaction;
 use Magento\Store\Model\ScopeInterface as StoreScopeInterface;
 
 /**
@@ -10,14 +13,14 @@ use Magento\Store\Model\ScopeInterface as StoreScopeInterface;
  *
  * All Heidelpay payment methods will extend this abstract payment method
  *
- * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
- * @copyright Copyright © 2016-present Heidelberger Payment GmbH. All rights reserved.
- * @link https://dev.heidelpay.de/magento
- * @author Jens Richter
+ * @license    Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
+ * @copyright  Copyright © 2016-present Heidelberger Payment GmbH. All rights reserved.
+ * @link       https://dev.heidelpay.de/magento
+ * @author     Jens Richter
  *
- * @package heidelpay
+ * @package    heidelpay
  * @subpackage magento2
- * @category magento2
+ * @category   magento2
  */
 class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\AbstractMethod
 {
@@ -147,24 +150,24 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
     /**
      * heidelpay Abstract Payment method constructor
      *
-     * @param \Magento\Framework\Model\Context $context
-     * @param \Magento\Framework\Registry $registry
-     * @param \Magento\Framework\Api\ExtensionAttributesFactory $extensionFactory
-     * @param \Magento\Framework\Api\AttributeValueFactory $customAttributeFactory
-     * @param \Magento\Payment\Helper\Data $paymentData
-     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
-     * @param \Magento\Framework\App\RequestInterface $request
-     * @param \Magento\Framework\UrlInterface $urlinterface
-     * @param \Magento\Framework\Encryption\Encryptor $encryptor
-     * @param \Magento\Payment\Model\Method\Logger $logger
-     * @param \Magento\Framework\Locale\ResolverInterface $localeResolver
-     * @param \Magento\Framework\App\ProductMetadataInterface $productMetadata
-     * @param \Magento\Framework\Module\ResourceInterface $moduleResource
-     * @param \Heidelpay\Gateway\Helper\Payment $paymentHelper
-     * @param PaymentInformationCollectionFactory $paymentInformationCollectionFactory
+     * @param \Magento\Framework\Model\Context                        $context
+     * @param \Magento\Framework\Registry                             $registry
+     * @param \Magento\Framework\Api\ExtensionAttributesFactory       $extensionFactory
+     * @param \Magento\Framework\Api\AttributeValueFactory            $customAttributeFactory
+     * @param \Magento\Payment\Helper\Data                            $paymentData
+     * @param \Magento\Framework\App\Config\ScopeConfigInterface      $scopeConfig
+     * @param \Magento\Framework\App\RequestInterface                 $request
+     * @param \Magento\Framework\UrlInterface                         $urlinterface
+     * @param \Magento\Framework\Encryption\Encryptor                 $encryptor
+     * @param \Magento\Payment\Model\Method\Logger                    $logger
+     * @param \Magento\Framework\Locale\ResolverInterface             $localeResolver
+     * @param \Magento\Framework\App\ProductMetadataInterface         $productMetadata
+     * @param \Magento\Framework\Module\ResourceInterface             $moduleResource
+     * @param \Heidelpay\Gateway\Helper\Payment                       $paymentHelper
+     * @param PaymentInformationCollectionFactory                     $paymentInformationCollectionFactory
      * @param \Magento\Framework\Model\ResourceModel\AbstractResource $resource
-     * @param \Magento\Framework\Data\Collection\AbstractDb $resourceCollection
-     * @param array $data
+     * @param \Magento\Framework\Data\Collection\AbstractDb           $resourceCollection
+     * @param array                                                   $data
      */
     public function __construct(
         \Magento\Framework\Model\Context $context,
@@ -212,7 +215,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
      * @return boolean
      */
 
-    public function activeRedirct()
+    public function activeRedirect()
     {
         return true;
     }
@@ -220,8 +223,9 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
     /**
      * override getConfig to change the configuration path
      *
-     * @param string $field
+     * @param string  $field
      * @param integer $storeId
+     *
      * @return string config value
      */
     public function getConfigData($field, $storeId = null)
@@ -267,7 +271,8 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
             $user['CONTACT.EMAIL']                 // Customer mail address
         );
 
-        $this->_heidelpayPaymentMethod->getRequest()->getCriterion()->set('guest', $user['CRITERION.GUEST']);
+        $this->_heidelpayPaymentMethod->getRequest()->getCriterion()
+            ->set('guest', $user['CRITERION.GUEST']);
 
         $this->_heidelpayPaymentMethod->getRequest()->basketData(
             $quote->getId(),                                        // Reference Id of your application
@@ -287,13 +292,34 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
             'SHOPMODULE.VERSION',
             'Heidelpay Gateway ' . $this->moduleResource->getDataVersion('Heidelpay_Gateway')
         );
+
+        // add a push url to the criterion object for future push responses from heidelpay
+        $this->_heidelpayPaymentMethod->getRequest()->getCriterion()->set(
+            'PUSH_URL',
+            $this->urlBuilder->getUrl('hgw/index/push', [
+                '_forced_secure' => true,
+                '_scope_to_url' => true,
+                '_nosid' => true
+            ])
+        );
+    }
+
+    /**
+     * Returns the heidelpay PhpApi Paymentmethod Instance.
+     *
+     * @return \Heidelpay\PhpApi\PaymentMethods\AbstractPaymentMethod
+     */
+    public function getHeidelpayPaymentMethodInstance()
+    {
+        return $this->_heidelpayPaymentMethod;
     }
 
     /**
      * getMainConfig will return the backend configuration for the given payment method
      *
-     * @param string $code payment method name
+     * @param string $code    payment method name
      * @param string $storeId id of the store front
+     *
      * @return array configuration form backend
      */
     public function getMainConfig($code, $storeId = false)
@@ -355,7 +381,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
             'LANGUAGE' => $lang,
             'RESPONSE_URL' => $this->urlBuilder->getUrl('hgw/index/response', [
                 '_forced_secure' => true,
-                '_store_to_url' => true,
+                '_scope_to_url' => true,
                 '_nosid' => true
             ]),
         ];
@@ -365,6 +391,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
      * extract customer information from magento order object
      *
      * @param  \Magento\Quote\Api\Data\CartInterface $order object
+     *
      * @return array customer information
      */
     public function getUser($order)
@@ -394,16 +421,96 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
     }
 
     /**
+     *
+     * @param \Magento\Sales\Model\Order $order
+     * @param string|null                $message
+     */
+    public function cancelledTransactionProcessing(&$order, $message = null)
+    {
+        if ($order->canCancel()) {
+            $order->cancel()
+                ->setState(Order::STATE_CANCELED)
+                ->addStatusHistoryComment($message, Order::STATE_CANCELED)
+                ->setIsCustomerNotified(false);
+        }
+    }
+
+    /**
+     *
+     * @param array                      $data
+     * @param \Magento\Sales\Model\Order $order
+     * @param string|null                $message
+     */
+    public function pendingTransactionProcessing($data, &$order, $message = null)
+    {
+        $order->getPayment()->setTransactionId($data['IDENTIFICATION_UNIQUEID']);
+        $order->getPayment()->setIsTransactionClosed(false);
+        $order->getPayment()->addTransaction(Transaction::TYPE_AUTH, null, true);
+
+        $order->setState(Order::STATE_PENDING_PAYMENT)
+            ->addStatusHistoryComment($message, Order::STATE_PENDING_PAYMENT)
+            ->setIsCustomerNotified(true);
+    }
+
+    /**
+     *
+     * @param array                      $data
+     * @param \Magento\Sales\Model\Order $order
+     */
+    public function processingTransactionProcessing($data, &$order)
+    {
+        $message = __('ShortId : %1', $data['IDENTIFICATION_SHORTID']);
+
+        $order->getPayment()
+            ->setTransactionId($data['IDENTIFICATION_UNIQUEID'])
+            ->setParentTransactionId($order->getPayment()->getLastTransId())
+            ->setIsTransactionClosed(true);
+
+        // if the total sum of the order matches the presentation amount of the heidelpay response...
+        if ($this->_paymentHelper->isMatchingAmount($order, $data)
+            && $this->_paymentHelper->isMatchingCurrency($order, $data)
+        ) {
+            $order->setState(Order::STATE_PROCESSING)
+                ->addStatusHistoryComment($message, Order::STATE_PROCESSING)
+                ->setIsCustomerNotified(true);
+        } else {
+            // in case rc is ack and amount is to low/heigh or curreny missmatch
+            $message = __(
+                'Amount or currency missmatch : %1',
+                $data['PRESENTATION_AMOUNT'] . ' ' . $data['PRESENTATION_CURRENCY']
+            );
+
+            $order->setState(Order::STATE_PAYMENT_REVIEW)
+                ->addStatusHistoryComment($message, Order::STATE_PAYMENT_REVIEW)
+                ->setIsCustomerNotified(true);
+        }
+
+        // if the order can be invoiced, create one and save it into a transaction.
+        if ($order->canInvoice()) {
+            $invoice = $order->prepareInvoice();
+            $invoice->setRequestedCaptureCase(Invoice::CAPTURE_ONLINE);
+            $invoice->register();
+            $invoice->setIsPaid(true);
+            $invoice->pay();
+
+            $this->_paymentHelper->saveTransaction($invoice);
+        }
+
+        $order->getPayment()->addTransaction(Transaction::TYPE_CAPTURE, null, true);
+    }
+
+    /**
      * Additional payment information
      *
      * This function will return a text message used to show payment information
      * to your customer on the checkout success page
      *
      * @param array $response
-     * @return string|boolean payment information or false
+     *
+     * @return \Magento\Framework\Phrase|null
      */
     public function additionalPaymentInformation($response)
     {
-        return false;
+        return null;
     }
 }
