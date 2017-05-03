@@ -24,11 +24,6 @@ use Magento\Sales\Model\Order;
 class Save extends \Magento\Shipping\Controller\Adminhtml\Order\Shipment\Save
 {
     /**
-     * @var \Magento\Sales\Model\Order\Shipment\ShipmentValidatorInterface
-     */
-    protected $shipmentValidator;
-
-    /**
      * @var \Magento\Sales\Model\OrderRepository
      */
     protected $orderResository;
@@ -55,7 +50,6 @@ class Save extends \Magento\Shipping\Controller\Adminhtml\Order\Shipment\Save
      * @param \Magento\Shipping\Controller\Adminhtml\Order\ShipmentLoader $shipmentLoader
      * @param \Magento\Shipping\Model\Shipping\LabelGenerator $labelGenerator
      * @param \Magento\Sales\Model\Order\Email\Sender\ShipmentSender $shipmentSender
-     * @param \Magento\Sales\Model\Order\Shipment\ShipmentValidatorInterface $shipmentValidator
      * @param \Psr\Log\LoggerInterface $logger
      * @param \Magento\Framework\Encryption\Encryptor $encryptor
      * @param \Magento\Sales\Model\OrderRepository $orderRepository
@@ -66,13 +60,11 @@ class Save extends \Magento\Shipping\Controller\Adminhtml\Order\Shipment\Save
         \Magento\Shipping\Controller\Adminhtml\Order\ShipmentLoader $shipmentLoader,
         \Magento\Shipping\Model\Shipping\LabelGenerator $labelGenerator,
         \Magento\Sales\Model\Order\Email\Sender\ShipmentSender $shipmentSender,
-        \Magento\Sales\Model\Order\Shipment\ShipmentValidatorInterface $shipmentValidator,
         \Psr\Log\LoggerInterface $logger,
         \Magento\Framework\Encryption\Encryptor $encryptor,
         \Magento\Sales\Model\OrderRepository $orderRepository,
         \Heidelpay\Gateway\Helper\Payment $paymentHelper
     ) {
-        $this->shipmentValidator = $shipmentValidator;
         $this->orderResository = $orderRepository;
         $this->logger = $logger;
         $this->encryptor = $encryptor;
