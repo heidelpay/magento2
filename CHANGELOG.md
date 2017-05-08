@@ -1,5 +1,15 @@
 # Release Notes - heidelpay Payment Gateway for Magento 2
 
+## v17.5.9
+
+### Fixed
+- Bugfix for isAvailable() method on both B2C payment methods where an exception was thrown (tested on 2.1.1) when loading the checkout and the quote was null for some reason
+
+## v17.5.3
+
+### Changed/Fixed
+- Removed the usage of the unsed Class 'ShipmentValidatorInterface', which wasn't present in <=2.0.8 and <=2.1.1
+
 ## v17.4.16
 
 ### Added
