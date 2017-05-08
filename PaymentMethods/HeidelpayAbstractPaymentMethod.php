@@ -3,6 +3,8 @@
 namespace Heidelpay\Gateway\PaymentMethods;
 
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
+use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
+use Heidelpay\PhpApi\Response;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Order\Payment\Transaction;
@@ -148,6 +150,16 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
     protected $paymentInformationCollectionFactory;
 
     /**
+     * @var \Heidelpay\Gateway\Model\TransactionFactory
+     */
+    protected $transactionFactory;
+
+    /**
+     * @var HeidelpayTransactionCollectionFactory
+     */
+    protected $transactionCollectionFactory;
+
+    /**
      * heidelpay Abstract Payment method constructor
      *
      * @param \Magento\Framework\Model\Context                        $context
@@ -165,6 +177,8 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
      * @param \Magento\Framework\Module\ResourceInterface             $moduleResource
      * @param \Heidelpay\Gateway\Helper\Payment                       $paymentHelper
      * @param PaymentInformationCollectionFactory                     $paymentInformationCollectionFactory
+     * @param \Heidelpay\Gateway\Model\TransactionFactory             $transactionFactory
+     * @param HeidelpayTransactionCollectionFactory                   $transactionCollectionFactory
      * @param \Magento\Framework\Model\ResourceModel\AbstractResource $resource
      * @param \Magento\Framework\Data\Collection\AbstractDb           $resourceCollection
      * @param array                                                   $data
@@ -185,13 +199,23 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         \Magento\Framework\Module\ResourceInterface $moduleResource,
         \Heidelpay\Gateway\Helper\Payment $paymentHelper,
         PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
+        \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory,
+        HeidelpayTransactionCollectionFactory $transactionCollectionFactory,
         \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
         array $data = []
     ) {
         parent::__construct(
-            $context, $registry, $extensionFactory, $customAttributeFactory, $paymentData, $scopeConfig,
-            $logger, $resource, $resourceCollection, $data
+            $context,
+            $registry,
+            $extensionFactory,
+            $customAttributeFactory,
+            $paymentData,
+            $scopeConfig,
+            $logger,
+            $resource,
+            $resourceCollection,
+            $data
         );
 
         $this->urlBuilder = $urlinterface;
@@ -205,6 +229,8 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         $this->moduleResource = $moduleResource;
 
         $this->paymentInformationCollectionFactory = $paymentInformationCollectionFactory;
+        $this->transactionFactory = $transactionFactory;
+        $this->transactionCollectionFactory = $transactionCollectionFactory;
     }
 
     /**
@@ -236,18 +262,109 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
     }
 
     /**
+     * @inheritdoc
+     *
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function capture(\Magento\Payment\Model\InfoInterface $payment, $amount)
+    {
+        /** @var \Magento\Sales\Model\Order\Payment $payment */
+        if (!$this->canCapture()) {
+            throw new \Magento\Framework\Exception\LocalizedException(__('The capture action is not available.'));
+        }
+
+        // create the transactioncollection factory to load heidelpay transactions
+        $factory = $this->transactionCollectionFactory->create();
+        /** @var \Heidelpay\Gateway\Model\Transaction $transactionInfo */
+        $transactionInfo = $factory->loadByTransactionId($payment->getLastTransId());
+
+        // TODO: Immer die UniqueID der 'PA' Transaktion bekommen.
+
+        // if there is no heidelpay transaction, something went wrong.
+        if ($transactionInfo === null || $transactionInfo->isEmpty()) {
+            throw new \Magento\Framework\Exception\LocalizedException(__('No transaction data available'));
+        }
+
+        $this->_logger->debug('heidelpay - Capture Transaction: ' . $transactionInfo->toJson());
+
+        // we can only Capture on Pre-Authorization payment types.
+        // so is the payment type of this Transaction is no PA, we won't capture anything.
+        if ($transactionInfo->getPaymentType() !== 'PA') {
+            return $this;
+        }
+
+        // TODO: Prüfen, ob der Request aus dem backend kommt.
+
+        // get the configuration for the heidelpay Capture Request
+        $config = $this->getMainConfig($this->getCode(), $payment->getOrder()->getStoreId());
+
+        // set authentification data
+        $this->_heidelpayPaymentMethod->getRequest()->authentification(
+            $config['SECURITY.SENDER'],
+            $config['USER.LOGIN'],
+            $config['USER.PWD'],
+            $config['TRANSACTION.CHANNEL'],
+            $config['TRANSACTION.MODE']
+        );
+
+        // set basket data
+        $this->_heidelpayPaymentMethod->getRequest()->basketData(
+            $payment->getOrder()->getQuoteId(),
+            $this->_paymentHelper->format($amount),
+            $payment->getOrder()->getOrderCurrencyCode(),
+            $this->_encryptor->exportKeys()
+        );
+
+        // send the capture request
+        $this->_heidelpayPaymentMethod->capture($transactionInfo->getUniqueId());
+
+        // if the heidelpay Request wasn't successful, throw an Exception with the heidelpay message
+        if (!$this->_heidelpayPaymentMethod->getResponse()->isSuccess()) {
+            throw new \Magento\Framework\Exception\LocalizedException(
+                __('heidelpay - ' . $this->_heidelpayPaymentMethod->getResponse()->getProcessing()->getReturn())
+            );
+        }
+
+        list($paymentMethod, $paymentType) = $this->_paymentHelper->splitPaymentCode(
+            $this->_heidelpayPaymentMethod->getResponse()->getPayment()->getCode()
+        );
+
+        // Create a new heidelpay Transaction
+        $this->saveHeidelpayTransaction(
+            $this->_heidelpayPaymentMethod->getResponse(),
+            $paymentMethod,
+            $paymentType,
+            'RESPONSE',
+            []
+        );
+
+        // create a child transaction.
+        $payment->setTransactionId($this->_heidelpayPaymentMethod->getResponse()->getPaymentReferenceId());
+        $payment->setParentTransactionId($transactionInfo->getUniqueId());
+        $payment->setIsTransactionClosed(true);
+        $payment->addTransaction(Transaction::TYPE_CAPTURE, null, true);
+
+        // set the last transaction id to the Pre-Authorization.
+        $payment->setLastTransId($this->_heidelpayPaymentMethod->getResponse()->getIdentification()->getReferenceId());
+        $payment->save();
+        // TODO: Schauen, dass die LastTransId von hier nicht überschrieben wird?
+
+        return $this;
+    }
+
+    /**
      * @param \Magento\Quote\Model\Quote $quote
      */
     public function getHeidelpayUrl($quote)
     {
-        $config = $this->getMainConfig($this->_code, $this->getStore());
+        $config = $this->getMainConfig($this->getCode(), $this->getStore());
 
         $this->_heidelpayPaymentMethod->getRequest()->authentification(
-            $config ['SECURITY.SENDER'],        // SecuritySender
-            $config ['USER.LOGIN'],             // UserLogin
-            $config ['USER.PWD'],               // UserPassword
-            $config ['TRANSACTION.CHANNEL'],    // TransactionChannel credit card without 3d secure
-            $config ['TRANSACTION.MODE']        // Enable sandbox mode
+            $config['SECURITY.SENDER'],        // SecuritySender
+            $config['USER.LOGIN'],             // UserLogin
+            $config['USER.PWD'],               // UserPassword
+            $config['TRANSACTION.CHANNEL'],    // TransactionChannel credit card without 3d secure
+            $config['TRANSACTION.MODE']        // Enable sandbox mode
         );
 
         $frontend = $this->getFrontend();
@@ -302,6 +419,30 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
                 '_nosid' => true
             ])
         );
+    }
+
+    /**
+     * @param Response $response
+     * @param $paymentMethod
+     * @param $paymentType
+     * @param string $source
+     * @param array $data
+     */
+    public function saveHeidelpayTransaction(Response $response, $paymentMethod, $paymentType, $source, array $data)
+    {
+        $transaction = $this->transactionFactory->create();
+        $transaction->setPaymentMethod($paymentMethod)
+            ->setPaymentType($paymentType)
+            ->setTransactionId($response->getIdentification()->getTransactionId())
+            ->setUniqueId($response->getIdentification()->getUniqueId())
+            ->setShortId($response->getIdentification()->getShortId())
+            ->setStatusCode($response->getProcessing()->getStatusCode())
+            ->setResult($response->getProcessing()->getResult())
+            ->setReturnMessage($response->getProcessing()->getReturn())
+            ->setReturnCode($response->getProcessing()->getReturnCode())
+            ->setJsonResponse(json_encode($data))
+            ->setSource($source)
+            ->save();
     }
 
     /**
@@ -430,7 +571,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         if ($order->canCancel()) {
             $order->cancel()
                 ->setState(Order::STATE_CANCELED)
-                ->addStatusHistoryComment($message, Order::STATE_CANCELED)
+                ->addStatusHistoryComment('heidelpay - ' . $message, Order::STATE_CANCELED)
                 ->setIsCustomerNotified(false);
         }
     }
@@ -448,7 +589,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         $order->getPayment()->addTransaction(Transaction::TYPE_AUTH, null, true);
 
         $order->setState(Order::STATE_PENDING_PAYMENT)
-            ->addStatusHistoryComment($message, Order::STATE_PENDING_PAYMENT)
+            ->addStatusHistoryComment('heidelpay - ' . $message, Order::STATE_PENDING_PAYMENT)
             ->setIsCustomerNotified(true);
     }
 
@@ -471,7 +612,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
             && $this->_paymentHelper->isMatchingCurrency($order, $data)
         ) {
             $order->setState(Order::STATE_PROCESSING)
-                ->addStatusHistoryComment($message, Order::STATE_PROCESSING)
+                ->addStatusHistoryComment('heidelpay - ' . $message, Order::STATE_PROCESSING)
                 ->setIsCustomerNotified(true);
         } else {
             // in case rc is ack and amount is to low/heigh or curreny missmatch
@@ -481,12 +622,13 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
             );
 
             $order->setState(Order::STATE_PAYMENT_REVIEW)
-                ->addStatusHistoryComment($message, Order::STATE_PAYMENT_REVIEW)
+                ->addStatusHistoryComment('heidelpay - ' . $message, Order::STATE_PAYMENT_REVIEW)
                 ->setIsCustomerNotified(true);
         }
 
-        // if the order can be invoiced, create one and save it into a transaction.
-        if ($order->canInvoice()) {
+        // if the order can be invoiced and is no Pre-Authorization,
+        // create one and save it into a transaction.
+        if ($order->canInvoice() && !$this->_paymentHelper->isPreAuthorization($data)) {
             $invoice = $order->prepareInvoice();
             $invoice->setRequestedCaptureCase(Invoice::CAPTURE_ONLINE);
             $invoice->register();
@@ -497,6 +639,25 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         }
 
         $order->getPayment()->addTransaction(Transaction::TYPE_CAPTURE, null, true);
+    }
+
+    /**
+     * Returns the booking mode.
+     * This is needed for payment methods with multiple booking modes like 'debit' or 'preauthorization' and 'capture'.
+     *
+     * @param int $storeId
+     *
+     * @return string|null
+     */
+    public function getBookingMode($storeId = null)
+    {
+        $store = $storeId === null ? $this->getStore() : $storeId;
+
+        return $this->_scopeConfig->getValue(
+            'payment/' . $this->getCode() . '/bookingmode',
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+            $store
+        );
     }
 
     /**

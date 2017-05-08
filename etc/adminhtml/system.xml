@@ -47,12 +47,12 @@
                         <label>Channel</label>
                         <config_path>payment/hgwcc/channel</config_path>
                     </field>
-                    <!-- <field id="bookingmode" translate="label" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Directbooking</label>
-                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <field id="bookingmode" translate="label" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Booking Mode</label>
+                        <source_model>Heidelpay\Gateway\Model\Config\Source\BookingMode</source_model>
                         <config_path>payment/hgwcc/bookingmode</config_path>
-                        <comment>If this is enabled the card will be charged immediately. Otherwise the amount will just be authorised.</comment>
-                    </field> -->
+                        <comment>If 'Debit' is enabled, the card will be charged immediately. Otherwise the amount will just be authorised.</comment>
+                    </field>
                     <field id="sort_order" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Sort Order</label>
                         <config_path>payment/hgwcc/sort_order</config_path>
@@ -92,12 +92,12 @@
                         <label>Channel</label>
                         <config_path>payment/hgwdc/channel</config_path>
                     </field>
-                    <!-- <field id="bookingmode" translate="label" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Directbooking</label>
-                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <field id="bookingmode" translate="label" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Booking Mode</label>
+                        <source_model>Heidelpay\Gateway\Model\Config\Source\BookingMode</source_model>
                         <config_path>payment/hgwdc/bookingmode</config_path>
-                        <comment>If this is enabled the card will be charged immediately. Otherwise the amount will just be authorised.</comment>
-                    </field> -->
+                        <comment>If 'Debit' is enabled, the card will be charged immediately. Otherwise the amount will just be authorised.</comment>
+                    </field>
                     <field id="sort_order" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Sort Order</label>
                         <config_path>payment/hgwdc/sort_order</config_path>
@@ -176,12 +176,12 @@
                         <label>Channel</label>
                         <config_path>payment/hgwpal/channel</config_path>
                     </field>
-                    <!-- <field id="bookingmode" translate="label" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
-                        <label>Directbooking</label>
-                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <field id="bookingmode" translate="label" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Booking Mode</label>
+                        <source_model>Heidelpay\Gateway\Model\Config\Source\BookingMode</source_model>
                         <config_path>payment/hgwpal/bookingmode</config_path>
-                        <comment>If this is enabled the card will be charged immediately. Otherwise the amount will just be authorised.</comment>
-                    </field> -->
+                        <comment>If 'Debit' is enabled, the card will be charged immediately. Otherwise the amount will just be authorised.</comment>
+                    </field>
                     <field id="sort_order" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Sort Order</label>
                         <config_path>payment/hgwpal/sort_order</config_path>

@@ -3,6 +3,7 @@
 namespace Heidelpay\Gateway\Controller\Index;
 
 use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
+use Magento\Sales\Model\Order\Payment\Transaction;
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Order;
 
@@ -143,8 +144,12 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
 
         $this->_logger->debug('Push Response: ' . print_r($this->heidelpayPush->getResponse(), true));
 
+        list($paymentMethod, $paymentType) = $this->_paymentHelper->splitPaymentCode(
+            $this->heidelpayPush->getResponse()->getPayment()->getCode()
+        );
+
         // in case of invoice receipts, we process the push message
-        if ($this->heidelpayPush->getResponse()->getPayment()->getCode() == 'IV.RC') {
+        if ($paymentMethod === 'IV' && $paymentType === 'RC') {
             // only when the Response is ACK.
             if ($this->heidelpayPush->getResponse()->isSuccess()) {
                 // load the reference quote to receive the quote information.
@@ -160,12 +165,12 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
                 $dueLeft = (float)($order->getTotalDue() - $paidAmount);
 
                 $state = Order::STATE_COMPLETE;
-                $comment = 'heidelpay - Purchase complete';
+                $comment = 'heidelpay - Purchase Complete';
 
                 // if payment is not complete
                 if ($dueLeft > 0.00) {
                     $state = Order::STATE_PAYMENT_REVIEW;
-                    $comment = 'heidelpay - Partly paid ('
+                    $comment = 'heidelpay - Partly Paid ('
                         . $this->_paymentHelper->format(
                             $this->heidelpayPush->getResponse()->getPresentation()->getAmount()
                         )
@@ -183,6 +188,24 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
                 $order->setTotalPaid($order->getTotalPaid() + $paidAmount)
                     ->setState($state)
                     ->addStatusHistoryComment($comment, $state);
+
+                // create a heidelpay Transaction.
+                $order->getPayment()->getMethodInstance()->saveHeidelpayTransaction(
+                    $this->heidelpayPush->getResponse(),
+                    $paymentMethod,
+                    $paymentType,
+                    'PUSH',
+                    []
+                );
+
+                // create a child transaction.
+                $order->getPayment()->setTransactionId($this->heidelpayPush->getResponse()->getPaymentReferenceId());
+                $order->getPayment()->setParentTransactionId(
+                    $this->heidelpayPush->getResponse()->getIdentification()->getUniqueId()
+                );
+                $order->getPayment()->setIsTransactionClosed(true);
+
+                $order->getPayment()->addTransaction(Transaction::TYPE_CAPTURE, null, true);
 
                 $order->save();
             }

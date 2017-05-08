@@ -93,7 +93,7 @@ class Transaction extends \Magento\Framework\Model\AbstractModel
      */
     public function getUniqueId()
     {
-        return $this->getData('uniqueid');
+        return $this->getData('uniqeid');
     }
 
     /**

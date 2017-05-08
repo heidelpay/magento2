@@ -25,6 +25,7 @@
                 <payment_action>authorize</payment_action>
                 <title><![CDATA[Credit card]]></title>
                 <channel>31HA07BC8142C5A171744F3D6D155865</channel>
+                <bookingmode>debit</bookingmode>
                 <allowspecific>0</allowspecific>
                 <min_order_total>0</min_order_total>
                 <max_order_total>0</max_order_total>
@@ -35,6 +36,7 @@
                 <payment_action>authorize</payment_action>
                 <title><![CDATA[Debit card]]></title>
                 <channel>31HA07BC8142C5A171744F3D6D155865</channel>
+                <bookingmode>debit</bookingmode>
                 <allowspecific>0</allowspecific>
                 <min_order_total>0</min_order_total>
                 <max_order_total>0</max_order_total>
@@ -56,6 +58,7 @@
                 <payment_action>authorize</payment_action>
                 <title><![CDATA[PayPal]]></title>
                 <channel>31HA07BC8142C5A171749A60D979B6E4</channel>
+                <bookingmode>debit</bookingmode>
                 <allowspecific>0</allowspecific>
                 <min_order_total>0</min_order_total>
                 <max_order_total>0</max_order_total>

@@ -3,6 +3,7 @@
 namespace Heidelpay\Gateway\PaymentMethods;
 
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
+use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
 
 /**
  * heidelpay giropay Payment Method
@@ -44,6 +45,8 @@ class HeidelpayGiropayPaymentMethod extends HeidelpayAbstractPaymentMethod
      * @param \Magento\Framework\Module\ResourceInterface $moduleResource
      * @param \Heidelpay\Gateway\Helper\Payment $paymentHelper
      * @param PaymentInformationCollectionFactory $paymentInformationCollectionFactory
+     * @param \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory
+     * @param HeidelpayTransactionCollectionFactory $transactionCollectionFactory
      * @param \Heidelpay\PhpApi\PaymentMethods\GiropayPaymentMethod $giropayPaymentMethod
      * @param \Magento\Framework\Model\ResourceModel\AbstractResource|null $resource
      * @param \Magento\Framework\Data\Collection\AbstractDb|null $resourceCollection
@@ -65,6 +68,8 @@ class HeidelpayGiropayPaymentMethod extends HeidelpayAbstractPaymentMethod
         \Magento\Framework\Module\ResourceInterface $moduleResource,
         \Heidelpay\Gateway\Helper\Payment $paymentHelper,
         PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
+        \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory,
+        HeidelpayTransactionCollectionFactory $transactionCollectionFactory,
         \Heidelpay\PhpApi\PaymentMethods\GiropayPaymentMethod $giropayPaymentMethod,
         \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
@@ -86,6 +91,8 @@ class HeidelpayGiropayPaymentMethod extends HeidelpayAbstractPaymentMethod
             $moduleResource,
             $paymentHelper,
             $paymentInformationCollectionFactory,
+            $transactionFactory,
+            $transactionCollectionFactory,
             $resource,
             $resourceCollection,
             $data

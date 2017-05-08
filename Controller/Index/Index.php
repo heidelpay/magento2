@@ -47,9 +47,23 @@ class Index extends \Heidelpay\Gateway\Controller\HgwAbstract
         \Magento\Customer\Model\Url $customerUrl,
         \Magento\Framework\Escaper $escaper
     ) {
-        parent::__construct($context, $customerSession, $checkoutSession, $orderFactory, $urlHelper, $logger,
-            $cartManagement, $quoteObject, $resultPageFactory, $paymentHelper, $orderSender, $invoiceSender,
-            $orderCommentSender, $encryptor, $customerUrl);
+        parent::__construct(
+            $context,
+            $customerSession,
+            $checkoutSession,
+            $orderFactory,
+            $urlHelper,
+            $logger,
+            $cartManagement,
+            $quoteObject,
+            $resultPageFactory,
+            $paymentHelper,
+            $orderSender,
+            $invoiceSender,
+            $orderCommentSender,
+            $encryptor,
+            $customerUrl
+        );
 
         $this->escaper = $escaper;
     }

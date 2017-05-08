@@ -176,6 +176,26 @@ class Payment extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
+     * @param array $data
+     *
+     * @return bool
+     */
+    public function isPreAuthorization(array $data)
+    {
+        if (!isset($data['PAYMENT_CODE'])) {
+            return false;
+        }
+
+        $paymentCode = $this->splitPaymentCode($data['PAYMENT_CODE']);
+
+        if ($paymentCode[1] == 'PA') {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Saves a transaction by the given invoice.
      *
      * @param Invoice $invoice

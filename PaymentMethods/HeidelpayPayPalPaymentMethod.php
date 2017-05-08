@@ -2,7 +2,9 @@
 
 namespace Heidelpay\Gateway\PaymentMethods;
 
+use Heidelpay\Gateway\Model\Config\Source\BookingMode;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
+use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
 
 /**
  * heidelpay PayPal payment method
@@ -45,6 +47,26 @@ class HeidelpayPayPalPaymentMethod extends HeidelpayAbstractPaymentMethod
     protected $_canAuthorize = true;
 
     /**
+     * @var boolean
+     */
+    protected $_canCapture = true;
+
+    /**
+     * @var boolean
+     */
+    protected $_canCapturePartial = true;
+
+    /**
+     * @var boolean
+     */
+    protected $_canRefund = true;
+
+    /**
+     * @var boolean
+     */
+    protected $_canRefundInvoicePartial = true;
+
+    /**
      * HeidelpayPayPalPaymentMethod constructor.
      *
      * @param \Magento\Framework\Model\Context $context
@@ -62,6 +84,8 @@ class HeidelpayPayPalPaymentMethod extends HeidelpayAbstractPaymentMethod
      * @param \Magento\Framework\Module\ResourceInterface $moduleResource
      * @param \Heidelpay\Gateway\Helper\Payment $paymentHelper
      * @param PaymentInformationCollectionFactory $paymentInformationCollectionFactory
+     * @param \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory
+     * @param HeidelpayTransactionCollectionFactory $transactionCollectionFactory
      * @param \Heidelpay\PhpApi\PaymentMethods\PayPalPaymentMethod $payPalPaymentMethod
      * @param \Magento\Framework\Model\ResourceModel\AbstractResource|null $resource
      * @param \Magento\Framework\Data\Collection\AbstractDb|null $resourceCollection
@@ -83,6 +107,8 @@ class HeidelpayPayPalPaymentMethod extends HeidelpayAbstractPaymentMethod
         \Magento\Framework\Module\ResourceInterface $moduleResource,
         \Heidelpay\Gateway\Helper\Payment $paymentHelper,
         PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
+        \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory,
+        HeidelpayTransactionCollectionFactory $transactionCollectionFactory,
         \Heidelpay\PhpApi\PaymentMethods\PayPalPaymentMethod $payPalPaymentMethod,
         \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
@@ -104,6 +130,8 @@ class HeidelpayPayPalPaymentMethod extends HeidelpayAbstractPaymentMethod
             $moduleResource,
             $paymentHelper,
             $paymentInformationCollectionFactory,
+            $transactionFactory,
+            $transactionCollectionFactory,
             $resource,
             $resourceCollection,
             $data
@@ -122,8 +150,15 @@ class HeidelpayPayPalPaymentMethod extends HeidelpayAbstractPaymentMethod
         // set initial data for the request
         parent::getHeidelpayUrl($quote);
 
-        // send the debit request
-        $this->_heidelpayPaymentMethod->debit();
+        // make an authorize request, if set...
+        if ($this->getBookingMode() === BookingMode::AUTHORIZATION) {
+            $this->_heidelpayPaymentMethod->authorize();
+        }
+
+        // ... else if no booking mode is set or bookingmode is set to 'debit', make a debit request.
+        if ($this->getBookingMode() === null || $this->getBookingMode() === BookingMode::DEBIT) {
+            $this->_heidelpayPaymentMethod->debit();
+        }
 
         return $this->_heidelpayPaymentMethod->getResponse();
     }
