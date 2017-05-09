@@ -187,7 +187,7 @@ class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMetho
     {
         // in B2C payment methods, we don't want companies to be involved.
         // so, if the address contains a company, return false.
-        if ($quote->getBillingAddress()->getCompany() !== null) {
+        if ($quote !== null && $quote->getBillingAddress()->getCompany() !== null) {
             return false;
         }
 
