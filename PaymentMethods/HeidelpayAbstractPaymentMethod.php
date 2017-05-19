@@ -273,24 +273,22 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
             throw new \Magento\Framework\Exception\LocalizedException(__('The capture action is not available.'));
         }
 
-        // create the transactioncollection factory to load heidelpay transactions
+        // create the transactioncollection factory to get the parent authorization.
         $factory = $this->transactionCollectionFactory->create();
         /** @var \Heidelpay\Gateway\Model\Transaction $transactionInfo */
-        $transactionInfo = $factory->loadByTransactionId($payment->getLastTransId());
-
-        // TODO: Immer die UniqueID der 'PA' Transaktion bekommen.
+        $transactionInfo = $factory->loadByTransactionId($payment->getParentTransactionId());
 
         // if there is no heidelpay transaction, something went wrong.
         if ($transactionInfo === null || $transactionInfo->isEmpty()) {
-            throw new \Magento\Framework\Exception\LocalizedException(__('No transaction data available'));
+            throw new \Magento\Framework\Exception\LocalizedException(__('heidelpay - No transaction data available'));
         }
-
-        $this->_logger->debug('heidelpay - Capture Transaction: ' . $transactionInfo->toJson());
 
         // we can only Capture on Pre-Authorization payment types.
         // so is the payment type of this Transaction is no PA, we won't capture anything.
         if ($transactionInfo->getPaymentType() !== 'PA') {
-            return $this;
+            throw new \Magento\Framework\Exception\LocalizedException(
+                __('heidelpay - Cannot refund this transaction.')
+            );
         }
 
         // TODO: Prüfen, ob der Request aus dem backend kommt.
@@ -345,9 +343,94 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         $payment->addTransaction(Transaction::TYPE_CAPTURE, null, true);
 
         // set the last transaction id to the Pre-Authorization.
-        $payment->setLastTransId($this->_heidelpayPaymentMethod->getResponse()->getIdentification()->getReferenceId());
+        $payment->setLastTransId($this->_heidelpayPaymentMethod->getResponse()->getPaymentReferenceId());
         $payment->save();
-        // TODO: Schauen, dass die LastTransId von hier nicht überschrieben wird?
+
+        return $this;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function refund(\Magento\Payment\Model\InfoInterface $payment, $amount)
+    {
+        /** @var \Magento\Sales\Model\Order\Payment\Interceptor $payment */
+        if (!$this->canRefund()) {
+            throw new \Magento\Framework\Exception\LocalizedException(__('The refund action is not available.'));
+        }
+
+        // create the transactioncollection factory to get the parent authorization.
+        $factory = $this->transactionCollectionFactory->create();
+        /** @var \Heidelpay\Gateway\Model\Transaction $transactionInfo */
+        $transactionInfo = $factory->loadByTransactionId($payment->getParentTransactionId());
+
+        // if there is no heidelpay transaction, something went wrong.
+        if ($transactionInfo === null || $transactionInfo->isEmpty()) {
+            throw new \Magento\Framework\Exception\LocalizedException(__('heidelpay - No transaction data available'));
+        }
+
+        // we can only refund on transaction where money has been credited/debited
+        // so is the payment type of this Transaction none of them, we won't refund anything.
+        if (!$this->_paymentHelper->isRefundable($transactionInfo->getPaymentType())) {
+            throw new \Magento\Framework\Exception\LocalizedException(
+                __('heidelpay - Cannot refund this transaction.')
+            );
+        }
+
+        // TODO: Prüfen, ob der Request aus dem backend kommt.
+
+        // get the configuration for the heidelpay Capture Request
+        $config = $this->getMainConfig($this->getCode(), $payment->getOrder()->getStoreId());
+
+        // set authentification data
+        $this->_heidelpayPaymentMethod->getRequest()->authentification(
+            $config['SECURITY.SENDER'],
+            $config['USER.LOGIN'],
+            $config['USER.PWD'],
+            $config['TRANSACTION.CHANNEL'],
+            $config['TRANSACTION.MODE']
+        );
+
+        // set basket data
+        $this->_heidelpayPaymentMethod->getRequest()->basketData(
+            $payment->getOrder()->getQuoteId(),
+            $this->_paymentHelper->format($amount),
+            $payment->getOrder()->getOrderCurrencyCode(),
+            $this->_encryptor->exportKeys()
+        );
+
+        // send the capture request
+        $this->_heidelpayPaymentMethod->refund($transactionInfo->getUniqueId());
+
+        // if the heidelpay Request wasn't successful, throw an Exception with the heidelpay message
+        if (!$this->_heidelpayPaymentMethod->getResponse()->isSuccess()) {
+            throw new \Magento\Framework\Exception\LocalizedException(
+                __('heidelpay - ' . $this->_heidelpayPaymentMethod->getResponse()->getProcessing()->getReturn())
+            );
+        }
+
+        list($paymentMethod, $paymentType) = $this->_paymentHelper->splitPaymentCode(
+            $this->_heidelpayPaymentMethod->getResponse()->getPayment()->getCode()
+        );
+
+        // Create a new heidelpay Transaction
+        $this->saveHeidelpayTransaction(
+            $this->_heidelpayPaymentMethod->getResponse(),
+            $paymentMethod,
+            $paymentType,
+            'RESPONSE',
+            []
+        );
+
+        // create a child transaction.
+        $payment->setTransactionId($this->_heidelpayPaymentMethod->getResponse()->getPaymentReferenceId());
+        $payment->setParentTransactionId($transactionInfo->getUniqueId());
+        $payment->setIsTransactionClosed(true);
+        $payment->addTransaction(Transaction::TYPE_REFUND, null, true);
+
+        // set the last transaction id to the Pre-Authorization.
+        $payment->setLastTransId($this->_heidelpayPaymentMethod->getResponse()->getPaymentReferenceId());
+        $payment->save();
 
         return $this;
     }
@@ -630,10 +713,10 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         // create one and save it into a transaction.
         if ($order->canInvoice() && !$this->_paymentHelper->isPreAuthorization($data)) {
             $invoice = $order->prepareInvoice();
+
             $invoice->setRequestedCaptureCase(Invoice::CAPTURE_ONLINE);
-            $invoice->register();
-            $invoice->setIsPaid(true);
-            $invoice->pay();
+            $invoice->setTransactionId($data['IDENTIFICATION_UNIQUEID']);
+            $invoice->register()->pay();
 
             $this->_paymentHelper->saveTransaction($invoice);
         }

@@ -4,42 +4,56 @@ namespace Heidelpay\Gateway\PaymentMethods;
 
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
 use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
+use Heidelpay\PhpApi\PaymentMethods\InvoicePaymentMethod;
 
 /**
- * Heidelpay Direct Debit
+ * Heidelpay prepayment payment method
  *
- * The heidelpay Direct Debit payment method.
+ * This is the payment class for heidelpay prepayment
  *
- * @license Use of this software requires acceptance of the License Agreement. See LICENSE file.
+ * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
  * @copyright Copyright © 2016-present Heidelberger Payment GmbH. All rights reserved.
- * @link https://dev.heidelpay.de/magento2
- *
- * @author Stephano Vogel
+ * @link https://dev.heidelpay.de/magento
+ * @author Jens Richter
  *
  * @package heidelpay
  * @subpackage magento2
  * @category magento2
  */
-class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
+class HeidelpayInvoicePaymentMethod extends HeidelpayAbstractPaymentMethod
 {
-    /** @var string heidelpay Gateway Paymentcode */
-    protected $_code = 'hgwdd';
+    /**
+     * Payment Code
+     * @var string
+     */
+    const CODE = 'hgwiv';
 
-    /** @var bool */
+    /**
+     * Payment Code
+     * @var string
+     */
+    protected $_code = 'hgwiv';
+
+    /**
+     * Info Block Class (used for Order/Invoice details)
+     * @var string
+     */
+    protected $_infoBlockType = 'Heidelpay\Gateway\Block\Info\Invoice';
+
+    /**
+     * isGateway
+     * @var boolean
+     */
+    protected $_isGateway = true;
+
+    /**
+     * canAuthorize
+     * @var boolean
+     */
     protected $_canAuthorize = true;
 
     /**
-     * @var boolean
-     */
-    protected $_canRefund = true;
-
-    /**
-     * @var boolean
-     */
-    protected $_canRefundInvoicePartial = true;
-
-    /**
-     * HeidelpayDirectDebitPaymentMethod constructor.
+     * HeidelpayPrepaymentPaymentMethod constructor.
      *
      * @param \Magento\Framework\Model\Context $context
      * @param \Magento\Framework\Registry $registry
@@ -58,7 +72,7 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
      * @param PaymentInformationCollectionFactory $paymentInformationCollectionFactory
      * @param \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory
      * @param HeidelpayTransactionCollectionFactory $transactionCollectionFactory
-     * @param \Heidelpay\PhpApi\PaymentMethods\DirectDebitPaymentMethod $directDebitPaymentMethod
+     * @param \Heidelpay\PhpApi\PaymentMethods\InvoiceB2CSecuredPaymentMethod $invoiceB2CSecuredPaymentMethod
      * @param \Magento\Framework\Model\ResourceModel\AbstractResource|null $resource
      * @param \Magento\Framework\Data\Collection\AbstractDb|null $resourceCollection
      * @param array $data
@@ -81,7 +95,7 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
         PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
         \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory,
         HeidelpayTransactionCollectionFactory $transactionCollectionFactory,
-        \Heidelpay\PhpApi\PaymentMethods\DirectDebitPaymentMethod $directDebitPaymentMethod,
+        \Heidelpay\PhpApi\PaymentMethods\InvoicePaymentMethod $invoicePaymentMethod,
         \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
         array $data = []
@@ -109,50 +123,22 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
             $data
         );
 
-        // initialize the Direct Debit payment method
-        $this->_heidelpayPaymentMethod = $directDebitPaymentMethod;
+        $this->_heidelpayPaymentMethod = $invoicePaymentMethod;
     }
 
     /**
-     * Fires the initial request to the heidelpay payment provider.
-     *
-     * @param \Magento\Quote\Model\Quote $quote
-     * @return \Heidelpay\PhpApi\Response
+     * Initial Request to heidelpay payment server to get the form / iframe url
+     * {@inheritDoc}
+     * @see \Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod::getHeidelpayUrl()
      */
     public function getHeidelpayUrl($quote)
     {
-        // create the collection factory
-        $paymentInfoCollection = $this->paymentInformationCollectionFactory->create();
-
-        // load the payment information by store id, customer email address and payment method
-        /** @var \Heidelpay\Gateway\Model\PaymentInformation $paymentInfo */
-        $paymentInfo = $paymentInfoCollection->loadByCustomerInformation(
-            $quote->getStoreId(),
-            $quote->getBillingAddress()->getEmail(),
-            $quote->getPayment()->getMethod()
-        );
-
-        // set some parameters inside the Abstract Payment method helper which are used for all requests,
-        // e.g. authentification, customer data, ...
+        // set initial data for the request
         parent::getHeidelpayUrl($quote);
 
-        // add IBAN and Bank account owner to the request.
-        if (isset($paymentInfo->getAdditionalData()->hgw_iban)) {
-            $this->_heidelpayPaymentMethod
-                ->getRequest()->getAccount()
-                ->set('iban', $paymentInfo->getAdditionalData()->hgw_iban);
-        }
+        // send the authorize request
+        $this->_heidelpayPaymentMethod->authorize();
 
-        if (isset($paymentInfo->getAdditionalData()->hgw_holder)) {
-            $this->_heidelpayPaymentMethod
-                ->getRequest()->getAccount()
-                ->set('holder', $paymentInfo->getAdditionalData()->hgw_holder);
-        }
-
-        // send the init request with the debit method.
-        $this->_heidelpayPaymentMethod->debit();
-
-        // return the response object
         return $this->_heidelpayPaymentMethod->getResponse();
     }
 
@@ -162,15 +148,43 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
     public function additionalPaymentInformation($response)
     {
         return __(
-            'The amount of <strong>%1 %2</strong> will be debited from this account within the next days:'
-            . '<br /><br />IBAN: %3<br /><br /><i>The booking contains the mandate reference ID: %4'
-            . '<br >and the creditor identifier: %5</i><br /><br />'
-            . 'Please ensure that there will be sufficient funds on the corresponding account.',
+            'Please transfer the amount of <strong>%1 %2</strong> '
+            . 'to the following account after your order has arrived:<br /><br />'
+            . 'Holder: %3<br/>IBAN: %4<br/>BIC: %5<br/><br/><i>'
+            . 'Please use only this identification number as the descriptor :</i><br/><strong>%6</strong>',
             $this->_paymentHelper->format($response['PRESENTATION_AMOUNT']),
             $response['PRESENTATION_CURRENCY'],
-            $response['ACCOUNT_IBAN'],
-            $response['ACCOUNT_IDENTIFICATION'],
-            $response['IDENTIFICATION_CREDITOR_ID']
+            $response['CONNECTOR_ACCOUNT_HOLDER'],
+            $response['CONNECTOR_ACCOUNT_IBAN'],
+            $response['CONNECTOR_ACCOUNT_BIC'],
+            $response['IDENTIFICATION_SHORTID']
         );
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function pendingTransactionProcessing($data, &$order, $message = null)
+    {
+        $order->getPayment()->setTransactionId($data['IDENTIFICATION_UNIQUEID']);
+        $order->getPayment()->setIsTransactionClosed(false);
+        $order->getPayment()->addTransaction(\Magento\Sales\Model\Order\Payment\Transaction::TYPE_AUTH, null, true);
+
+        $order->setState(\Magento\Sales\Model\Order::STATE_PROCESSING)
+            ->addStatusHistoryComment($message, \Magento\Sales\Model\Order::STATE_PROCESSING)
+            ->setIsCustomerNotified(true);
+
+        // payment is pending at the beginning, so we set the total paid sum to 0.
+        $order->setTotalPaid(0.00);
+
+        // if the order can be invoiced, create one and save it into a transaction.
+        if ($order->canInvoice()) {
+            $invoice = $order->prepareInvoice();
+            $invoice->setRequestedCaptureCase(\Magento\Sales\Model\Order\Invoice::CAPTURE_ONLINE)
+                ->setIsPaid(false)
+                ->register();
+
+            $this->_paymentHelper->saveTransaction($invoice);
+        }
     }
 }

@@ -196,6 +196,22 @@ class Payment extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
+     * Checks if the given paymentcode is viable for a refund transaction.
+     *
+     * @param string $paymentcode
+     *
+     * @return bool
+     */
+    public function isRefundable($paymentcode)
+    {
+        if ($paymentcode === 'DB' || $paymentcode === 'CP' || $paymentcode === 'RC') {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Saves a transaction by the given invoice.
      *
      * @param Invoice $invoice
