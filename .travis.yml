@@ -1,5 +1,13 @@
-language: php
+sudo: required
 dist: trusty
+addons:
+  apt:
+    packages:
+    - mysql-server-5.6
+    - mysql-client-core-5.6
+    - mysql-client-5.6
+    - postfix
+language: php
 
 matrix:
   fast_finish: true
@@ -22,7 +30,10 @@ before_script:
   - mkdir -p "$HOME/.php-cs-fixer"
   - pwd
   - composer create-project "magento/community-edition:$magento" magento
-  - cd "$HOME/magento"
+  - cd "magento"
+  - mysql -uroot -e 'CREATE DATABASE magento2;'
+  - php bin/magento setup:install -q --admin-user="admin" --admin-password="123123q" --admin-email="admin@example.com" --admin-firstname="John" --admin-lastname="Doe"
+
   - cd "$HOME"
   - composer self-update
   - if [ "$deps" = "no" ]; then composer --prefer-dist install; fi;
