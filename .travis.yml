@@ -12,9 +12,11 @@ addons:
     - mysql-client-core-5.6
     - mysql-client-5.6
     - postfix
-
 language: php
-
+env:
+  matrix:
+    - TEST_SUITE=unit
+    - TEST_SUITE=integration
 matrix:
   fast_finish: true
   include:
@@ -24,33 +26,16 @@ matrix:
       env: magento=2.1.1
     - php: 7.0
       env: magento=2.1.6
-
 cache:
   directories:
     - $HOME/.composer/cache
     - $HOME/.php-cs-fixer
     - $HOME/.local
-
 before_install:
   - composer config -g http-basic.repo.magento.com $MAGE_PUBLICKEY $MAGE_PRIVATEKEY
-
-before_script:
-  - mkdir -p "$HOME/.php-cs-fixer"
-  - cd ..
-  - composer self-update
-  - composer create-project "magento/community-edition:$magento" magento-ce
-  - cd "magento-ce"
-  - mysql -uroot -e 'CREATE DATABASE magento2;'
-  - php bin/magento setup:install -q --admin-user="admin" --admin-password="123123q" --admin-email="admin@example.com" --admin-firstname="John" --admin-lastname="Doe"
-  - composer require "heidelpay/magento2:dev-$TRAVIS_BRANCH"
-  - php -f bin/magento module:enable Heidelpay_Gateway
-  - php -f bin/magento setup:upgrade
-  - php -f bin/magento cache:flush
-  - php -f bin/magento setup:di:compile
-  - php -f bin/magento dev:tests:run
-  - cd ../magento2
-  - composer update
-  - ./vendor/bin/phpcs --config-set installed_paths vendor/magento/marketplace-eqp;
-
+  - ./dev/travis/before_install.sh
+before_script: ./dev/travis/before_script.sh
 script:
   - ./vendor/bin/phpcs . --ignore=vendor/ --standard=MEQP2;
+  - ./dev/travis/script.sh
+
