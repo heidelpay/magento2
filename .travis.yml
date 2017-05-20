@@ -46,7 +46,7 @@ before_script:
   - php -f bin/magento module:enable Heidelpay_Gateway
   - php -f bin/magento setup:upgrade
   - php -f bin/magento cache:flush
-  - php -f bin/magento setup:di:compil
+  - php -f bin/magento setup:di:compile
   - php -f bin/magento dev:tests:run
   - cd ../magento2
   - composer update
