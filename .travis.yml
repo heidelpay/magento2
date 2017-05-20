@@ -7,8 +7,13 @@ addons:
     - mysql-client-core-5.6
     - mysql-client-5.6
     - postfix
+
 language: php
 
+env:
+  global:
+      - PhpApi=~17.4.13
+      - PhpCustomerMessages=~17.2.3
 matrix:
   fast_finish: true
   include:
@@ -36,10 +41,15 @@ before_script:
   - php bin/magento setup:install -q --admin-user="admin" --admin-password="123123q" --admin-email="admin@example.com" --admin-firstname="John" --admin-lastname="Doe"
   - mkdir -p "./vendor/heidelpay"
   - cp -r ../magento2 ./vendor/heidelpay/
-  - composer update
+  - composer require "heidelpay/php-api:$PhpApi"
+  - composer require "heidelpay/php-customer-messages:$PhpCustomerMessages"
+  - php -f bin/magento module:enable Heidelpay_Gateway
+  - php -f bin/magento setup:upgrade
+  - php -f bin/magento cache:flush
+  - php -f bin/magento setup:di:compile
+  - php -f bin/magento setup:static-content:deploy
   - cd ../magento2
-  - if [ "$deps" = "no" ]; then composer --prefer-dist install; fi;
-  - if [ "$deps" = "high" ]; then composer --prefer-source update; fi;
+  - composer update
   - ./vendor/bin/phpcs --config-set installed_paths vendor/magento/marketplace-eqp;
 
 script:
