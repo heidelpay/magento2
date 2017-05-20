@@ -1,3 +1,8 @@
+# automated extension test for different magento 2 version
+# Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
+# Copyright © 2016-present Heidelberger Payment GmbH. All rights reserved.
+# https://dev.heidelpay.de/magento2
+# Jens Richter
 sudo: required
 dist: trusty
 addons:
@@ -10,10 +15,6 @@ addons:
 
 language: php
 
-env:
-  global:
-      - PhpApi=~17.4.13
-      - PhpCustomerMessages=~17.2.3
 matrix:
   fast_finish: true
   include:
@@ -41,18 +42,12 @@ before_script:
   - cd "magento-ce"
   - mysql -uroot -e 'CREATE DATABASE magento2;'
   - php bin/magento setup:install -q --admin-user="admin" --admin-password="123123q" --admin-email="admin@example.com" --admin-firstname="John" --admin-lastname="Doe"
-  - mkdir -p "./app/code/Heidelpay/Gateway"
-  - cp -r ../magento2 ./app/code/Heidelpay/Gateway/
-  - composer require "heidelpay/php-api:$PhpApi"
-  - composer require "heidelpay/php-customer-messages:$PhpCustomerMessages"
+  - composer require "heidelpay/magento2:dev-$TRAVIS_BRANCH"
   - php -f bin/magento module:enable Heidelpay_Gateway
   - php -f bin/magento setup:upgrade
   - php -f bin/magento cache:flush
   - php -f bin/magento setup:di:compile
-  - php -f bin/magento setup:static-content:deploy
-  - pwd
-  - ls -la
-  - cd ../magento2
+  - php -f bin/magento setup:static-content:deployento2
   - composer update
   - ./vendor/bin/phpcs --config-set installed_paths vendor/magento/marketplace-eqp;
 
