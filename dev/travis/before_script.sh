@@ -37,4 +37,4 @@ php -f bin/magento dev:tests:run
 echo "==> Doing preperations for EQP tests."
 cd ../magento2
 composer update
-./vendor/bin/phpcs --config-set installed_paths vendor/magento/marketplace-eqp;
+./vendor/bin/phpcs --config-set installed_paths vendor/magento/marketplace-eqp
