@@ -5,9 +5,9 @@ matrix:
   fast_finish: true
   include:
     - php: 5.6
-      env: magneto=2.0.1
+      env: magento=2.0.1
     - php: 5.6
-      env: magneto=2.1.1
+      env: magento=2.1.1
 
 cache:
   directories:
@@ -20,6 +20,7 @@ before_install:
 
 before_script:
   - mkdir -p "$HOME/.php-cs-fixer"
+  - pwd
   - composer create-project "magento/community-edition:$magento" magento
   - cd "$HOME/magento"
   - cd "$HOME"
