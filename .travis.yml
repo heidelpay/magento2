@@ -39,9 +39,8 @@ before_script:
   - cd "magento-ce"
   - mysql -uroot -e 'CREATE DATABASE magento2;'
   - php bin/magento setup:install -q --admin-user="admin" --admin-password="123123q" --admin-email="admin@example.com" --admin-firstname="John" --admin-lastname="Doe"
-  - mkdir -p "./vendor/heidelpay"
-  - cp -r ../magento2 ./vendor/heidelpay/
-  - composer dump-autoload
+  - mkdir -p "./app/code/Heidelpay/Gateway"
+  - cp -r ../magento2 ./app/code/Heidelpay/Gateway/
   - composer require "heidelpay/php-api:$PhpApi"
   - composer require "heidelpay/php-customer-messages:$PhpCustomerMessages"
   - php -f bin/magento module:enable Heidelpay_Gateway
