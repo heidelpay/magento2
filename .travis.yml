@@ -20,7 +20,26 @@ env:
   global:
     - INTEGRATION_SETS=3
   matrix:
+    - magento=2.0.0
     - magento=2.0.1
+    - magento=2.0.2
+    - magento=2.0.3
+    - magento=2.0.4
+    - magento=2.0.5
+    - magento=2.0.6
+    - magento=2.0.7
+    - magento=2.0.8
+    - magento=2.0.9
+    - magento=2.0.10
+    - magento=2.0.11
+    - magento=2.0.12
+    - magento=2.0.13
+    - magento=2.1.0
+    - magento=2.1.1
+    - magento=2.1.2
+    - magento=2.1.3
+    - magento=2.1.4
+    - magento=2.1.5
     - magento=2.1.6
 matrix:
   fast_finish: true
