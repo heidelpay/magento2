@@ -15,6 +15,18 @@ cd "magento-ce"
 echo "==> Requiring heidelpay/magento2 from the dev-$TRAVIS_BRANCH branch"
 composer require "heidelpay/magento2:dev-$TRAVIS_BRANCH"
 
+echo "==> Installing Magento"
+mysql -uroot -e 'CREATE DATABASE magento2;'
+php bin/magento setup:install -q --admin-user="admin" --admin-password="123123q" --admin-email="admin@example.com" --admin-firstname="John" --admin-lastname="Doe"
+
+# enable the extension, do other relavant mage tasks.
+echo "==> Enable extension, do mage tasks..."
+php -f bin/magento module:enable Heidelpay_Gateway
+php -f bin/magento setup:upgrade
+php -f bin/magento cache:flush
+php -f bin/magento setup:di:compile
+php -f bin/magento dev:tests:run
+
 # definition for the test suites
 test_suites=(integration unit)
 integration_levels=(1 2 3)
@@ -95,23 +107,11 @@ for test_suite in test_suites; do
             cp Gruntfile.js.sample Gruntfile.js
             yarn
 
-            echo "Installing Magento"
-            mysql -uroot -e 'CREATE DATABASE magento2;'
-            php bin/magento setup:install -q --admin-user="admin" --admin-password="123123q" --admin-email="admin@example.com" --admin-firstname="John" --admin-lastname="Doe"
-
             echo "Deploying Static Content"
             php bin/magento setup:static-content:deploy -f -q -j=2 --no-css --no-less --no-images --no-fonts --no-misc --no-html-minify
             ;;
     esac
 done
-
-# enable the extension, do other relavant mage tasks.
-echo "==> Enable extension, do mage tasks..."
-php -f bin/magento module:enable Heidelpay_Gateway
-php -f bin/magento setup:upgrade
-php -f bin/magento cache:flush
-php -f bin/magento setup:di:compile
-php -f bin/magento dev:tests:run
 
 # go into the actual cloned repo to do make preparations for the EQP tests.
 echo "==> Doing preperations for EQP tests."
