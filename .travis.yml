@@ -37,6 +37,4 @@ before_install:
   - chmod +x ./dev/travis/*
   - ./dev/travis/before_install.sh
 before_script: ./dev/travis/before_script.sh
-script:
-  - ./vendor/bin/phpcs . --ignore=vendor/ --standard=MEQP2;
-  - ./dev/travis/script.sh
+script: ./dev/travis/script.sh
