@@ -5,6 +5,7 @@ echo "==> Actual directory: `pwd`"
 echo '==> Doing phpcs tests with MEQP2 Standard setting.'
 ./vendor/bin/phpcs . --ignore=vendor/ --standard=MEQP2;
 
+cd ../magento-ce
 echo '==> Doing unit tests.';
 php bin/magento dev:tests:run unit
 
