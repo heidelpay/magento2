@@ -25,7 +25,6 @@ php -f bin/magento module:enable Heidelpay_Gateway
 php -f bin/magento setup:upgrade
 php -f bin/magento cache:flush
 php -f bin/magento setup:di:compile
-php -f bin/magento dev:tests:run
 
 # definition for the test suites
 test_suites=(integration unit)
