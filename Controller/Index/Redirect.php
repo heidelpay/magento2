@@ -160,7 +160,7 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
             }
 
             // Check send Invoice Mail enabled
-            if($this->salesHelper->canSendNewInvoiceEmail($session->getQuote()->getStore()->getId())) {
+            if ($this->salesHelper->canSendNewInvoiceEmail($session->getQuote()->getStore()->getId())) {
                 // send invoice(s) to the customer
                 if (!$order->canInvoice()) {
                     $invoices = $order->getInvoiceCollection();
