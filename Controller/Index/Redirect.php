@@ -35,6 +35,8 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
     /** @var \Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory */
     protected $transactionCollectionFactory;
 
+    /** @var \Magento\Sales\Helper\Data */
+    protected $salesHelper;
     /**
      * heidelpay Redirect constructor.
      *
@@ -55,6 +57,7 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
      * @param \Magento\Customer\Model\Url $customerUrl
      * @param \Heidelpay\PhpApi\Response $heidelpayResponse
      * @param \Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory $transactionCollectionFactory
+     * @param \Magento\Sales\Helper\Data $salesHelper
      */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
@@ -73,7 +76,8 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
         \Magento\Framework\Encryption\Encryptor $encryptor,
         \Magento\Customer\Model\Url $customerUrl,
         \Heidelpay\PhpApi\Response $heidelpayResponse,
-        \Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory $transactionCollectionFactory
+        \Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory $transactionCollectionFactory,
+        \Magento\Sales\Helper\Data $salesHelper
     ) {
         parent::__construct(
             $context,
@@ -95,6 +99,7 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
 
         $this->heidelpayResponse = $heidelpayResponse;
         $this->transactionCollectionFactory = $transactionCollectionFactory;
+        $this->salesHelper = $salesHelper;
     }
 
     public function execute()
@@ -154,14 +159,18 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
                 );
             }
 
-            // send invoice(s) to the customer
-            if (!$order->canInvoice()) {
-                $invoices = $order->getInvoiceCollection();
+            // Check send Invoice Mail enabled
+            if($this->salesHelper->canSendNewInvoiceEmail($session->getQuote()->getStore()->getId())) {
+                // send invoice(s) to the customer
+                if (!$order->canInvoice()) {
+                    $invoices = $order->getInvoiceCollection();
 
-                foreach ($invoices as $invoice) {
-                    $this->_invoiceSender->send($invoice);
+                    foreach ($invoices as $invoice) {
+                        $this->_invoiceSender->send($invoice);
+                    }
                 }
             }
+
 
             $session->clearHelperData();
 
