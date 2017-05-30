@@ -7,7 +7,6 @@ mkdir -p "$HOME/.php-cs-fixer"
 
 # go into the parent folder and pull a full magento 2 ce project, to do all tests.
 cd ..
-composer self-update
 composer create-project "magento/community-edition:$magento" magento-ce
 cd "magento-ce"
 
@@ -17,7 +16,10 @@ composer require "heidelpay/magento2:dev-$TRAVIS_BRANCH"
 
 echo "==> Installing Magento"
 mysql -uroot -e 'CREATE DATABASE magento2;'
-php bin/magento setup:install -q --admin-user="admin" --admin-password="123123q" --admin-email="admin@example.com" --admin-firstname="John" --admin-lastname="Doe"
+php bin/magento setup:install -q --admin-user="admin" --admin-password="123123q" --admin-email="admin@example.com" --admin-firstname="John" --admin-lastname="Doe" --db-name="magento2"
+
+echo "==> Copying the current build to the Magento 2 installation."
+cp -R ../magento2/* vendor/heidelpay/magento2/
 
 # enable the extension, do other relavant mage tasks.
 echo "==> Enable extension, do mage tasks..."
