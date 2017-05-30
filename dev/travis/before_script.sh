@@ -17,7 +17,7 @@ composer require "heidelpay/magento2:dev-$TRAVIS_BRANCH"
 
 echo "==> Installing Magento 2"
 mysql -uroot -e 'CREATE DATABASE magento2;'
-php bin/magento setup:install -q --admin-user="admin" --admin-password="123123q" --admin-email="admin@example.com" --admin-firstname="John" --admin-lastname="Doe" --db-name="magento2" --db-host="localhost" --db-user="root"
+php bin/magento setup:install -q --admin-user="admin" --admin-password="123123q" --admin-email="admin@example.com" --admin-firstname="John" --admin-lastname="Doe" --db-name="magento2"
 
 echo "==> Copying the current build to the Magento 2 installation."
 cp -R ../magento2/* vendor/heidelpay/magento2/
