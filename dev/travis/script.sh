@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-echo "==> Actual directory: `pwd`"
-
 echo '==> Doing phpcs tests with MEQP2 Standard setting.'
 ./vendor/bin/phpcs . --ignore=vendor/ --standard=MEQP2;
 

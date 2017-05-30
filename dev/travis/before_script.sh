@@ -6,6 +6,7 @@ trap '>&2 echo Error: Command \`$BASH_COMMAND\` on line $LINENO failed with exit
 mkdir -p "$HOME/.php-cs-fixer"
 
 # go into the parent folder and pull a full magento 2 ce project, to do all tests.
+echo "==> Installing Magento 2 CE (Version $magento)..."
 cd ..
 composer create-project "magento/community-edition:$magento" magento-ce
 cd "magento-ce"
@@ -16,7 +17,7 @@ composer require "heidelpay/magento2:dev-$TRAVIS_BRANCH"
 
 echo "==> Installing Magento"
 mysql -uroot -e 'CREATE DATABASE magento2;'
-php bin/magento setup:install -q --admin-user="admin" --admin-password="123123q" --admin-email="admin@example.com" --admin-firstname="John" --admin-lastname="Doe" --db-name="magento2" --db-host="localhost" --db-user="root"
+php -f bin/magento setup:install -q --admin-user="admin" --admin-password="123123q" --admin-email="admin@example.com" --admin-firstname="John" --admin-lastname="Doe" --db-name="magento2" --db-host="localhost" --db-user="root"
 
 echo "==> Copying the current build to the Magento 2 installation."
 cp -R ../magento2/* vendor/heidelpay/magento2/
@@ -34,7 +35,7 @@ integration_levels=(1 2 3)
 
 for test_suite in test_suites; do
     # prepare for test suite
-    case ${test_suite} in
+    case test_suite in
         integration)
             cd dev/tests/integration
 
@@ -115,7 +116,7 @@ for test_suite in test_suites; do
 done
 
 # go into the actual cloned repo to do make preparations for the EQP tests.
-echo "==> Doing preperations for EQP tests."
+echo "==> Doing preparations for EQP tests."
 cd ../magento2
 composer update
 ./vendor/bin/phpcs --config-set installed_paths vendor/magento/marketplace-eqp
