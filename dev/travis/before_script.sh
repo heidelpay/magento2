@@ -34,7 +34,7 @@ integration_levels=(1 2 3)
 for test_suite in integration unit; do
     echo " ===> test_suite: $test_suite"
     # prepare for test suite
-    case test_suite in
+    case ${test_suite} in
         integration)
             echo " ===> test_suite_case: $test_suite"
             cd dev/tests/integration
