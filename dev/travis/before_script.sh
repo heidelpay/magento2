@@ -6,7 +6,7 @@ trap '>&2 echo Error: Command \`$BASH_COMMAND\` on line $LINENO failed with exit
 mkdir -p "$HOME/.php-cs-fixer"
 
 # go into the parent folder and pull a full magento 2 ce project, to do all tests.
-echo "==> Installing Magento 2 CE (Version $magento)..."
+echo "==> Installing Magento 2 CE (Version $magento) over composer create-project ..."
 cd ..
 composer create-project "magento/community-edition:$magento" magento-ce
 cd "magento-ce"
@@ -15,28 +15,28 @@ cd "magento-ce"
 echo "==> Requiring heidelpay/magento2 from the dev-$TRAVIS_BRANCH branch"
 composer require "heidelpay/magento2:dev-$TRAVIS_BRANCH"
 
-echo "==> Installing Magento"
+echo "==> Installing Magento 2"
 mysql -uroot -e 'CREATE DATABASE magento2;'
-php -f bin/magento setup:install --admin-user="admin" --admin-password="123123q" --admin-email="admin@example.com" --admin-firstname="John" --admin-lastname="Doe" --db-name="magento2" --db-host="localhost" --db-user="root"
+php bin/magento setup:install -q --admin-user="admin" --admin-password="123123q" --admin-email="admin@example.com" --admin-firstname="John" --admin-lastname="Doe" --db-name="magento2" --db-host="localhost" --db-user="root"
 
 echo "==> Copying the current build to the Magento 2 installation."
 cp -R ../magento2/* vendor/heidelpay/magento2/
 
 # enable the extension, do other relavant mage tasks.
 echo "==> Enable extension, do mage tasks..."
-php -f bin/magento module:enable Heidelpay_Gateway
-php -f bin/magento setup:upgrade
-php -f bin/magento cache:flush
-php -f bin/magento setup:di:compile
+php bin/magento module:enable Heidelpay_Gateway
+php bin/magento setup:upgrade
+php bin/magento cache:flush
+php bin/magento setup:di:compile
 
 # definition for the test suites
+test_suites=("integration" "unit")
 integration_levels=(1 2 3)
-for test_suite in integration unit; do
-    echo " ===> test_suite: $test_suite"
+
+for test_suite in ${test_suites[@]}; do
     # prepare for test suite
     case ${test_suite} in
         integration)
-            echo " ===> test_suite_case: $test_suite"
             cd dev/tests/integration
 
             test_set_list=$(find testsuite/* -maxdepth 1 -mindepth 1 -type d | sort)
@@ -46,8 +46,7 @@ for test_suite in integration unit; do
             test_set_size[3]=$((test_set_count-test_set_size[1]-test_set_size[2])) #56%
             echo "Total = ${test_set_count}; Batch #1 = ${test_set_size[1]}; Batch #2 = ${test_set_size[2]}; Batch #3 = ${test_set_size[3]};";
 
-            for integration_index in integration_levels; do
-                echo " ===> integration_index: $integration_index"
+            for integration_index in ${integration_levels[@]}; do
                 echo "==> preparing integration testsuite on index $integration_index with set size of ${test_set_size[$integration_index]}"
                 cp phpunit.xml.dist phpunit.xml
 
