@@ -30,10 +30,8 @@ php -f bin/magento cache:flush
 php -f bin/magento setup:di:compile
 
 # definition for the test suites
-test_suites=(integration unit)
 integration_levels=(1 2 3)
-
-for test_suite in test_suites; do
+for test_suite in integration unit; do
     echo " ===> test_suite: $test_suite"
     # prepare for test suite
     case test_suite in
