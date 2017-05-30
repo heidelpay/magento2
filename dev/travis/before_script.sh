@@ -34,9 +34,11 @@ test_suites=(integration unit)
 integration_levels=(1 2 3)
 
 for test_suite in test_suites; do
+    echo " ===> test_suite: $test_suite"
     # prepare for test suite
     case test_suite in
         integration)
+            echo " ===> test_suite_case: $test_suite"
             cd dev/tests/integration
 
             test_set_list=$(find testsuite/* -maxdepth 1 -mindepth 1 -type d | sort)
@@ -47,6 +49,7 @@ for test_suite in test_suites; do
             echo "Total = ${test_set_count}; Batch #1 = ${test_set_size[1]}; Batch #2 = ${test_set_size[2]}; Batch #3 = ${test_set_size[3]};";
 
             for integration_index in integration_levels; do
+                echo " ===> integration_index: $integration_index"
                 echo "==> preparing integration testsuite on index $integration_index with set size of ${test_set_size[$integration_index]}"
                 cp phpunit.xml.dist phpunit.xml
 
