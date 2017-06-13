@@ -1,5 +1,15 @@
 # Release Notes - heidelpay Payment Gateway for Magento 2
 
+## v17.6.13
+
+### Added
+- Invoice payment method (non-secure)
+- Online Capture and Refund functionality for all payment methods
+
+### Fixed
+- Wrong parent transaction id was set for Receipts in Push notifications
+- Added an additional validator for sending invoices (PR #24)
+
 ## v17.5.9
 
 ### Fixed

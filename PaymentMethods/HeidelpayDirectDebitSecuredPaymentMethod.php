@@ -29,6 +29,16 @@ class HeidelpayDirectDebitSecuredPaymentMethod extends HeidelpayAbstractPaymentM
     protected $_canAuthorize = true;
 
     /**
+     * @var boolean
+     */
+    protected $_canRefund = true;
+
+    /**
+     * @var boolean
+     */
+    protected $_canRefundInvoicePartial = true;
+
+    /**
      * HeidelpayDirectDebitSecurePaymentMethod constructor.
      *
      * @param \Magento\Framework\Model\Context $context
