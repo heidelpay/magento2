@@ -135,6 +135,9 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
      */
     protected $productMetadata;
 
+    /** @var \Magento\Sales\Helper\Data */
+    protected $salesHelper;
+
     /**
      * Resource information about modules
      *
@@ -181,6 +184,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
      * @param HeidelpayTransactionCollectionFactory                   $transactionCollectionFactory
      * @param \Magento\Framework\Model\ResourceModel\AbstractResource $resource
      * @param \Magento\Framework\Data\Collection\AbstractDb           $resourceCollection
+     * @param \Magento\Sales\Helper\Data                              $salesHelper
      * @param array                                                   $data
      */
     public function __construct(
@@ -203,6 +207,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         HeidelpayTransactionCollectionFactory $transactionCollectionFactory,
         \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
+        \Magento\Sales\Helper\Data $salesHelper,
         array $data = []
     ) {
         parent::__construct(
@@ -222,6 +227,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         $this->logger = $logger;
         $this->_requestHttp = $request;
         $this->_paymentHelper = $paymentHelper;
+        $this->salesHelper = $salesHelper;
 
         $this->_encryptor = $encryptor;
         $this->_localResolver = $localeResolver;
@@ -711,14 +717,16 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
 
         // if the order can be invoiced and is no Pre-Authorization,
         // create one and save it into a transaction.
-        if ($order->canInvoice() && !$this->_paymentHelper->isPreAuthorization($data)) {
-            $invoice = $order->prepareInvoice();
+        if ($this->salesHelper->canSendNewInvoiceEmail($order->getStore()->getId())) {
+            if ($order->canInvoice() && !$this->_paymentHelper->isPreAuthorization($data)) {
+                $invoice = $order->prepareInvoice();
 
-            $invoice->setRequestedCaptureCase(Invoice::CAPTURE_ONLINE);
-            $invoice->setTransactionId($data['IDENTIFICATION_UNIQUEID']);
-            $invoice->register()->pay();
+                $invoice->setRequestedCaptureCase(Invoice::CAPTURE_ONLINE);
+                $invoice->setTransactionId($data['IDENTIFICATION_UNIQUEID']);
+                $invoice->register()->pay();
 
-            $this->_paymentHelper->saveTransaction($invoice);
+                $this->_paymentHelper->saveTransaction($invoice);
+            }
         }
 
         $order->getPayment()->addTransaction(Transaction::TYPE_CAPTURE, null, true);

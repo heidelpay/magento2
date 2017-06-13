@@ -9,7 +9,7 @@
  * @var $block \Heidelpay\Gateway\Block\Info\Invoice
  */
 ?>
-<dl class="payment-method invoice-secured">
+<dl class="payment-method invoice">
     <dt class="title"><?php echo $block->escapeHtml($block->getMethod()->getTitle()) ?></dt>
     <?php if ($block->getTransactionInfo() !== null) : ?>
         <dd class="content">

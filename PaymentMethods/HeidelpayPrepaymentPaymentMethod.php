@@ -62,6 +62,7 @@ class HeidelpayPrepaymentPaymentMethod extends HeidelpayAbstractPaymentMethod
      * @param \Magento\Framework\App\ProductMetadataInterface $productMetadata
      * @param \Magento\Framework\Module\ResourceInterface $moduleResource
      * @param \Heidelpay\Gateway\Helper\Payment $paymentHelper
+     * @param \Magento\Sales\Helper\Data $salesHelper
      * @param PaymentInformationCollectionFactory $paymentInformationCollectionFactory
      * @param \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory
      * @param HeidelpayTransactionCollectionFactory $transactionCollectionFactory
@@ -85,6 +86,7 @@ class HeidelpayPrepaymentPaymentMethod extends HeidelpayAbstractPaymentMethod
         \Magento\Framework\App\ProductMetadataInterface $productMetadata,
         \Magento\Framework\Module\ResourceInterface $moduleResource,
         \Heidelpay\Gateway\Helper\Payment $paymentHelper,
+        \Magento\Sales\Helper\Data $salesHelper,
         PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
         \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory,
         HeidelpayTransactionCollectionFactory $transactionCollectionFactory,
@@ -108,6 +110,7 @@ class HeidelpayPrepaymentPaymentMethod extends HeidelpayAbstractPaymentMethod
             $productMetadata,
             $moduleResource,
             $paymentHelper,
+            $salesHelper,
             $paymentInformationCollectionFactory,
             $transactionFactory,
             $transactionCollectionFactory,
@@ -169,13 +172,15 @@ class HeidelpayPrepaymentPaymentMethod extends HeidelpayAbstractPaymentMethod
         $order->setTotalPaid(0.00);
 
         // if the order can be invoiced, create one and save it into a transaction.
-        if ($order->canInvoice()) {
-            $invoice = $order->prepareInvoice();
-            $invoice->setRequestedCaptureCase(\Magento\Sales\Model\Order\Invoice::CAPTURE_ONLINE)
-                ->setIsPaid(false)
-                ->register();
+        if ($this->salesHelper->canSendNewInvoiceEmail($order->getStore()->getId())) {
+            if ($order->canInvoice()) {
+                $invoice = $order->prepareInvoice();
+                $invoice->setRequestedCaptureCase(\Magento\Sales\Model\Order\Invoice::CAPTURE_ONLINE)
+                    ->setIsPaid(false)
+                    ->register();
 
-            $this->_paymentHelper->saveTransaction($invoice);
+                $this->_paymentHelper->saveTransaction($invoice);
+            }
         }
     }
 }

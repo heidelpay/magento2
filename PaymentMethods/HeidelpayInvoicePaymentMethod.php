@@ -69,10 +69,11 @@ class HeidelpayInvoicePaymentMethod extends HeidelpayAbstractPaymentMethod
      * @param \Magento\Framework\App\ProductMetadataInterface $productMetadata
      * @param \Magento\Framework\Module\ResourceInterface $moduleResource
      * @param \Heidelpay\Gateway\Helper\Payment $paymentHelper
+     * @param \Magento\Sales\Helper\Data $salesHelper
      * @param PaymentInformationCollectionFactory $paymentInformationCollectionFactory
      * @param \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory
      * @param HeidelpayTransactionCollectionFactory $transactionCollectionFactory
-     * @param \Heidelpay\PhpApi\PaymentMethods\InvoiceB2CSecuredPaymentMethod $invoiceB2CSecuredPaymentMethod
+     * @param \Heidelpay\PhpApi\PaymentMethods\InvoicePaymentMethod $invoicePaymentMethod
      * @param \Magento\Framework\Model\ResourceModel\AbstractResource|null $resource
      * @param \Magento\Framework\Data\Collection\AbstractDb|null $resourceCollection
      * @param array $data
@@ -92,6 +93,7 @@ class HeidelpayInvoicePaymentMethod extends HeidelpayAbstractPaymentMethod
         \Magento\Framework\App\ProductMetadataInterface $productMetadata,
         \Magento\Framework\Module\ResourceInterface $moduleResource,
         \Heidelpay\Gateway\Helper\Payment $paymentHelper,
+        \Magento\Sales\Helper\Data $salesHelper,
         PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
         \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory,
         HeidelpayTransactionCollectionFactory $transactionCollectionFactory,
@@ -115,6 +117,7 @@ class HeidelpayInvoicePaymentMethod extends HeidelpayAbstractPaymentMethod
             $productMetadata,
             $moduleResource,
             $paymentHelper,
+            $salesHelper,
             $paymentInformationCollectionFactory,
             $transactionFactory,
             $transactionCollectionFactory,
@@ -178,13 +181,15 @@ class HeidelpayInvoicePaymentMethod extends HeidelpayAbstractPaymentMethod
         $order->setTotalPaid(0.00);
 
         // if the order can be invoiced, create one and save it into a transaction.
-        if ($order->canInvoice()) {
-            $invoice = $order->prepareInvoice();
-            $invoice->setRequestedCaptureCase(\Magento\Sales\Model\Order\Invoice::CAPTURE_ONLINE)
-                ->setIsPaid(false)
-                ->register();
+        if ($this->salesHelper->canSendNewInvoiceEmail($order->getStore()->getId())) {
+            if ($order->canInvoice()) {
+                $invoice = $order->prepareInvoice();
+                $invoice->setRequestedCaptureCase(\Magento\Sales\Model\Order\Invoice::CAPTURE_ONLINE)
+                    ->setIsPaid(false)
+                    ->register();
 
-            $this->_paymentHelper->saveTransaction($invoice);
+                $this->_paymentHelper->saveTransaction($invoice);
+            }
         }
     }
 }

@@ -37,6 +37,7 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
 
     /** @var \Magento\Sales\Helper\Data */
     protected $salesHelper;
+
     /**
      * heidelpay Redirect constructor.
      *
@@ -50,6 +51,7 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
      * @param \Magento\Quote\Api\CartRepositoryInterface $quoteObject
      * @param \Magento\Framework\View\Result\PageFactory $resultPageFactory
      * @param HeidelpayHelper $paymentHelper
+     * @param \Magento\Sales\Helper\Data $salesHelper
      * @param OrderSender $orderSender
      * @param InvoiceSender $invoiceSender
      * @param OrderCommentSender $orderCommentSender
@@ -57,7 +59,6 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
      * @param \Magento\Customer\Model\Url $customerUrl
      * @param \Heidelpay\PhpApi\Response $heidelpayResponse
      * @param \Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory $transactionCollectionFactory
-     * @param \Magento\Sales\Helper\Data $salesHelper
      */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
@@ -70,14 +71,14 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
         \Magento\Quote\Api\CartRepositoryInterface $quoteObject,
         \Magento\Framework\View\Result\PageFactory $resultPageFactory,
         HeidelpayHelper $paymentHelper,
+        \Magento\Sales\Helper\Data $salesHelper,
         OrderSender $orderSender,
         InvoiceSender $invoiceSender,
         OrderCommentSender $orderCommentSender,
         \Magento\Framework\Encryption\Encryptor $encryptor,
         \Magento\Customer\Model\Url $customerUrl,
         \Heidelpay\PhpApi\Response $heidelpayResponse,
-        \Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory $transactionCollectionFactory,
-        \Magento\Sales\Helper\Data $salesHelper
+        \Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory $transactionCollectionFactory
     ) {
         parent::__construct(
             $context,

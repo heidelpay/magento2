@@ -15,6 +15,7 @@ Currently supported payment methods are:
 * Sofortüberweisung
 * PayPal
 * Prepayment
+* Invoice
 * Invoice (Secured) (B2C)
 * giropay
 
