@@ -179,12 +179,12 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
      * @param \Magento\Framework\App\ProductMetadataInterface         $productMetadata
      * @param \Magento\Framework\Module\ResourceInterface             $moduleResource
      * @param \Heidelpay\Gateway\Helper\Payment                       $paymentHelper
+     * @param \Magento\Sales\Helper\Data                              $salesHelper
      * @param PaymentInformationCollectionFactory                     $paymentInformationCollectionFactory
      * @param \Heidelpay\Gateway\Model\TransactionFactory             $transactionFactory
      * @param HeidelpayTransactionCollectionFactory                   $transactionCollectionFactory
      * @param \Magento\Framework\Model\ResourceModel\AbstractResource $resource
      * @param \Magento\Framework\Data\Collection\AbstractDb           $resourceCollection
-     * @param \Magento\Sales\Helper\Data                              $salesHelper
      * @param array                                                   $data
      */
     public function __construct(
@@ -202,12 +202,12 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         \Magento\Framework\App\ProductMetadataInterface $productMetadata,
         \Magento\Framework\Module\ResourceInterface $moduleResource,
         \Heidelpay\Gateway\Helper\Payment $paymentHelper,
+        \Magento\Sales\Helper\Data $salesHelper,
         PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
         \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory,
         HeidelpayTransactionCollectionFactory $transactionCollectionFactory,
         \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
-        \Magento\Sales\Helper\Data $salesHelper,
         array $data = []
     ) {
         parent::__construct(

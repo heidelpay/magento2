@@ -131,6 +131,7 @@ class HeidelpayCreditCardPaymentMethod extends HeidelpayAbstractPaymentMethod
             $productMetadata,
             $moduleResource,
             $paymentHelper,
+            $salesHelper,
             $paymentInformationCollectionFactory,
             $transactionFactory,
             $transactionCollectionFactory,
