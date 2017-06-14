@@ -405,22 +405,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
             $this->_encryptor->exportKeys()
         );
 
-        // add customerdata, since some refund transactions need those.
-        $transactionData = $transactionInfo->getJsonResponse();
-        $this->_heidelpayPaymentMethod->getRequest()->customerAddress(
-            $transactionData['NAME_GIVEN'],
-            $transactionData['NAME_FAMILY'],
-            (isset($transactionData['NAME_COMPANY']) ? $transactionData['NAME_COMPANY'] : ''),
-            (isset($transactionData['IDENTIFICATION_SHOPPERID']) ? $transactionData['IDENTIFICATION_SHOPPERID'] : ''),
-            $transactionData['ADDRESS_STREET'],
-            (isset($transactionData['ADDRESS_STATE']) ? $transactionData['ADDRESS_STATE'] : ''),
-            $transactionData['ADDRESS_ZIP'],
-            $transactionData['ADDRESS_CITY'],
-            $transactionData['ADDRESS_COUNTRY'],
-            $transactionData['CONTACT_EMAIL']
-        );
-
-        // send the capture request
+        // send the refund request
         $this->_heidelpayPaymentMethod->refund($transactionInfo->getUniqueId());
 
         // if the heidelpay Request wasn't successful, throw an Exception with the heidelpay message
