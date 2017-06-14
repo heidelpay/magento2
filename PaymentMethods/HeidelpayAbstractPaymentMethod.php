@@ -2,6 +2,7 @@
 
 namespace Heidelpay\Gateway\PaymentMethods;
 
+use Heidelpay\Gateway\Model\Config\Source\BookingMode;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
 use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
 use Heidelpay\PhpApi\Response;
@@ -279,6 +280,11 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
             throw new \Magento\Framework\Exception\LocalizedException(__('The capture action is not available.'));
         }
 
+        // skip the bottom part, if the booking mode is not authorization.
+        if ($this->getBookingMode() !== BookingMode::AUTHORIZATION) {
+            return $this;
+        }
+
         // create the transactioncollection factory to get the parent authorization.
         $factory = $this->transactionCollectionFactory->create();
         /** @var \Heidelpay\Gateway\Model\Transaction $transactionInfo */
@@ -293,7 +299,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         // so is the payment type of this Transaction is no PA, we won't capture anything.
         if ($transactionInfo->getPaymentType() !== 'PA') {
             throw new \Magento\Framework\Exception\LocalizedException(
-                __('heidelpay - Cannot refund this transaction.')
+                __('heidelpay - Cannot capture this transaction.')
             );
         }
 
