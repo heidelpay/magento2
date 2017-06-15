@@ -148,8 +148,8 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
             $this->heidelpayPush->getResponse()->getPayment()->getCode()
         );
 
-        // in case of invoice receipts, we process the push message
-        if ($paymentMethod === 'IV' && $paymentType === 'RC') {
+        // in case of receipts, we process the push message for receipts.
+        if ($this->_paymentHelper->isReceiptAble($paymentMethod, $paymentType)) {
             // only when the Response is ACK.
             if ($this->heidelpayPush->getResponse()->isSuccess()) {
                 // load the reference quote to receive the quote information.
