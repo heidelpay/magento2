@@ -188,13 +188,14 @@ class HeidelpayInvoicePaymentMethod extends HeidelpayAbstractPaymentMethod
             ->setIsCustomerNotified(true);
 
         // payment is pending at the beginning, so we set the total paid sum to 0.
-        $order->setTotalPaid(0.00);
+        $order->setTotalPaid(0.00)->setBaseTotalPaid(0.00);
 
         // if the order can be invoiced, create one and save it into a transaction.
         if ($this->salesHelper->canSendNewInvoiceEmail($order->getStore()->getId())) {
             if ($order->canInvoice()) {
                 $invoice = $order->prepareInvoice();
                 $invoice->setRequestedCaptureCase(\Magento\Sales\Model\Order\Invoice::CAPTURE_ONLINE)
+                    ->setTransactionId($data['IDENTIFICATION_UNIQUEID'])
                     ->setIsPaid(false)
                     ->register();
 

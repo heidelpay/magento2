@@ -186,6 +186,7 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
                 }
 
                 $order->setTotalPaid($order->getTotalPaid() + $paidAmount)
+                    ->setBaseTotalPaid($order->getBaseTotalPaid() + $paidAmount)
                     ->setState($state)
                     ->addStatusHistoryComment($comment, $state);
 

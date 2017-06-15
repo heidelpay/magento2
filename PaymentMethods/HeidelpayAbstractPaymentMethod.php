@@ -374,7 +374,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         // create the transactioncollection factory to get the parent authorization.
         $factory = $this->transactionCollectionFactory->create();
         /** @var \Heidelpay\Gateway\Model\Transaction $transactionInfo */
-        $transactionInfo = $factory->loadByTransactionId($payment->getParentTransactionId());
+        $transactionInfo = $factory->loadByTransactionId($payment->getTransactionId());
 
         // if there is no heidelpay transaction, something went wrong.
         if ($transactionInfo === null || $transactionInfo->isEmpty()) {
@@ -388,8 +388,6 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
                 __('heidelpay - Cannot refund this transaction.')
             );
         }
-
-        // TODO: Prüfen, ob der Request aus dem backend kommt.
 
         // get the configuration for the heidelpay Capture Request
         $config = $this->getMainConfig($this->getCode(), $payment->getOrder()->getStoreId());
