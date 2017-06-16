@@ -1,9 +1,9 @@
 # Release Notes - heidelpay Payment Gateway for Magento 2
 
-## v17.6.13
+## v17.6.16
 
 ### Added
-- Invoice payment method (non-secure)
+- Invoice (non-secure) payment method
 - Online Capture and Refund functionality for all payment methods
 
 ### Fixed
