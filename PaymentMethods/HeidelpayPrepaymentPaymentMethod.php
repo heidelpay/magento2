@@ -186,6 +186,7 @@ class HeidelpayPrepaymentPaymentMethod extends HeidelpayAbstractPaymentMethod
             if ($order->canInvoice()) {
                 $invoice = $order->prepareInvoice();
                 $invoice->setRequestedCaptureCase(\Magento\Sales\Model\Order\Invoice::CAPTURE_ONLINE)
+                    ->setTransactionId($data['IDENTIFICATION_UNIQUEID'])
                     ->setIsPaid(false)
                     ->register();
 
