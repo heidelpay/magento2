@@ -371,10 +371,11 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
             throw new \Magento\Framework\Exception\LocalizedException(__('The refund action is not available.'));
         }
 
-        // create the transactioncollection factory to get the parent authorization.
-        $factory = $this->transactionCollectionFactory->create();
+        // create the transactioncollection to get the parent authorization.
+        $collection = $this->transactionCollectionFactory->create();
+
         /** @var \Heidelpay\Gateway\Model\Transaction $transactionInfo */
-        $transactionInfo = $factory->loadByTransactionId($payment->getTransactionId());
+        $transactionInfo = $collection->loadByTransactionId($payment->getLastTransId());
 
         // if there is no heidelpay transaction, something went wrong.
         if ($transactionInfo === null || $transactionInfo->isEmpty()) {

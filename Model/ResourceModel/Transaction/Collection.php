@@ -45,21 +45,41 @@ class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\Ab
     }
 
     /**
-     * Adds a filter for the customer/guest e-mail address
+     * Adds a filter for the quote id
      *
      * @param string $quoteId
      *
      * @return $this
      */
-    private function addQuoteIdFilter($quoteId)
+    public function addQuoteIdFilter($quoteId)
     {
         $this->addFieldToFilter('transactionid', $quoteId);
         return $this;
     }
 
-    private function addTransactionIdFilter($transactionId)
+    /**
+     * Adds a filter for unique transaction id.
+     *
+     * @param string $transactionId
+     *
+     * @return $this
+     */
+    public function addTransactionIdFilter($transactionId)
     {
         $this->addFieldToFilter('uniqeid', $transactionId);
+        return $this;
+    }
+
+    /**
+     * Adds a filter for unique transaction id.
+     *
+     * @param string|array $paymentType
+     *
+     * @return $this
+     */
+    public function addPaymentTypeFilter($paymentType)
+    {
+        $this->addFieldToFilter('payment_type', $paymentType);
         return $this;
     }
 }
