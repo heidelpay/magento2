@@ -303,8 +303,6 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
             );
         }
 
-        // TODO: Prüfen, ob der Request aus dem backend kommt.
-
         // get the configuration for the heidelpay Capture Request
         $config = $this->getMainConfig($this->getCode(), $payment->getOrder()->getStoreId());
 
@@ -327,6 +325,10 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
 
         // send the capture request
         $this->_heidelpayPaymentMethod->capture($transactionInfo->getUniqueId());
+
+        $this->_logger->debug(
+            'heidelpay - Capture Response: ' . print_r($this->_heidelpayPaymentMethod->getResponse(), 1)
+        );
 
         // if the heidelpay Request wasn't successful, throw an Exception with the heidelpay message
         if (!$this->_heidelpayPaymentMethod->getResponse()->isSuccess()) {
@@ -412,6 +414,10 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
 
         // send the refund request
         $this->_heidelpayPaymentMethod->refund($transactionInfo->getUniqueId());
+
+        $this->_logger->debug(
+            'heidelpay - Refund Response: ' . print_r($this->_heidelpayPaymentMethod->getResponse(), 1)
+        );
 
         // if the heidelpay Request wasn't successful, throw an Exception with the heidelpay message
         if (!$this->_heidelpayPaymentMethod->getResponse()->isSuccess()) {
