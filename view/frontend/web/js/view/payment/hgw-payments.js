@@ -42,6 +42,10 @@ define(
                 component: 'Heidelpay_Gateway/js/view/payment/method-renderer/hgw-directdebitsecured'
             },
             {
+                type: 'hgwiv',
+                component: 'Heidelpay_Gateway/js/view/payment/method-renderer/hgw-abstract'
+            },
+            {
                 type: 'hgwivs',
                 component: 'Heidelpay_Gateway/js/view/payment/method-renderer/hgw-invoicesecured'
             }

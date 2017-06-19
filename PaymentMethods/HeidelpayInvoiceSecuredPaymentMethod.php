@@ -3,6 +3,7 @@
 namespace Heidelpay\Gateway\PaymentMethods;
 
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
+use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
 
 /**
  * Heidelpay prepayment payment method
@@ -51,6 +52,16 @@ class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMetho
     protected $_canAuthorize = true;
 
     /**
+     * @var boolean
+     */
+    protected $_canRefund = true;
+
+    /**
+     * @var boolean
+     */
+    protected $_canRefundInvoicePartial = true;
+
+    /**
      * HeidelpayPrepaymentPaymentMethod constructor.
      *
      * @param \Magento\Framework\Model\Context $context
@@ -67,7 +78,10 @@ class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMetho
      * @param \Magento\Framework\App\ProductMetadataInterface $productMetadata
      * @param \Magento\Framework\Module\ResourceInterface $moduleResource
      * @param \Heidelpay\Gateway\Helper\Payment $paymentHelper
+     * @param \Magento\Sales\Helper\Data $salesHelper
      * @param PaymentInformationCollectionFactory $paymentInformationCollectionFactory
+     * @param \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory
+     * @param HeidelpayTransactionCollectionFactory $transactionCollectionFactory
      * @param \Heidelpay\PhpApi\PaymentMethods\InvoiceB2CSecuredPaymentMethod $invoiceB2CSecuredPaymentMethod
      * @param \Magento\Framework\Model\ResourceModel\AbstractResource|null $resource
      * @param \Magento\Framework\Data\Collection\AbstractDb|null $resourceCollection
@@ -88,7 +102,10 @@ class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMetho
         \Magento\Framework\App\ProductMetadataInterface $productMetadata,
         \Magento\Framework\Module\ResourceInterface $moduleResource,
         \Heidelpay\Gateway\Helper\Payment $paymentHelper,
+        \Magento\Sales\Helper\Data $salesHelper,
         PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
+        \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory,
+        HeidelpayTransactionCollectionFactory $transactionCollectionFactory,
         \Heidelpay\PhpApi\PaymentMethods\InvoiceB2CSecuredPaymentMethod $invoiceB2CSecuredPaymentMethod,
         \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
@@ -109,7 +126,10 @@ class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMetho
             $productMetadata,
             $moduleResource,
             $paymentHelper,
+            $salesHelper,
             $paymentInformationCollectionFactory,
+            $transactionFactory,
+            $transactionCollectionFactory,
             $resource,
             $resourceCollection,
             $data
@@ -209,16 +229,19 @@ class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMetho
             ->setIsCustomerNotified(true);
 
         // payment is pending at the beginning, so we set the total paid sum to 0.
-        $order->setTotalPaid(0.00);
+        $order->setTotalPaid(0.00)->setBaseTotalPaid(0.00);
 
         // if the order can be invoiced, create one and save it into a transaction.
-        if ($order->canInvoice()) {
-            $invoice = $order->prepareInvoice();
-            $invoice->setRequestedCaptureCase(\Magento\Sales\Model\Order\Invoice::CAPTURE_ONLINE)
-                ->setIsPaid(false)
-                ->register();
+        if ($this->salesHelper->canSendNewInvoiceEmail($order->getStore()->getId())) {
+            if ($order->canInvoice()) {
+                $invoice = $order->prepareInvoice();
+                $invoice->setRequestedCaptureCase(\Magento\Sales\Model\Order\Invoice::CAPTURE_ONLINE)
+                    ->setTransactionId($data['IDENTIFICATION_UNIQUEID'])
+                    ->setIsPaid(false)
+                    ->register();
 
-            $this->_paymentHelper->saveTransaction($invoice);
+                $this->_paymentHelper->saveTransaction($invoice);
+            }
         }
     }
 }

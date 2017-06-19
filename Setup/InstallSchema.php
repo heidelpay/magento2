@@ -29,7 +29,7 @@ class InstallSchema implements InstallSchemaInterface
         // create transactions table
         $tablerealname = 'heidelpay_transaction';
         $tablename = $installer->getTable($tablerealname);
-        if ($installer->getConnection()->isTableExists($tablename) != true) {
+        if (!$installer->getConnection()->isTableExists($tablename)) {
             $table = $installer->getConnection()->newTable($tablename)
                 ->addColumn('id', \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER, null, [
                     'unsigned' => true,
@@ -109,7 +109,7 @@ class InstallSchema implements InstallSchemaInterface
         $tablerealname = 'heidelpay_payment_information';
         $tablename = $installer->getTable($tablerealname);
 
-        if ($installer->getConnection()->isTableExists($tablename) != true) {
+        if (!$installer->getConnection()->isTableExists($tablename)) {
             $table = $installer->getConnection()->newTable($tablename)
                 ->addColumn('id', \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER, null, [
                     'unsigned' => true,

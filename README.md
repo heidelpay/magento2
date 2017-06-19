@@ -1,5 +1,7 @@
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/heidelpay/magento2.svg?style=flat-square)](https://packagist.org/packages/heidelpay/magento2)
 [![Codacy Badge](https://api.codacy.com/project/badge/grade/fb5b516ad21f44a591a58761a8c3ef42)](https://www.codacy.com/app/heidelpay/magento2/dashboard)
+[![PHP 5.6](https://img.shields.io/badge/php-5.6-blue.svg)](http://www.php.net)
+[![PHP 7.0](https://img.shields.io/badge/php-7.0-blue.svg)](http://www.php.net)
 
 ![Logo](https://dev.heidelpay.de/devHeidelpay_400_180.jpg)
 
@@ -15,6 +17,7 @@ Currently supported payment methods are:
 * Sofortüberweisung
 * PayPal
 * Prepayment
+* Invoice
 * Invoice (Secured) (B2C)
 * giropay
 
@@ -38,11 +41,11 @@ All versions greater than 16.10.17 are based on the heidelpay php-api. (https://
 
 ### Install the heidelpay Magento 2 composer package
 
-```composer require "heidelpay/magento2:17.5.9"```
+```composer require "heidelpay/magento2:17.6.16"```
 
 ### Enable the extension in Magento 2
 
-```php -f bin/magento module:enable --clear-static-content Heidelpay_Gateway```
+```php -f bin/magento module:enable Heidelpay_Gateway --clear-static-content```
 
 ### Setup the extension and refresh cache
 

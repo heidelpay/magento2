@@ -17,7 +17,7 @@
                         <config_path>payment/hgwmain/user_login</config_path>
                     </field>
                     <field id="user_passwd" translate="label" type="obscure" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
-                        <label>UserPassword</label>
+                        <label>User Password</label>
                         <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
                         <config_path>payment/hgwmain/user_passwd</config_path>
                     </field>
@@ -47,12 +47,12 @@
                         <label>Channel</label>
                         <config_path>payment/hgwcc/channel</config_path>
                     </field>
-                    <!-- <field id="bookingmode" translate="label" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Directbooking</label>
-                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <field id="bookingmode" translate="label" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Booking Mode</label>
+                        <source_model>Heidelpay\Gateway\Model\Config\Source\BookingMode</source_model>
                         <config_path>payment/hgwcc/bookingmode</config_path>
-                        <comment>If this is enabled the card will be charged immediately. Otherwise the amount will just be authorised.</comment>
-                    </field> -->
+                        <comment>If 'Debit' is enabled, the card will be charged immediately. Otherwise the amount will just be authorised.</comment>
+                    </field>
                     <field id="sort_order" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Sort Order</label>
                         <config_path>payment/hgwcc/sort_order</config_path>
@@ -92,12 +92,12 @@
                         <label>Channel</label>
                         <config_path>payment/hgwdc/channel</config_path>
                     </field>
-                    <!-- <field id="bookingmode" translate="label" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Directbooking</label>
-                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <field id="bookingmode" translate="label" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Booking Mode</label>
+                        <source_model>Heidelpay\Gateway\Model\Config\Source\BookingMode</source_model>
                         <config_path>payment/hgwdc/bookingmode</config_path>
-                        <comment>If this is enabled the card will be charged immediately. Otherwise the amount will just be authorised.</comment>
-                    </field> -->
+                        <comment>If 'Debit' is enabled, the card will be charged immediately. Otherwise the amount will just be authorised.</comment>
+                    </field>
                     <field id="sort_order" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Sort Order</label>
                         <config_path>payment/hgwdc/sort_order</config_path>
@@ -176,12 +176,12 @@
                         <label>Channel</label>
                         <config_path>payment/hgwpal/channel</config_path>
                     </field>
-                    <!-- <field id="bookingmode" translate="label" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
-                        <label>Directbooking</label>
-                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <field id="bookingmode" translate="label" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Booking Mode</label>
+                        <source_model>Heidelpay\Gateway\Model\Config\Source\BookingMode</source_model>
                         <config_path>payment/hgwpal/bookingmode</config_path>
-                        <comment>If this is enabled the card will be charged immediately. Otherwise the amount will just be authorised.</comment>
-                    </field> -->
+                        <comment>If 'Debit' is enabled, the Account will be charged immediately. Otherwise the amount will just be authorised.</comment>
+                    </field>
                     <field id="sort_order" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Sort Order</label>
                         <config_path>payment/hgwpal/sort_order</config_path>
@@ -371,6 +371,45 @@
                     <field id="max_order_total" translate="label" type="text" sortOrder="99" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Maximum Order Total</label>
                         <config_path>payment/hgwdds/max_order_total</config_path>
+                        <comment>Insert 0 to disable limit.</comment>
+                    </field>
+                </group>
+                <group id="hgwiv" translate="label" type="text" sortOrder="195" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>HGWIV</label>
+                    <field id="active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Enabled</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        <config_path>payment/hgwiv/active</config_path>
+                    </field>
+                    <field id="title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Title</label>
+                        <config_path>payment/hgwiv/title</config_path>
+                    </field>
+                    <field id="channel" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Channel</label>
+                        <config_path>payment/hgwiv/channel</config_path>
+                    </field>
+                    <field id="sort_order" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Sort Order</label>
+                        <config_path>payment/hgwiv/sort_order</config_path>
+                    </field>
+                    <field id="allowspecific" translate="label" type="allowspecific" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Payment from Applicable Countries</label>
+                        <source_model>Magento\Payment\Model\Config\Source\Allspecificcountries</source_model>
+                        <config_path>payment/hgwiv/allowspecific</config_path>
+                    </field>
+                    <field id="specificcountry" translate="label" type="multiselect" sortOrder="51" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Payment from Specific Countries</label>
+                        <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
+                        <config_path>payment/hgwiv/specificcountry</config_path>
+                    </field>
+                    <field id="min_order_total" translate="label" type="text" sortOrder="98" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Minimum Order Total</label>
+                        <config_path>payment/hgwiv/min_order_total</config_path>
+                    </field>
+                    <field id="max_order_total" translate="label" type="text" sortOrder="99" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Maximum Order Total</label>
+                        <config_path>payment/hgwiv/max_order_total</config_path>
                         <comment>Insert 0 to disable limit.</comment>
                     </field>
                 </group>

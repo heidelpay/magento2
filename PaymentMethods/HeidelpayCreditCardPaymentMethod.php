@@ -2,7 +2,9 @@
 
 namespace Heidelpay\Gateway\PaymentMethods;
 
+use Heidelpay\Gateway\Model\Config\Source\BookingMode;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
+use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
 
 /**
  * Heidelpay credit card payment method
@@ -45,6 +47,26 @@ class HeidelpayCreditCardPaymentMethod extends HeidelpayAbstractPaymentMethod
     protected $_canAuthorize = true;
 
     /**
+     * @var boolean
+     */
+    protected $_canCapture = true;
+
+    /**
+     * @var boolean
+     */
+    protected $_canCapturePartial = true;
+
+    /**
+     * @var boolean
+     */
+    protected $_canRefund = true;
+
+    /**
+     * @var boolean
+     */
+    protected $_canRefundInvoicePartial = true;
+
+    /**
      * HeidelpayCreditCardPaymentMethod constructor.
      *
      * @param \Magento\Framework\Model\Context $context
@@ -61,7 +83,10 @@ class HeidelpayCreditCardPaymentMethod extends HeidelpayAbstractPaymentMethod
      * @param \Magento\Framework\App\ProductMetadataInterface $productMetadata
      * @param \Magento\Framework\Module\ResourceInterface $moduleResource
      * @param \Heidelpay\Gateway\Helper\Payment $paymentHelper
+     * @param \Magento\Sales\Helper\Data $salesHelper
      * @param PaymentInformationCollectionFactory $paymentInformationCollectionFactory
+     * @param \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory
+     * @param HeidelpayTransactionCollectionFactory $transactionCollectionFactory
      * @param \Heidelpay\PhpApi\PaymentMethods\CreditCardPaymentMethod $creditCardPaymentMethod
      * @param \Magento\Framework\Model\ResourceModel\AbstractResource|null $resource
      * @param \Magento\Framework\Data\Collection\AbstractDb|null $resourceCollection
@@ -82,7 +107,10 @@ class HeidelpayCreditCardPaymentMethod extends HeidelpayAbstractPaymentMethod
         \Magento\Framework\App\ProductMetadataInterface $productMetadata,
         \Magento\Framework\Module\ResourceInterface $moduleResource,
         \Heidelpay\Gateway\Helper\Payment $paymentHelper,
+        \Magento\Sales\Helper\Data $salesHelper,
         PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
+        \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory,
+        HeidelpayTransactionCollectionFactory $transactionCollectionFactory,
         \Heidelpay\PhpApi\PaymentMethods\CreditCardPaymentMethod $creditCardPaymentMethod,
         \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
@@ -103,7 +131,10 @@ class HeidelpayCreditCardPaymentMethod extends HeidelpayAbstractPaymentMethod
             $productMetadata,
             $moduleResource,
             $paymentHelper,
+            $salesHelper,
             $paymentInformationCollectionFactory,
+            $transactionFactory,
+            $transactionCollectionFactory,
             $resource,
             $resourceCollection,
             $data
@@ -145,8 +176,15 @@ class HeidelpayCreditCardPaymentMethod extends HeidelpayAbstractPaymentMethod
             $this->getStore()
         );
 
-        // send the debit request
-        $this->_heidelpayPaymentMethod->debit($paymentFrameOrigin, $preventAsyncRedirect, $cssPath);
+        // make an authorize request, if set...
+        if ($this->getBookingMode() === BookingMode::AUTHORIZATION) {
+            $this->_heidelpayPaymentMethod->authorize($paymentFrameOrigin, $preventAsyncRedirect, $cssPath);
+        }
+
+        // ... else if no booking mode is set or bookingmode is set to 'debit', make a debit request.
+        if ($this->getBookingMode() === null || $this->getBookingMode() === BookingMode::DEBIT) {
+            $this->_heidelpayPaymentMethod->debit($paymentFrameOrigin, $preventAsyncRedirect, $cssPath);
+        }
 
         return $this->_heidelpayPaymentMethod->getResponse();
     }

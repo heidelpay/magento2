@@ -4,11 +4,12 @@ namespace Heidelpay\Gateway\PaymentMethods;
 
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
 use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
+use Heidelpay\PhpApi\PaymentMethods\InvoicePaymentMethod;
 
 /**
- * heidelpay sofort payment method
+ * Heidelpay prepayment payment method
  *
- * This is the payment class for heidelpay sofort
+ * This is the payment class for heidelpay prepayment
  *
  * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
  * @copyright Copyright © 2016-present Heidelberger Payment GmbH. All rights reserved.
@@ -19,19 +20,25 @@ use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as Heide
  * @subpackage magento2
  * @category magento2
  */
-class HeidelpaySofortPaymentMethod extends HeidelpayAbstractPaymentMethod
+class HeidelpayInvoicePaymentMethod extends HeidelpayAbstractPaymentMethod
 {
     /**
      * Payment Code
-     * @var string PayentCode
+     * @var string
      */
-    const CODE = 'hgwsue';
+    const CODE = 'hgwiv';
 
     /**
      * Payment Code
-     * @var string PayentCode
+     * @var string
      */
-    protected $_code = 'hgwsue';
+    protected $_code = 'hgwiv';
+
+    /**
+     * Info Block Class (used for Order/Invoice details)
+     * @var string
+     */
+    protected $_infoBlockType = 'Heidelpay\Gateway\Block\Info\Invoice';
 
     /**
      * isGateway
@@ -56,7 +63,7 @@ class HeidelpaySofortPaymentMethod extends HeidelpayAbstractPaymentMethod
     protected $_canRefundInvoicePartial = true;
 
     /**
-     * HeidelpaySofortPaymentMethod constructor.
+     * HeidelpayPrepaymentPaymentMethod constructor.
      *
      * @param \Magento\Framework\Model\Context $context
      * @param \Magento\Framework\Registry $registry
@@ -76,7 +83,7 @@ class HeidelpaySofortPaymentMethod extends HeidelpayAbstractPaymentMethod
      * @param PaymentInformationCollectionFactory $paymentInformationCollectionFactory
      * @param \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory
      * @param HeidelpayTransactionCollectionFactory $transactionCollectionFactory
-     * @param \Heidelpay\PhpApi\PaymentMethods\SofortPaymentMethod $sofortPaymentMethod
+     * @param \Heidelpay\PhpApi\PaymentMethods\InvoicePaymentMethod $invoicePaymentMethod
      * @param \Magento\Framework\Model\ResourceModel\AbstractResource|null $resource
      * @param \Magento\Framework\Data\Collection\AbstractDb|null $resourceCollection
      * @param array $data
@@ -100,7 +107,7 @@ class HeidelpaySofortPaymentMethod extends HeidelpayAbstractPaymentMethod
         PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
         \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory,
         HeidelpayTransactionCollectionFactory $transactionCollectionFactory,
-        \Heidelpay\PhpApi\PaymentMethods\SofortPaymentMethod $sofortPaymentMethod,
+        \Heidelpay\PhpApi\PaymentMethods\InvoicePaymentMethod $invoicePaymentMethod,
         \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
         array $data = []
@@ -129,7 +136,7 @@ class HeidelpaySofortPaymentMethod extends HeidelpayAbstractPaymentMethod
             $data
         );
 
-        $this->_heidelpayPaymentMethod = $sofortPaymentMethod;
+        $this->_heidelpayPaymentMethod = $invoicePaymentMethod;
     }
 
     /**
@@ -146,5 +153,54 @@ class HeidelpaySofortPaymentMethod extends HeidelpayAbstractPaymentMethod
         $this->_heidelpayPaymentMethod->authorize();
 
         return $this->_heidelpayPaymentMethod->getResponse();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function additionalPaymentInformation($response)
+    {
+        return __(
+            'Please transfer the amount of <strong>%1 %2</strong> '
+            . 'to the following account after your order has arrived:<br /><br />'
+            . 'Holder: %3<br/>IBAN: %4<br/>BIC: %5<br/><br/><i>'
+            . 'Please use only this identification number as the descriptor :</i><br/><strong>%6</strong>',
+            $this->_paymentHelper->format($response['PRESENTATION_AMOUNT']),
+            $response['PRESENTATION_CURRENCY'],
+            $response['CONNECTOR_ACCOUNT_HOLDER'],
+            $response['CONNECTOR_ACCOUNT_IBAN'],
+            $response['CONNECTOR_ACCOUNT_BIC'],
+            $response['IDENTIFICATION_SHORTID']
+        );
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function pendingTransactionProcessing($data, &$order, $message = null)
+    {
+        $order->getPayment()->setTransactionId($data['IDENTIFICATION_UNIQUEID']);
+        $order->getPayment()->setIsTransactionClosed(false);
+        $order->getPayment()->addTransaction(\Magento\Sales\Model\Order\Payment\Transaction::TYPE_AUTH, null, true);
+
+        $order->setState(\Magento\Sales\Model\Order::STATE_PROCESSING)
+            ->addStatusHistoryComment($message, \Magento\Sales\Model\Order::STATE_PROCESSING)
+            ->setIsCustomerNotified(true);
+
+        // payment is pending at the beginning, so we set the total paid sum to 0.
+        $order->setTotalPaid(0.00)->setBaseTotalPaid(0.00);
+
+        // if the order can be invoiced, create one and save it into a transaction.
+        if ($this->salesHelper->canSendNewInvoiceEmail($order->getStore()->getId())) {
+            if ($order->canInvoice()) {
+                $invoice = $order->prepareInvoice();
+                $invoice->setRequestedCaptureCase(\Magento\Sales\Model\Order\Invoice::CAPTURE_ONLINE)
+                    ->setTransactionId($data['IDENTIFICATION_UNIQUEID'])
+                    ->setIsPaid(false)
+                    ->register();
+
+                $this->_paymentHelper->saveTransaction($invoice);
+            }
+        }
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Heidelpay\Gateway\Controller\Adminhtml\Order\Shipment;
 
+use Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod;
 use Heidelpay\PhpApi\TransactionTypes\FinalizeTransactionType;
 use Magento\Sales\Model\Order;
 
@@ -91,55 +92,60 @@ class Save extends \Magento\Shipping\Controller\Adminhtml\Order\Shipment\Save
         // get the payment method instance and the heidelpay method instance
         /** @var \Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod $method */
         $method = $order->getPayment()->getMethodInstance();
-        $heidelpayMethod = $method->getHeidelpayPaymentMethodInstance();
 
-        // if the payment method uses the Finalize Transaction type, we'll send a FIN request to the payment api.
-        if (in_array(FinalizeTransactionType::class, class_uses($heidelpayMethod))) {
-            // get the heidelpay configuration for the given payment method and store.
-            $paymentConfig = $method->getMainConfig($method->getCode(), $method->getStore());
+        // only fire the shipping when a heidelpay payment method is used.
+        if ($method instanceof HeidelpayAbstractPaymentMethod) {
+            // get the php-api instance.
+            $heidelpayMethod = $method->getHeidelpayPaymentMethodInstance();
 
-            // set the authentification data
-            $heidelpayMethod->getRequest()->authentification(
-                $paymentConfig['SECURITY.SENDER'],
-                $paymentConfig['USER.LOGIN'],
-                $paymentConfig['USER.PWD'],
-                $paymentConfig['TRANSACTION.CHANNEL'],
-                $paymentConfig['TRANSACTION.MODE']
-            );
+            // if the payment method uses the Finalize Transaction type, we'll send a FIN request to the payment api.
+            if (in_array(FinalizeTransactionType::class, class_uses($heidelpayMethod))) {
+                // get the heidelpay configuration for the given payment method and store.
+                $paymentConfig = $method->getMainConfig($method->getCode(), $method->getStore());
 
-            // set the basket data (for amount and currency and a secret hash for fraud checking)
-            $heidelpayMethod->getRequest()->basketData(
-                $order->getQuoteId(),
-                $this->paymentHelper->format($order->getGrandTotal()),
-                $order->getOrderCurrencyCode(),
-                $this->encryptor->exportKeys()
-            );
-
-            // send the finalize request
-            /** @var \Heidelpay\PhpApi\Response $response */
-            $heidelpayMethod->finalize($order->getPayment()->getLastTransId());
-
-            // if the response isn't successful, redirect back to the order view.
-            if (!$heidelpayMethod->getResponse()->isSuccess()) {
-                $this->messageManager->addErrorMessage(
-                    __('Heidelpay Error at sending Finalize Request. The Shipment was not created.')
-                    . ' Error Message: ' . $heidelpayMethod->getResponse()->getError()['message']
+                // set the authentification data
+                $heidelpayMethod->getRequest()->authentification(
+                    $paymentConfig['SECURITY.SENDER'],
+                    $paymentConfig['USER.LOGIN'],
+                    $paymentConfig['USER.PWD'],
+                    $paymentConfig['TRANSACTION.CHANNEL'],
+                    $paymentConfig['TRANSACTION.MODE']
                 );
 
-                $this->logger->error(
-                    'Heidelpay - Shipment Creation: Failure when sending finalize request. Error Message: '
-                    . json_encode($heidelpayMethod->getResponse()->getError())
+                // set the basket data (for amount and currency and a secret hash for fraud checking)
+                $heidelpayMethod->getRequest()->basketData(
+                    $order->getQuoteId(),
+                    $this->paymentHelper->format($order->getGrandTotal()),
+                    $order->getOrderCurrencyCode(),
+                    $this->encryptor->exportKeys()
                 );
 
-                $this->_redirect('*/*/new', ['order_id' => $this->getRequest()->getParam('order_id')]);
+                // send the finalize request
+                /** @var \Heidelpay\PhpApi\Response $response */
+                $heidelpayMethod->finalize($order->getPayment()->getLastTransId());
+
+                // if the response isn't successful, redirect back to the order view.
+                if (!$heidelpayMethod->getResponse()->isSuccess()) {
+                    $this->messageManager->addErrorMessage(
+                        __('Heidelpay Error at sending Finalize Request. The Shipment was not created.')
+                        . ' Error Message: ' . $heidelpayMethod->getResponse()->getError()['message']
+                    );
+
+                    $this->logger->error(
+                        'Heidelpay - Shipment Creation: Failure when sending finalize request. Error Message: '
+                        . json_encode($heidelpayMethod->getResponse()->getError())
+                    );
+
+                    $this->_redirect('*/*/new', ['order_id' => $this->getRequest()->getParam('order_id')]);
+                }
+
+                // set order status to "pending payment"
+                $order->setStatus(Order::STATE_PENDING_PAYMENT)
+                    ->addStatusHistoryComment('heidelpay - Finalizing Order', Order::STATE_PENDING_PAYMENT)
+                    ->save();
+
+                $this->messageManager->addSuccessMessage(__('Shipping Notification has been sent to Heidelpay.'));
             }
-
-            // set order status to "pending payment"
-            $order->setStatus(Order::STATE_PENDING_PAYMENT)
-                ->addStatusHistoryComment('heidelpay - Finalizing Order', Order::STATE_PENDING_PAYMENT)
-                ->save();
-
-            $this->messageManager->addSuccessMessage(__('Shipping Notification has been sent to Heidelpay.'));
         }
     }
 }

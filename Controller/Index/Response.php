@@ -261,26 +261,19 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
 
         try {
             // save the response details into the heidelpay Transactions table.
-            $transaction = $this->transactionFactory->create();
-            $transaction->setPaymentMethod($paymentMethod)
-                ->setPaymentType($paymentType)
-                ->setTransactionId($this->heidelpayResponse->getIdentification()->getTransactionId())
-                ->setUniqueId($this->heidelpayResponse->getIdentification()->getUniqueId())
-                ->setShortId($this->heidelpayResponse->getIdentification()->getShortId())
-                ->setStatusCode($this->heidelpayResponse->getProcessing()->getStatusCode())
-                ->setResult($this->heidelpayResponse->getProcessing()->getResult())
-                ->setReturnMessage($this->heidelpayResponse->getProcessing()->getReturn())
-                ->setReturnCode($this->heidelpayResponse->getProcessing()->getReturnCode())
-                ->setJsonResponse(json_encode($data))
-                ->setSource('RESPONSE')
-                ->save();
+            $order->getPayment()->getMethodInstance()->saveHeidelpayTransaction(
+                $this->heidelpayResponse,
+                $paymentMethod,
+                $paymentType,
+                'RESPONSE',
+                $data
+            );
         } catch (\Exception $e) {
             $this->_logger->error('Heidelpay - Response: Save transaction error. ' . $e->getMessage());
         }
 
         // return the heidelpay response url as raw response instead of echoing it out.
         $result->setContents($redirectUrl);
-
         return $result;
     }
 }

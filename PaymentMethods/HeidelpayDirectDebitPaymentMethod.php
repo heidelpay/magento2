@@ -3,6 +3,7 @@
 namespace Heidelpay\Gateway\PaymentMethods;
 
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
+use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
 
 /**
  * Heidelpay Direct Debit
@@ -28,6 +29,16 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
     protected $_canAuthorize = true;
 
     /**
+     * @var boolean
+     */
+    protected $_canRefund = true;
+
+    /**
+     * @var boolean
+     */
+    protected $_canRefundInvoicePartial = true;
+
+    /**
      * HeidelpayDirectDebitPaymentMethod constructor.
      *
      * @param \Magento\Framework\Model\Context $context
@@ -44,7 +55,10 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
      * @param \Magento\Framework\App\ProductMetadataInterface $productMetadata
      * @param \Magento\Framework\Module\ResourceInterface $moduleResource
      * @param \Heidelpay\Gateway\Helper\Payment $paymentHelper
+     * @param \Magento\Sales\Helper\Data $salesHelper
      * @param PaymentInformationCollectionFactory $paymentInformationCollectionFactory
+     * @param \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory
+     * @param HeidelpayTransactionCollectionFactory $transactionCollectionFactory
      * @param \Heidelpay\PhpApi\PaymentMethods\DirectDebitPaymentMethod $directDebitPaymentMethod
      * @param \Magento\Framework\Model\ResourceModel\AbstractResource|null $resource
      * @param \Magento\Framework\Data\Collection\AbstractDb|null $resourceCollection
@@ -65,7 +79,10 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
         \Magento\Framework\App\ProductMetadataInterface $productMetadata,
         \Magento\Framework\Module\ResourceInterface $moduleResource,
         \Heidelpay\Gateway\Helper\Payment $paymentHelper,
+        \Magento\Sales\Helper\Data $salesHelper,
         PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
+        \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory,
+        HeidelpayTransactionCollectionFactory $transactionCollectionFactory,
         \Heidelpay\PhpApi\PaymentMethods\DirectDebitPaymentMethod $directDebitPaymentMethod,
         \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
@@ -86,7 +103,10 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
             $productMetadata,
             $moduleResource,
             $paymentHelper,
+            $salesHelper,
             $paymentInformationCollectionFactory,
+            $transactionFactory,
+            $transactionCollectionFactory,
             $resource,
             $resourceCollection,
             $data

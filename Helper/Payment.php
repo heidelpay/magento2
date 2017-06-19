@@ -176,6 +176,75 @@ class Payment extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
+     * @param array $data
+     *
+     * @return bool
+     */
+    public function isPreAuthorization(array $data)
+    {
+        if (!isset($data['PAYMENT_CODE'])) {
+            return false;
+        }
+
+        $paymentCode = $this->splitPaymentCode($data['PAYMENT_CODE']);
+
+        if ($paymentCode[1] == 'PA') {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Determines if the payment code and type are for a receipt.
+     *
+     * @param string $paymentMethod
+     * @param string $paymentType
+     *
+     * @return bool
+     */
+    public function isReceiptAble($paymentMethod, $paymentType)
+    {
+        if ($paymentType !== 'RC') {
+            return false;
+        }
+
+        switch ($paymentMethod) {
+            case 'DD':
+            case 'PP':
+            case 'IV':
+            case 'OT':
+            case 'PC':
+            case 'MP':
+            case 'HP':
+                $return = true;
+                break;
+
+            default:
+                $return = false;
+                break;
+        }
+
+        return $return;
+    }
+
+    /**
+     * Checks if the given paymentcode is viable for a refund transaction.
+     *
+     * @param string $paymentcode
+     *
+     * @return bool
+     */
+    public function isRefundable($paymentcode)
+    {
+        if ($paymentcode === 'DB' || $paymentcode === 'CP' || $paymentcode === 'RC') {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Saves a transaction by the given invoice.
      *
      * @param Invoice $invoice
