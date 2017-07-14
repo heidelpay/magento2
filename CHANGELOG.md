@@ -1,5 +1,11 @@
 # Release Notes - heidelpay Payment Gateway for Magento 2
 
+## 17.7.14
+
+### Fixed
+- Update php-api because of response issue in case of prepayment and invoice
+- remove name input field on secured invoice
+
 ## v17.6.16
 
 ### Added
