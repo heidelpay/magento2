@@ -9,7 +9,7 @@
                 <group id="hgwmain" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>HGWMAIN</label>
                     <field id="security_sender" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
-                        <label>Security Sender</label>
+                        <label>Sender-ID</label>
                         <config_path>payment/hgwmain/security_sender</config_path>
                     </field>
                     <field id="user_login" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">

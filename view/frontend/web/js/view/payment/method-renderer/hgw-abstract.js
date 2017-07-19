@@ -62,11 +62,17 @@ define(
             getFullName: function() {
                 var name = '';
 
-                name += window.customerData.firstname;
-                if (window.customerData.middlename !== null) {
+                if (typeof window.customerData.firstname !== 'undefined') {
+                    name += window.customerData.firstname;
+                }
+
+                if (typeof window.customerData.middlename !== 'undefined' && window.customerData.middlename !== null) {
                     name +=  ' ' + window.customerData.middlename;
                 }
-                name += ' ' + window.customerData.lastname;
+
+                if (typeof window.customerData.lastname !== 'undefined') {
+                    name += ' ' + window.customerData.lastname;
+                }
 
                 return name;
             },
