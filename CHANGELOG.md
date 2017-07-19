@@ -5,6 +5,7 @@
 ### Fixed
 - Re-added the name input field in Secured Invoice
 - Pre-filled 'undefined undefined undefined' in secured payment methods
+- Removed readonly attribute in full name input (Secured Invoice)
 
 ### Changed
 - Changed 'Security Sender' to 'Sender-ID' in heidelpay backend configuration
