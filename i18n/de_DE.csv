@@ -21,7 +21,7 @@
 "Enabled","Aktiviert"
 "Channel","Kanal-ID"
 "Insert 0 to disable limit.","Tragen Sie 0 ein um das Limit zu deaktivieren."
-"If this is enabled the card will be charged immediately. Otherwise the amount will just be authorised.","Wenn diese Einstellung auf Ja steht, wird die Karte sofort belastet. Ansonsten wird der Betrag nur reserviert."
+"If 'Debit' is enabled the card will be charged immediately. Otherwise the amount will first be authorised and charged at order creation.","Wenn diese Einstellung auf Ja steht, wird die Karte sofort belastet. Ansonsten wird der Betrag nur reserviert und bei erstellter Bestellung abgebucht."
 "An unexpected error occurred. Please contact us to get further information.","Es ist ein Fehler aufgetreten. Bitte kontaktieren Sie uns für weitere Informationen."
 
 "Never","Nie"

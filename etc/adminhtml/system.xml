@@ -51,7 +51,7 @@
                         <label>Booking Mode</label>
                         <source_model>Heidelpay\Gateway\Model\Config\Source\BookingMode</source_model>
                         <config_path>payment/hgwcc/bookingmode</config_path>
-                        <comment>If 'Debit' is enabled, the card will be charged immediately. Otherwise the amount will just be authorised.</comment>
+                        <comment>If 'Debit' is enabled the card will be charged immediately. Otherwise the amount will first be authorised and charged at order creation.</comment>
                     </field>
                     <field id="sort_order" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Sort Order</label>
@@ -96,7 +96,7 @@
                         <label>Booking Mode</label>
                         <source_model>Heidelpay\Gateway\Model\Config\Source\BookingMode</source_model>
                         <config_path>payment/hgwdc/bookingmode</config_path>
-                        <comment>If 'Debit' is enabled, the card will be charged immediately. Otherwise the amount will just be authorised.</comment>
+                        <comment>If 'Debit' is enabled the card will be charged immediately. Otherwise the amount will first be authorised and charged at order creation.</comment>
                     </field>
                     <field id="sort_order" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Sort Order</label>
