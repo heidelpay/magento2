@@ -2,6 +2,9 @@
 
 ## 17.7.19
 
+### Added
+- Customer's ip address will now be added to the payment api request
+
 ### Fixed
 - Re-added the name input field in Secured Invoice
 - Pre-filled 'undefined undefined undefined' in secured payment methods
