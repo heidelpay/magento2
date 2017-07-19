@@ -1,5 +1,14 @@
 # Release Notes - heidelpay Payment Gateway for Magento 2
 
+## 17.7.19
+
+### Fixed
+- Re-added the name input field in Secured Invoice
+- Pre-filled 'undefined undefined undefined' in secured payment methods
+
+### Changed
+- Changed 'Security Sender' to 'Sender-ID' in heidelpay backend configuration
+
 ## 17.7.14
 
 ### Fixed
