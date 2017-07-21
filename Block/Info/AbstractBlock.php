@@ -122,6 +122,7 @@ class AbstractBlock extends \Magento\Payment\Block\Info
             if ($this->transactionInfo === null) {
                 $this->loadTransactionInfo();
             }
+
             if (isset($this->transactionInfo->getJsonResponse()['NAME_BIRTHDATE'])) {
                 return $this->transactionInfo->getJsonResponse()['NAME_BIRTHDATE'];
             }
@@ -140,6 +141,7 @@ class AbstractBlock extends \Magento\Payment\Block\Info
             if ($this->transactionInfo === null) {
                 $this->loadTransactionInfo();
             }
+
             if (isset($this->transactionInfo->getJsonResponse()['NAME_SALUTATION'])) {
                 return $this->transactionInfo->getJsonResponse()['NAME_SALUTATION'];
             }
@@ -157,7 +159,11 @@ class AbstractBlock extends \Magento\Payment\Block\Info
             $this->loadTransactionInfo();
         }
 
-        return $this->getMethod()->additionalPaymentInformation($this->transactionInfo->getJsonResponse());
+        if (! empty($this->transactionInfo->getJsonResponse())) {
+            return $this->getMethod()->additionalPaymentInformation($this->transactionInfo->getJsonResponse());
+        }
+
+        return '';
     }
 
     /**

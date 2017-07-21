@@ -11,10 +11,10 @@
 ?>
 <dl class="payment-method invoice">
     <dt class="title"><?php echo $block->escapeHtml($block->getMethod()->getTitle()) ?></dt>
-    <?php if ($block->getTransactionInfo() !== null) : ?>
+    <?php if ($block->getTransactionInfo() !== null && ! empty($block->printAdditionalInformationHtml())) : ?>
         <dd class="content">
             <strong><?php echo $block->escapeHtml(__('Payment information')) ?></strong><br />
-            <?php echo $block->printAdditionalInformationHtml() ?>
+            <?php echo $block->escapeHtml($block->printAdditionalInformationHtml()) ?>
         </dd>
     <?php endif; ?>
 </dl>
