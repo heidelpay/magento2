@@ -14,7 +14,7 @@
     <?php if ($block->getTransactionInfo() !== null && ! empty($block->printAdditionalInformationHtml())) : ?>
         <dd class="content">
             <strong><?php echo $block->escapeHtml(__('Payment information')) ?></strong><br />
-            <?php echo $block->escapeHtml($block->printAdditionalInformationHtml()) ?>
+            <?php echo $block->printAdditionalInformationHtml() ?>
         </dd>
     <?php endif; ?>
 </dl>
