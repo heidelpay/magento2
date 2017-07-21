@@ -1,9 +1,10 @@
 # Release Notes - heidelpay Payment Gateway for Magento 2
 
-## 17.7.19
+## 17.7.21
 
 ### Added
 - Customer's ip address will now be added to the payment api request
+- Prepayment Invoice details in backend, e-mail and pdf invoices
 
 ### Fixed
 - Re-added the name input field in Secured Invoice
