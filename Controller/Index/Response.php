@@ -208,13 +208,19 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
 
         try {
             // save the response details into the heidelpay Transactions table.
-            $order->getPayment()->getMethodInstance()->saveHeidelpayTransaction(
-                $this->heidelpayResponse,
-                $paymentMethod,
-                $paymentType,
-                'RESPONSE',
-                $data
-            );
+            $transaction = $this->transactionFactory->create();
+            $transaction->setPaymentMethod($paymentMethod)
+                ->setPaymentType($paymentType)
+                ->setTransactionId($this->heidelpayResponse->getIdentification()->getTransactionId())
+                ->setUniqueId($this->heidelpayResponse->getIdentification()->getUniqueId())
+                ->setShortId($this->heidelpayResponse->getIdentification()->getShortId())
+                ->setStatusCode($this->heidelpayResponse->getProcessing()->getStatusCode())
+                ->setResult($this->heidelpayResponse->getProcessing()->getResult())
+                ->setReturnMessage($this->heidelpayResponse->getProcessing()->getReturn())
+                ->setReturnCode($this->heidelpayResponse->getProcessing()->getReturnCode())
+                ->setJsonResponse(json_encode($data))
+                ->setSource('RESPONSE')
+                ->save();
         } catch (\Exception $e) {
             $this->_logger->error('Heidelpay - Response: Save transaction error. ' . $e->getMessage());
         }
