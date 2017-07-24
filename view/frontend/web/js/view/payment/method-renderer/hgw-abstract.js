@@ -63,20 +63,22 @@ define(
             getFullName: function() {
                 var name = '', billingAddress = quote.billingAddress();
 
-                if (billingAddress.firstname !== null) {
-                    name += billingAddress.firstname;
-                }
+                if (typeof billingAddress !== 'undefined') {
+                    if (billingAddress.firstname !== null) {
+                        name += billingAddress.firstname;
+                    }
 
-                if (typeof billingAddress.middlename !== 'undefined' && billingAddress.middlename !== null) {
-                    name += ' ' + billingAddress.middlename;
-                }
+                    if (typeof billingAddress.middlename !== 'undefined' && billingAddress.middlename !== null) {
+                        name += ' ' + billingAddress.middlename;
+                    }
 
-                if (billingAddress.lastname !== null) {
-                    name += ' ' + billingAddress.lastname;
+                    if (billingAddress.lastname !== null) {
+                        name += ' ' + billingAddress.lastname;
+                    }
                 }
 
                 // fallback, if name isn't set yet.
-                if (name === '' && window.customerData !== null) {
+                if (name === '') {
                     if (typeof window.customerData.firstname !== 'undefined') {
                         name += window.customerData.firstname;
                     }
