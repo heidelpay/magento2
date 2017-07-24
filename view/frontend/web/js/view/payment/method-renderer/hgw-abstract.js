@@ -61,18 +61,18 @@ define(
              * Function to receive the customer's full name.
              */
             getFullName: function() {
-                var name = '';
+                var name = '', billingAddress = quote.billingAddress();
 
-                if (quote.billingAddress().firstname !== null) {
-                    name += quote.billingAddress().firstname;
+                if (billingAddress.firstname !== null) {
+                    name += billingAddress.firstname;
                 }
 
-                if (quote.billingAddress().middlename !== null) {
-                    name += ' ' + quote.billingAddress().middlename;
+                if (typeof billingAddress.middlename !== 'undefined' && billingAddress.middlename !== null) {
+                    name += ' ' + billingAddress.middlename;
                 }
 
-                if (quote.billingAddress().lastname !== null) {
-                    name += ' ' + quote.billingAddress().lastname;
+                if (billingAddress.lastname !== null) {
+                    name += ' ' + billingAddress.lastname;
                 }
 
                 // fallback, if name isn't set yet.
