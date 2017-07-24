@@ -64,7 +64,7 @@ define(
                 var name = '', billingAddress = quote.billingAddress();
 
                 if (typeof billingAddress !== 'undefined') {
-                    if (billingAddress.firstname !== null) {
+                    if (typeof billingAddress.firstname !== 'undefined' && billingAddress.firstname !== null) {
                         name += billingAddress.firstname;
                     }
 
@@ -72,23 +72,25 @@ define(
                         name += ' ' + billingAddress.middlename;
                     }
 
-                    if (billingAddress.lastname !== null) {
+                    if (typeof billingAddress.lastname !== 'undefined' && billingAddress.lastname !== null) {
                         name += ' ' + billingAddress.lastname;
                     }
                 }
 
                 // fallback, if name isn't set yet.
                 if (name === '') {
-                    if (typeof window.customerData.firstname !== 'undefined') {
-                        name += window.customerData.firstname;
+                    var tmpName = window.customerData;
+
+                    if (typeof tmpName.firstname !== 'undefined' && tmpName.firstname !== null) {
+                        name += tmpName.firstname;
                     }
 
-                    if (typeof window.customerData.middlename !== 'undefined' && window.customerData.middlename !== null) {
-                        name +=  ' ' + window.customerData.middlename;
+                    if (typeof tmpName.middlename !== 'undefined' && tmpName.middlename !== null) {
+                        name +=  ' ' + tmpName.middlename;
                     }
 
-                    if (typeof window.customerData.lastname !== 'undefined') {
-                        name += ' ' + window.customerData.lastname;
+                    if (typeof tmpName.lastname !== 'undefined' && tmpName.lastname !== null) {
+                        name += ' ' + tmpName.lastname;
                     }
                 }
 
