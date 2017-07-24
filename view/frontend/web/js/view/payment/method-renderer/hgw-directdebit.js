@@ -30,6 +30,10 @@ define(
                 this._super();
                 this.getAdditionalPaymentInformation();
 
+                if (! this.hgwHolder()) {
+                    this.hgwHolder(this.getFullName());
+                }
+
                 return this;
             },
 
@@ -38,10 +42,6 @@ define(
                     .observe([
                         'hgwIban', 'hgwHolder'
                     ]);
-
-                if (! this.hgwHolder()) {
-                    this.hgwHolder(this.getFullName());
-                }
 
                 return this;
             },
