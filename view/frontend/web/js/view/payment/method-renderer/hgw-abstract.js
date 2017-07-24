@@ -6,9 +6,10 @@ define(
         'Magento_Checkout/js/model/payment/additional-validators',
         'Magento_Checkout/js/action/select-payment-method',
         'Magento_Checkout/js/checkout-data',
+        'Magento_Checkout/js/model/quote',
         'moment'
     ],
-    function ($, Component, placeOrderAction, additionalValidators, selectPaymentMethodAction, checkoutData) {
+    function ($, Component, placeOrderAction, additionalValidators, selectPaymentMethodAction, checkoutData, quote) {
         'use strict';
 
         // add IBAN validator
@@ -62,16 +63,31 @@ define(
             getFullName: function() {
                 var name = '';
 
-                if (typeof window.customerData.firstname !== 'undefined') {
-                    name += window.customerData.firstname;
+                if (quote.billingAddress().firstname !== null) {
+                    name += quote.billingAddress().firstname;
                 }
 
-                if (typeof window.customerData.middlename !== 'undefined' && window.customerData.middlename !== null) {
-                    name +=  ' ' + window.customerData.middlename;
+                if (quote.billingAddress().middlename !== null) {
+                    name += ' ' + quote.billingAddress().middlename;
                 }
 
-                if (typeof window.customerData.lastname !== 'undefined') {
-                    name += ' ' + window.customerData.lastname;
+                if (quote.billingAddress().lastname !== null) {
+                    name += ' ' + quote.billingAddress().lastname;
+                }
+
+                // fallback, if name isn't set yet.
+                if (name === '' && window.customerData !== null) {
+                    if (typeof window.customerData.firstname !== 'undefined') {
+                        name += window.customerData.firstname;
+                    }
+
+                    if (typeof window.customerData.middlename !== 'undefined' && window.customerData.middlename !== null) {
+                        name +=  ' ' + window.customerData.middlename;
+                    }
+
+                    if (typeof window.customerData.lastname !== 'undefined') {
+                        name += ' ' + window.customerData.lastname;
+                    }
                 }
 
                 return name;
