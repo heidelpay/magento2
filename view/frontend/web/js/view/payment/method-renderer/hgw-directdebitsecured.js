@@ -41,6 +41,11 @@ define(
                     this.years.push(i);
                 }
 
+                // pre-fill the holder with the billing name, if it does not exist yet.
+                if (! this.hgwHolder()) {
+                    this.hgwHolder(this.getFullName());
+                }
+
                 return this;
             },
 

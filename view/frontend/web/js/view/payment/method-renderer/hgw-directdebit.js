@@ -39,6 +39,10 @@ define(
                         'hgwIban', 'hgwHolder'
                     ]);
 
+                if (! this.hgwHolder()) {
+                    this.hgwHolder(this.getFullName());
+                }
+
                 return this;
             },
 
