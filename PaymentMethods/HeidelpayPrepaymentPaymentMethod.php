@@ -34,6 +34,12 @@ class HeidelpayPrepaymentPaymentMethod extends HeidelpayAbstractPaymentMethod
     protected $_code = 'hgwpp';
 
     /**
+     * Info Block Class (used for Order/Invoice details)
+     * @var string
+     */
+    protected $_infoBlockType = 'Heidelpay\Gateway\Block\Info\Prepayment';
+
+    /**
      * isGateway
      * @var boolean
      */

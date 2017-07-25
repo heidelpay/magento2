@@ -30,6 +30,10 @@ define(
                 this._super();
                 this.getAdditionalPaymentInformation();
 
+                if (! this.hgwHolder()) {
+                    this.hgwHolder(this.getFullName());
+                }
+
                 return this;
             },
 

@@ -35,7 +35,7 @@ define(
                 this.getAdditionalPaymentInformation();
 
                 // init years select menu
-                for (var i = new Date().getFullYear() - 100; i <= (new Date().getFullYear() - 17); i++) {
+                for (var i = (new Date().getFullYear() - 17); i >= new Date().getFullYear() - 120; i--) {
                     this.years.push(i);
                 }
 

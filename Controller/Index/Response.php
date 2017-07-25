@@ -201,6 +201,49 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
 
         $data = $this->getRequest()->getParams();
 
+        // save the heidelpay transaction data
+        list($paymentMethod, $paymentType) = $this->_paymentHelper->splitPaymentCode(
+            $this->heidelpayResponse->getPayment()->getCode()
+        );
+
+        try {
+            // save the response details into the heidelpay Transactions table.
+            $transaction = $this->transactionFactory->create();
+            $transaction->setPaymentMethod($paymentMethod)
+                ->setPaymentType($paymentType)
+                ->setTransactionId($this->heidelpayResponse->getIdentification()->getTransactionId())
+                ->setUniqueId($this->heidelpayResponse->getIdentification()->getUniqueId())
+                ->setShortId($this->heidelpayResponse->getIdentification()->getShortId())
+                ->setStatusCode($this->heidelpayResponse->getProcessing()->getStatusCode())
+                ->setResult($this->heidelpayResponse->getProcessing()->getResult())
+                ->setReturnMessage($this->heidelpayResponse->getProcessing()->getReturn())
+                ->setReturnCode($this->heidelpayResponse->getProcessing()->getReturnCode())
+                ->setJsonResponse(json_encode($data))
+                ->setSource('RESPONSE')
+                ->save();
+        } catch (\Exception $e) {
+            $this->_logger->error('Heidelpay - Response: Save transaction error. ' . $e->getMessage());
+        }
+
+        // if something went wrong, return the redirect url without processing the order.
+        if ($this->heidelpayResponse->isError()) {
+            $message = sprintf(
+                'Heidelpay - Response is NOK. Message: [%s], Reason: [%s] (%d), Code: [%s], Status: [%s] (%d)',
+                $this->heidelpayResponse->getError()['message'],
+                $this->heidelpayResponse->getProcessing()->reason,
+                $this->heidelpayResponse->getProcessing()->reason_code,
+                $this->heidelpayResponse->getError()['code'],
+                $this->heidelpayResponse->getProcessing()->status,
+                $this->heidelpayResponse->getProcessing()->getStatusCode()
+            );
+
+            $this->_logger->debug($message);
+
+            // return the heidelpay response url as raw response instead of echoing it out.
+            $result->setContents($redirectUrl);
+            return $result;
+        }
+
         if ($this->heidelpayResponse->isSuccess()) {
             try {
                 // get the quote by transactionid from the heidelpay response
@@ -254,23 +297,6 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
         }
 
         $this->_logger->debug('Heidelpay - Response: redirectUrl is ' . $redirectUrl);
-
-        list($paymentMethod, $paymentType) = $this->_paymentHelper->splitPaymentCode(
-            $this->heidelpayResponse->getPayment()->getCode()
-        );
-
-        try {
-            // save the response details into the heidelpay Transactions table.
-            $order->getPayment()->getMethodInstance()->saveHeidelpayTransaction(
-                $this->heidelpayResponse,
-                $paymentMethod,
-                $paymentType,
-                'RESPONSE',
-                $data
-            );
-        } catch (\Exception $e) {
-            $this->_logger->error('Heidelpay - Response: Save transaction error. ' . $e->getMessage());
-        }
 
         // return the heidelpay response url as raw response instead of echoing it out.
         $result->setContents($redirectUrl);

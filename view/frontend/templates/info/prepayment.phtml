@@ -6,10 +6,10 @@
  * @author Stephano Vogel
  */
 /**
- * @var $block \Heidelpay\Gateway\Block\Info\InvoiceSecured
+ * @var $block \Heidelpay\Gateway\Block\Info\Prepayment
  */
 ?>
-<dl class="payment-method invoice-secured">
+<dl class="payment-method prepayment">
     <dt class="title"><?php echo $block->escapeHtml($block->getMethod()->getTitle()) ?></dt>
     <?php if ($block->getTransactionInfo() !== null && ! empty($block->printAdditionalInformationHtml())) : ?>
         <dd class="content">

@@ -1,0 +1,39 @@
+<?php
+/**
+ * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
+ * @copyright Copyright © 2016-present Heidelberger Payment GmbH. All rights reserved.
+ * @link https://dev.heidelpay.de/magento
+ * @author Stephano Vogel
+ */
+/**
+ * @var $block \Heidelpay\Gateway\Block\Info\Invoice
+ */
+?>
+<div class="order-payment-method-name">
+    <?php echo $block->escapeHtml($block->getMethod()->getTitle()); ?>
+</div>
+<table class="data-table admin__table-secondary">
+    <?php if ($block->getTransactionInfo() !== null) : ?>
+        <tr>
+            <th colspan="2" style="text-align: center; font-weight: bold;">
+                <?php echo $block->escapeHtml(__('Heidelpay Payment Information')); ?>
+            </th>
+        </tr>
+        <tr>
+            <th><?php echo $block->escapeHtml(__('Account Holder')); ?>:</th>
+            <td><?php echo $block->escapeHtml($block->getAccountHolder()); ?></td>
+        </tr>
+        <tr>
+            <th><?php echo $block->escapeHtml(__('IBAN')); ?>:</th>
+            <td><?php echo $block->escapeHtml($block->getAccountIban()); ?></td>
+        </tr>
+        <tr>
+            <th><?php echo $block->escapeHtml(__('BIC')); ?>:</th>
+            <td><?php echo $block->escapeHtml($block->getAccountBic()); ?></td>
+        </tr>
+        <tr>
+            <th><?php echo $block->escapeHtml(__('Identification Number')); ?>:</th>
+            <td><?php echo $block->escapeHtml($block->getIdentificationNumber()); ?></td>
+        </tr>
+    <?php endif; ?>
+</table>

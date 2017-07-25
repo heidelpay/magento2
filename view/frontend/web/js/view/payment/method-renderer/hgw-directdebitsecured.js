@@ -37,8 +37,13 @@ define(
                 this.getAdditionalPaymentInformation();
 
                 // init years select menu
-                for (var i = new Date().getFullYear() - 100; i <= (new Date().getFullYear() - 17); i++) {
+                for (var i = (new Date().getFullYear() - 17); i >= new Date().getFullYear() - 120; i--) {
                     this.years.push(i);
+                }
+
+                // pre-fill the holder with the billing name, if it does not exist yet.
+                if (! this.hgwHolder()) {
+                    this.hgwHolder(this.getFullName());
                 }
 
                 return this;

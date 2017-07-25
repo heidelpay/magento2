@@ -6,9 +6,10 @@ define(
         'Magento_Checkout/js/model/payment/additional-validators',
         'Magento_Checkout/js/action/select-payment-method',
         'Magento_Checkout/js/checkout-data',
+        'Magento_Checkout/js/model/quote',
         'moment'
     ],
-    function ($, Component, placeOrderAction, additionalValidators, selectPaymentMethodAction, checkoutData) {
+    function ($, Component, placeOrderAction, additionalValidators, selectPaymentMethodAction, checkoutData, quote) {
         'use strict';
 
         // add IBAN validator
@@ -60,13 +61,38 @@ define(
              * Function to receive the customer's full name.
              */
             getFullName: function() {
-                var name = '';
+                var name = '', billingAddress = quote.billingAddress();
 
-                name += window.customerData.firstname;
-                if (window.customerData.middlename !== null) {
-                    name +=  ' ' + window.customerData.middlename;
+                if (typeof billingAddress !== 'undefined') {
+                    if (typeof billingAddress.firstname !== 'undefined' && billingAddress.firstname !== null) {
+                        name += billingAddress.firstname;
+                    }
+
+                    if (typeof billingAddress.middlename !== 'undefined' && billingAddress.middlename !== null) {
+                        name += ' ' + billingAddress.middlename;
+                    }
+
+                    if (typeof billingAddress.lastname !== 'undefined' && billingAddress.lastname !== null) {
+                        name += ' ' + billingAddress.lastname;
+                    }
                 }
-                name += ' ' + window.customerData.lastname;
+
+                // fallback, if name isn't set yet.
+                if (name === '') {
+                    var tmpName = window.customerData;
+
+                    if (typeof tmpName.firstname !== 'undefined' && tmpName.firstname !== null) {
+                        name += tmpName.firstname;
+                    }
+
+                    if (typeof tmpName.middlename !== 'undefined' && tmpName.middlename !== null) {
+                        name +=  ' ' + tmpName.middlename;
+                    }
+
+                    if (typeof tmpName.lastname !== 'undefined' && tmpName.lastname !== null) {
+                        name += ' ' + tmpName.lastname;
+                    }
+                }
 
                 return name;
             },

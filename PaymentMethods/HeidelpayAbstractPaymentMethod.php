@@ -498,6 +498,9 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
             $this->_encryptor->exportKeys()                         // A secret passphrase from your application
         );
 
+        // add the customer ip address
+        $this->_heidelpayPaymentMethod->getRequest()->getContact()->set('ip', $quote->getRemoteIp());
+
         // add the Magento Version to the heidelpay request
         $this->_heidelpayPaymentMethod->getRequest()->getCriterion()->set(
             'SHOP.TYPE',
