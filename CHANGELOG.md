@@ -1,18 +1,20 @@
 # Release Notes - heidelpay Payment Gateway for Magento 2
 
-## 17.7.21
+## 17.7.25
 
 ### Added
-- Customer's ip address will now be added to the payment api request
 - Prepayment Invoice details in backend, e-mail and pdf invoices
+- Customer's ip address will now be added to the payment api request
 
 ### Fixed
+- Fixed a missing redirect back to cart on nok transaction (error) responses
 - Re-added the name input field in Secured Invoice
 - Pre-filled 'undefined undefined undefined' in secured payment methods
 - Removed readonly attribute in full name input (Secured Invoice)
 
 ### Changed
 - Changed 'Security Sender' to 'Sender-ID' in heidelpay backend configuration
+- Reversed the order of the year selection in the secured payment method input forms
 
 ## 17.7.14
 
