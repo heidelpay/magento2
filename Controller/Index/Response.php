@@ -228,9 +228,13 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
         // if something went wrong, return the redirect url without processing the order.
         if ($this->heidelpayResponse->isError()) {
             $message = sprintf(
-                'Heidelpay - Response is NOK. Message: [%s], Code: [%s]',
+                'Heidelpay - Response is NOK. Message: [%s], Reason: [%s] (%d), Code: [%s], Status: [%s] (%d)',
                 $this->heidelpayResponse->getError()['message'],
-                $this->heidelpayResponse->getError()['code']
+                $this->heidelpayResponse->getProcessing()->reason,
+                $this->heidelpayResponse->getProcessing()->reason_code,
+                $this->heidelpayResponse->getError()['code'],
+                $this->heidelpayResponse->getProcessing()->status,
+                $this->heidelpayResponse->getProcessing()->getStatusCode()
             );
 
             $this->_logger->debug($message);
