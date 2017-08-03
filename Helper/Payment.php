@@ -91,6 +91,17 @@ class Payment extends \Magento\Framework\App\Helper\AbstractHelper
         if ($data['PROCESSING_RESULT'] == 'NOK') {
             $order->getPayment()->getMethodInstance()->cancelledTransactionProcessing($order, $message);
         } elseif ($this->isProcessing($paymentCode[1], $data)) {
+            if ($order->canInvoice()) {
+                $invoice = $order->prepareInvoice();
+                $invoice->setRequestedCaptureCase(\Magento\Sales\Model\Order\Invoice::CAPTURE_ONLINE);
+                $invoice->register();
+                $invoice->setIsPaid(true);
+                $invoice->pay();
+                $transaction = $this->transactionFactory->create();
+                $transaction->addObject($invoice)
+                    ->addObject($invoice->getOrder())
+                    ->save();
+            }
             $order->getPayment()->getMethodInstance()->processingTransactionProcessing($data, $order);
         } else {
             $order->getPayment()->getMethodInstance()->pendingTransactionProcessing($data, $order, $message);
