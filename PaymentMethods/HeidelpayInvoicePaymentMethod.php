@@ -191,16 +191,14 @@ class HeidelpayInvoicePaymentMethod extends HeidelpayAbstractPaymentMethod
         $order->setTotalPaid(0.00)->setBaseTotalPaid(0.00);
 
         // if the order can be invoiced, create one and save it into a transaction.
-        if ($this->salesHelper->canSendNewInvoiceEmail($order->getStore()->getId())) {
-            if ($order->canInvoice()) {
-                $invoice = $order->prepareInvoice();
-                $invoice->setRequestedCaptureCase(\Magento\Sales\Model\Order\Invoice::CAPTURE_ONLINE)
-                    ->setTransactionId($data['IDENTIFICATION_UNIQUEID'])
-                    ->setIsPaid(false)
-                    ->register();
+        if ($order->canInvoice()) {
+            $invoice = $order->prepareInvoice();
+            $invoice->setRequestedCaptureCase(\Magento\Sales\Model\Order\Invoice::CAPTURE_ONLINE)
+                ->setTransactionId($data['IDENTIFICATION_UNIQUEID'])
+                ->setIsPaid(false)
+                ->register();
 
-                $this->_paymentHelper->saveTransaction($invoice);
-            }
+            $this->_paymentHelper->saveTransaction($invoice);
         }
     }
 }

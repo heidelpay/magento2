@@ -731,16 +731,14 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
 
         // if the order can be invoiced and is no Pre-Authorization,
         // create one and save it into a transaction.
-        if ($this->salesHelper->canSendNewInvoiceEmail($order->getStore()->getId())) {
-            if ($order->canInvoice() && !$this->_paymentHelper->isPreAuthorization($data)) {
-                $invoice = $order->prepareInvoice();
+        if ($order->canInvoice() && !$this->_paymentHelper->isPreAuthorization($data)) {
+            $invoice = $order->prepareInvoice();
 
-                $invoice->setRequestedCaptureCase(Invoice::CAPTURE_ONLINE);
-                $invoice->setTransactionId($data['IDENTIFICATION_UNIQUEID']);
-                $invoice->register()->pay();
+            $invoice->setRequestedCaptureCase(Invoice::CAPTURE_ONLINE);
+            $invoice->setTransactionId($data['IDENTIFICATION_UNIQUEID']);
+            $invoice->register()->pay();
 
-                $this->_paymentHelper->saveTransaction($invoice);
-            }
+            $this->_paymentHelper->saveTransaction($invoice);
         }
 
         $order->getPayment()->addTransaction(Transaction::TYPE_CAPTURE, null, true);
