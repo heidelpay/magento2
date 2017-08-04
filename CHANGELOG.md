@@ -4,6 +4,12 @@
 
 This project does not follow a versioning standard. Versions are crafted after the dates; for example, the version 17.7.25 was released on July, 25th in 2017
 
+## 17.8.3
+
+### Fixed
+- A bug which thrown an exception when a language different from de_DE and en_US was used in Magento
+- Removed canSendNewInvoiceEmail checks when just creating Invoices
+
 ## 17.7.25
 
 ### Added
