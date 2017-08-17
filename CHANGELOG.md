@@ -4,6 +4,12 @@
 
 This project does not follow a versioning standard. Versions are crafted after the dates; for example, the version 17.7.25 was released on July, 25th in 2017
 
+## 17.8.17
+
+### Changed
+- Renamed "SOFORT Überweisung" to "Sofort." due to re-branding
+- Package requirements for Magento 2.2 support
+
 ## 17.8.3
 
 ### Fixed
