@@ -16,7 +16,7 @@
     "heidelpay/php-customer-messages": "~17.8.3"
   },
   "require-dev": {
-    "magento/marketplace-eqp": "2.0",
+    "magento/marketplace-eqp": "~1.0.5",
     "heidelpay/phpdocumentor": "2.9.1",
     "friendsofphp/php-cs-fixer": "2.1.0"
   },
