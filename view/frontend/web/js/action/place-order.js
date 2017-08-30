@@ -20,7 +20,7 @@ define(
             redirectOnSuccess = redirectOnSuccess !== false;
             
             if (agreementsConfig.isEnabled) {
-                var agreementForm = $('.payment-method._active form[data-role=checkout-agreements]'),
+                var agreementForm = $('.payment-method._active [data-role=checkout-agreements] input'),
                     agreementData = agreementForm.serializeArray(),
                     agreementIds = [];
 
