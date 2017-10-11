@@ -45,7 +45,7 @@
             <hgwsue>
                 <active>0</active>
                 <payment_action>authorize</payment_action>
-                <title><![CDATA[Sofortüberweisung]]></title>
+                <title><![CDATA[Sofort.]]></title>
                 <channel>31HA07BC8142C5A171749CDAA43365D2</channel>
                 <allowspecific>1</allowspecific>
                 <specificcountry>BE,DE,IT,NL,AT,SI,ES</specificcountry>

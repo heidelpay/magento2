@@ -14,7 +14,7 @@ Currently supported payment methods are:
 * Debit Card
 * Direct Debit
 * Direct Debit (Secured) (B2C)
-* Sofortüberweisung
+* Sofort.
 * PayPal
 * Prepayment
 * Invoice
