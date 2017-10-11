@@ -1,5 +1,5 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../lib/internal/Magento/Framework/Module/etc/module.xsd">
-    <module name="Heidelpay_Gateway" schema_version="17.8.3" setup_version="17.8.3">
+    <module name="Heidelpay_Gateway" schema_version="17.10.11" setup_version="17.10.11">
         <sequence>
             <module name="Magento_Sales" />
             <module name="Magento_Payment" />
