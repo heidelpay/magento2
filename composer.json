@@ -3,17 +3,17 @@
   "description": "This extension for Magento 2 provides a direct integration of the Heidelpay payment methods to your Magento 2 shop.",
   "require": {
     "php": "~5.6.0|~7.0.0|~7.1.0",
-    "magento/module-config": "^100.0.0",
-    "magento/module-store": "^100.0.0",
-    "magento/module-checkout": "^100.0.0",
-    "magento/module-sales": "^100.0.0",
-    "magento/module-quote": "^100.0.0",
-    "magento/module-customer": "^100.0.0",
-    "magento/module-payment": "^100.0.0",
-    "magento/module-backend": "^100.0.0",
-    "magento/framework": "^100.0.0",
+    "magento/module-config": "^100.0.0 | ^101.0.0",
+    "magento/module-store": "^100.0.0 | ^101.0.0",
+    "magento/module-checkout": "^100.0.0 | ^101.0.0",
+    "magento/module-sales": "^100.0.0 | ^101.0.0",
+    "magento/module-quote": "^100.0.0 | ^101.0.0",
+    "magento/module-customer": "^100.0.0 | ^101.0.0",
+    "magento/module-payment": "^100.0.0 | ^101.0.0",
+    "magento/module-backend": "^100.0.0 | ^101.0.0",
+    "magento/framework": "^100.0.0 | ^101.0.0",
     "heidelpay/php-api": "~17.7.14",
-    "heidelpay/php-customer-messages": "~17.8.3"
+    "heidelpay/php-customer-messages": "~17.10.11"
   },
   "require-dev": {
     "magento/marketplace-eqp": "~1.0.5",
@@ -21,7 +21,7 @@
     "friendsofphp/php-cs-fixer": "2.1.0"
   },
   "suggest": {
-    "magento/module-checkout-agreements": "^100.0.0"
+    "magento/module-checkout-agreements": "^100.0.0 | ^101.0.0"
   },
   "repositories": [
     {
