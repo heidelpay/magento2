@@ -4,6 +4,19 @@
 
 This project does not follow a versioning standard. Versions are crafted after the dates; for example, the version 17.7.25 was released on July, 25th in 2017
 
+## 17.10.12
+
+### Fixed
+- Potential bug that could occur when the shipping address step during checkout is skipped/inactive and/or visited as guest
+
+## 17.10.11
+
+### Added
+- Magento 2.2 Support
+
+### Fixed
+- Changed jQuery selector for checkout agreements in certain Magento versions
+
 ## 17.8.17
 
 ### Changed
