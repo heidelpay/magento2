@@ -63,7 +63,7 @@ define(
             getFullName: function() {
                 var name = '', billingAddress = quote.billingAddress();
 
-                if (typeof billingAddress !== 'undefined') {
+                if (billingAddress !== null) {
                     if (typeof billingAddress.firstname !== 'undefined' && billingAddress.firstname !== null) {
                         name += billingAddress.firstname;
                     }
@@ -81,16 +81,18 @@ define(
                 if (name === '') {
                     var tmpName = window.customerData;
 
-                    if (typeof tmpName.firstname !== 'undefined' && tmpName.firstname !== null) {
-                        name += tmpName.firstname;
-                    }
+                    if (tmpName !== null) {
+                        if (typeof tmpName.firstname !== 'undefined' && tmpName.firstname !== null) {
+                            name += tmpName.firstname;
+                        }
 
-                    if (typeof tmpName.middlename !== 'undefined' && tmpName.middlename !== null) {
-                        name +=  ' ' + tmpName.middlename;
-                    }
+                        if (typeof tmpName.middlename !== 'undefined' && tmpName.middlename !== null) {
+                            name +=  ' ' + tmpName.middlename;
+                        }
 
-                    if (typeof tmpName.lastname !== 'undefined' && tmpName.lastname !== null) {
-                        name += ' ' + tmpName.lastname;
+                        if (typeof tmpName.lastname !== 'undefined' && tmpName.lastname !== null) {
+                            name += ' ' + tmpName.lastname;
+                        }
                     }
                 }
 
