@@ -2,7 +2,7 @@
 
 namespace Heidelpay\Gateway\Helper;
 
-use Heidelpay\CustomerMessages\CustomerMessage;
+use Heidelpay\MessageCodeMapper\MessageCodeMapper;
 use Magento\Framework\HTTP\ZendClientFactory;
 use Magento\Payment\Model\Method\Logger;
 use Magento\Sales\Model\Order;
@@ -118,8 +118,8 @@ class Payment extends \Magento\Framework\App\Helper\AbstractHelper
      */
     public function handleError($errorCode = null)
     {
-        $customerMessage = new CustomerMessage($this->localeResolver->getLocale());
-        return $customerMessage->getMessage($errorCode);
+        $messageCodeMapper = new MessageCodeMapper($this->localeResolver->getLocale());
+        return $messageCodeMapper->getMessage($errorCode);
     }
 
     /**
