@@ -3,9 +3,12 @@
 namespace Heidelpay\Gateway\Controller\Index;
 
 use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
+use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Sales\Model\Order\Payment\Transaction;
 use Magento\Sales\Model\Order\Invoice;
+use Magento\Sales\Model\OrderRepository;
 use Magento\Sales\Model\Order;
+use Magento\Sales\Model\ResourceModel\Order\Collection;
 
 /**
  * heidelpay Push Controller
@@ -25,9 +28,9 @@ use Magento\Sales\Model\Order;
 class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
 {
     /**
-     * @var \Magento\Quote\Model\QuoteRepository
+     * @var OrderRepository $orderRepository
      */
-    protected $quoteRepository;
+    protected $orderRepository;
 
     /**
      * @var \Magento\Sales\Api\Data\OrderInterface
@@ -43,6 +46,10 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
      * @var HeidelpayTransactionCollectionFactory
      */
     protected $transactionCollectionFactory;
+    /**
+     * @var SearchCriteriaBuilder
+     */
+    private $searchCriteriaBuilder;
 
     /**
      * Push constructor.
@@ -62,10 +69,11 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
      * @param \Magento\Sales\Model\Order\Email\Sender\OrderCommentSender $orderCommentSender
      * @param \Magento\Framework\Encryption\Encryptor $encryptor
      * @param \Magento\Customer\Model\Url $customerUrl
-     * @param \Magento\Quote\Model\QuoteRepository $quoteRepository
+     * @param OrderRepository $orderRepository
      * @param \Magento\Sales\Api\Data\OrderInterface $order
      * @param \Heidelpay\PhpApi\Push $heidelpayPush
      * @param HeidelpayTransactionCollectionFactory $collectionFactory
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder
      */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
@@ -83,10 +91,11 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
         \Magento\Sales\Model\Order\Email\Sender\OrderCommentSender $orderCommentSender,
         \Magento\Framework\Encryption\Encryptor $encryptor,
         \Magento\Customer\Model\Url $customerUrl,
-        \Magento\Quote\Model\QuoteRepository $quoteRepository,
+        OrderRepository $orderRepository,
         \Magento\Sales\Api\Data\OrderInterface $order,
         \Heidelpay\PhpApi\Push $heidelpayPush,
-        HeidelpayTransactionCollectionFactory $collectionFactory
+        HeidelpayTransactionCollectionFactory $collectionFactory,
+        SearchCriteriaBuilder $searchCriteriaBuilder
     ) {
         parent::__construct(
             $context,
@@ -106,11 +115,12 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
             $customerUrl
         );
 
-        $this->quoteRepository = $quoteRepository;
+        $this->orderRepository = $orderRepository;
         $this->order = $order;
 
         $this->heidelpayPush = $heidelpayPush;
         $this->transactionCollectionFactory = $collectionFactory;
+        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
     }
 
     public function execute()
@@ -152,14 +162,18 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
         if ($this->_paymentHelper->isReceiptAble($paymentMethod, $paymentType)) {
             // only when the Response is ACK.
             if ($this->heidelpayPush->getResponse()->isSuccess()) {
-                // load the reference quote to receive the quote information.
-                $quote = $this->quoteRepository->get(
-                    $this->heidelpayPush->getResponse()->getIdentification()->getTransactionId()
-                );
+                // load the referenced order to receive the order information.
+                $criteria = $this->searchCriteriaBuilder
+                    ->addFilter(
+                        'quote_id',
+                        $this->heidelpayPush->getResponse()->getIdentification()->getTransactionId()
+                    )->create();
 
-                // load the order by quote.
-                /** @var \Magento\Sales\Model\Order $order */
-                $order = $this->order->loadByIncrementIdAndStoreId($quote->getReservedOrderId(), $quote->getStoreId());
+                /** @var Collection $orderList */
+                $orderList = $this->orderRepository->getList($criteria);
+
+                /** @var Order $order */
+                $order = $orderList->getFirstItem();
 
                 $paidAmount = (float)$this->heidelpayPush->getResponse()->getPresentation()->getAmount();
                 $dueLeft = (float)($order->getTotalDue() - $paidAmount);
