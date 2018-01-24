@@ -30,7 +30,7 @@
     }
   ],
   "type": "magento2-module",
-  "license": "Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.",
+  "license": "proprietary",
   "autoload": {
     "files": [
       "registration.php"
