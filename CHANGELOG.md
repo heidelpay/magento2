@@ -4,6 +4,14 @@
 
 This project does not follow a versioning standard. Versions are crafted after the dates; for example, the version 17.7.25 was released on July, 25th in 2017
 
+## 18.1.24
+
+### Fixed
+- Bug which resulted in a REC (push) not being referenceable to the corresponding order if the payment has been received >30 days after order placement.
+
+### Changed
+- Replaced php-customer-message with php-message-code-mapper.
+
 ## 17.10.12
 
 ### Fixed
