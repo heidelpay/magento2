@@ -13,7 +13,7 @@
     "magento/module-backend": "^100.0.0 | ^101.0.0",
     "magento/framework": "^100.0.0 | ^101.0.0",
     "heidelpay/php-api": "~17.7.14",
-    "heidelpay/php-customer-messages": "~17.10.11"
+    "heidelpay/php-message-code-mapper": "~1.0.0"
   },
   "require-dev": {
     "magento/marketplace-eqp": "~1.0.5",
