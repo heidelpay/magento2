@@ -504,7 +504,8 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         // add the Magento Version to the heidelpay request
         $this->_heidelpayPaymentMethod->getRequest()->getCriterion()->set(
             'SHOP.TYPE',
-            $this->productMetadata->getName() . ' ' . $this->productMetadata->getVersion()
+            $this->productMetadata->getName() . ' ' . $this->productMetadata->getVersion() . '-' .
+            $this->productMetadata->getEdition()
         );
 
         // add the module version to the heidelpay request
