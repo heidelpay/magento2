@@ -10,6 +10,7 @@ use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Order\Payment\Transaction;
 use Magento\Store\Model\ScopeInterface as StoreScopeInterface;
+use Heidelpay\Gateway\Block\Payment\HgwAbstract;
 
 /**
  * Heidelpay  abstract payment method
@@ -72,48 +73,53 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
     protected $_canUseInternal = false;
 
     /**
+     * @var boolean
+     */
+    private $canBasketApi = false;
+
+    /**
      * @var string
      */
-    protected $_formBlockType = 'Heidelpay\Gateway\Block\Payment\HgwAbstract';
+    protected $_formBlockType = HgwAbstract::class;
 
     /**
      * @var \Magento\Framework\UrlInterface
      */
-    protected $urlBuilder = null;
+    protected $urlBuilder;
 
     /**
      * @var \Magento\Framework\App\RequestInterface
      */
-    protected $_requestHttp = null;
+    protected $_requestHttp;
 
     /**
      * @var \Heidelpay\Gateway\Helper\Payment
      */
-    protected $_paymentHelper = null;
+    protected $_paymentHelper;
 
     /**
      * @var \Magento\Framework\Locale\ResolverInterface
      */
-    protected $_localResolver = null;
+    protected $_localResolver;
 
     /**
      * The used heidelpay payment method
      *
      * @var \Heidelpay\PhpApi\PaymentMethods\AbstractPaymentMethod
      */
-    protected $_heidelpayPaymentMethod = null;
+    protected $_heidelpayPaymentMethod;
 
     /**
      * @var \Magento\Payment\Model\Method\Logger
      */
-    protected $logger = null;
+    protected $logger;
 
     /**
      * Encryption & Hashing
      *
      * @var \Magento\Framework\Encryption\Encryptor
      */
-    protected $_encryptor = null;
+    protected $_encryptor;
 
     /**
      * Productive payment server url
@@ -777,5 +783,21 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
     public function additionalPaymentInformation($response)
     {
         return null;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCanBasketApi()
+    {
+        return $this->canBasketApi;
+    }
+
+    /**
+     * @param bool $canBasketApi
+     */
+    public function setCanBasketApi($canBasketApi)
+    {
+        $this->canBasketApi = $canBasketApi;
     }
 }
