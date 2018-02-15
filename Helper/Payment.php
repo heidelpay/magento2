@@ -1,12 +1,14 @@
 <?php
-
 namespace Heidelpay\Gateway\Helper;
 
 use Heidelpay\MessageCodeMapper\MessageCodeMapper;
+use Magento\Framework\App\Helper\AbstractHelper;
+use Magento\Framework\App\Helper\Context;
 use Magento\Framework\HTTP\ZendClientFactory;
-use Magento\Payment\Model\Method\Logger;
+use Magento\Quote\Model\Quote;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Invoice;
+use Magento\Store\Model\ScopeInterface;
 
 /**
  * Heidelpay payment helper
@@ -24,16 +26,13 @@ use Magento\Sales\Model\Order\Invoice;
  * @subpackage Magento2
  * @category   Magento2
  */
-class Payment extends \Magento\Framework\App\Helper\AbstractHelper
+class Payment extends AbstractHelper
 {
     protected $_invoiceOrderEmail = true;
     protected $_debug = false;
 
     /** @var ZendClientFactory */
     protected $httpClientFactory;
-
-    /** @var Logger */
-    protected $log;
 
     /** @var \Magento\Framework\DB\TransactionFactory */
     protected $transactionFactory;
@@ -42,26 +41,97 @@ class Payment extends \Magento\Framework\App\Helper\AbstractHelper
     protected $localeResolver;
 
     /**
-     * @param ZendClientFactory                        $httpClientFactory
-     * @param Logger                                   $logger
-     * @param \Magento\Framework\DB\TransactionFactory $transactionFactory
-     * @param \Magento\Framework\Locale\Resolver       $localeResolver
+     * @var \Magento\Store\Model\App\Emulation
+     */
+    protected $appEmulation;
+
+    /**
+     * @var \Magento\Catalog\Helper\ImageFactory
+     */
+    protected $imageHelperFactory;
+
+    /**
+     * @param Context                                            $context
+     * @param \Magento\Framework\HTTP\ZendClientFactory          $httpClientFactory
+     * @param \Magento\Framework\DB\TransactionFactory           $transactionFactory
+     * @param \Magento\Framework\Locale\Resolver                 $localeResolver
+     * @param \Magento\Store\Model\App\Emulation                 $appEmulation
+     * @param \Magento\Catalog\Helper\ImageFactory               $imageHelperFactory
      */
     public function __construct(
-        ZendClientFactory $httpClientFactory,
-        Logger $logger,
+        Context $context,
+        \Magento\Framework\HTTP\ZendClientFactory $httpClientFactory,
         \Magento\Framework\DB\TransactionFactory $transactionFactory,
-        \Magento\Framework\Locale\Resolver $localeResolver
+        \Magento\Framework\Locale\Resolver $localeResolver,
+        \Magento\Store\Model\App\Emulation $appEmulation,
+        \Magento\Catalog\Helper\ImageFactory $imageHelperFactory
     ) {
         $this->httpClientFactory = $httpClientFactory;
-        $this->log = $logger;
         $this->transactionFactory = $transactionFactory;
         $this->localeResolver = $localeResolver;
+        $this->appEmulation = $appEmulation;
+        $this->imageHelperFactory = $imageHelperFactory;
+
+        parent::__construct($context);
     }
 
     public function splitPaymentCode($PAYMENT_CODE)
     {
         return preg_split('/\./', $PAYMENT_CODE);
+    }
+
+    /**
+     * Returns an array containing the heidelpay authentication data
+     * (sender-id, user login, password, transaction channel).
+     *
+     * @param string $code the payment method code
+     * @param int|string $storeId id of the store front
+     *
+     * @return array configuration form backend
+     */
+    public function getHeidelpayAuthenticationConfig($code = '', $storeId = null)
+    {
+        $path = 'payment/hgwmain/';
+        $config = [];
+
+        $config['SECURITY.SENDER'] = $this->scopeConfig->getValue(
+            $path . 'security_sender',
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+
+        if ($this->scopeConfig->getValue($path . 'sandbox_mode', ScopeInterface::SCOPE_STORE, $storeId) == 0) {
+            $config['TRANSACTION.MODE'] = 'LIVE';
+        } else {
+            $config['TRANSACTION.MODE'] = 'CONNECTOR_TEST';
+        }
+
+        $config['USER.LOGIN'] = trim(
+            $this->scopeConfig->getValue(
+                $path . 'user_login',
+                ScopeInterface::SCOPE_STORE,
+                $storeId
+            )
+        );
+
+        $config['USER.PWD'] = trim(
+            $this->scopeConfig->getValue(
+                $path . 'user_passwd',
+                ScopeInterface::SCOPE_STORE,
+                $storeId
+            )
+        );
+
+        $path = 'payment/' . $code . '/';
+        $config['TRANSACTION.CHANNEL'] = trim(
+            $this->scopeConfig->getValue(
+                $path . 'channel',
+                ScopeInterface::SCOPE_STORE,
+                $storeId
+            )
+        );
+
+        return $config;
     }
 
     /**
@@ -73,7 +143,7 @@ class Payment extends \Magento\Framework\App\Helper\AbstractHelper
     {
         $paymentCode = $this->splitPaymentCode($data['PAYMENT_CODE']);
 
-        $message = (!empty($message)) ? $message : $data['PROCESSING_RETURN'];
+        $message = !empty($message) ? $message : $data['PROCESSING_RETURN'];
 
         $quoteID = ($order->getLastQuoteId() === false)
             ? $order->getQuoteId()
@@ -115,6 +185,7 @@ class Payment extends \Magento\Framework\App\Helper\AbstractHelper
      * @param string|null $errorCode
      *
      * @return string
+     * @throws \Heidelpay\MessageCodeMapper\Exceptions\MissingLocaleFileException
      */
     public function handleError($errorCode = null)
     {
@@ -255,5 +326,104 @@ class Payment extends \Magento\Framework\App\Helper\AbstractHelper
         $transaction->addObject($invoice)
             ->addObject($invoice->getOrder())
             ->save();
+    }
+
+    /**
+     * Converts a Quote to a heidelpay PHP Basket Api Request instance.
+     *
+     * @param Quote $quote
+     *
+     * @return \Heidelpay\PhpBasketApi\Request|null
+     * @throws \Heidelpay\PhpBasketApi\Exception\InvalidBasketitemPositionException
+     */
+    public function convertQuoteToBasket(Quote $quote)
+    {
+        // if no (valid) quote is supplied, we can't convert it to a heidelpay Basket object.
+        if ($quote === null || $quote->isEmpty()) {
+            return null;
+        }
+
+        // we emulate that we are in the frontend to get frontend product images.
+        $this->appEmulation->startEnvironmentEmulation(
+            $quote->getStoreId(),
+            \Magento\Framework\App\Area::AREA_FRONTEND,
+            true
+        );
+
+        // initialize the basket request
+        $basketRequest = new \Heidelpay\PhpBasketApi\Request();
+
+        $basketRequest->getBasket()
+            ->setCurrencyCode($quote->getQuoteCurrencyCode())
+            ->setAmountTotalNet((int) ($quote->getGrandTotal() * 100))
+            ->setAmountTotalVat((int) ($quote->getShippingAddress()->getTaxAmount() * 100))
+            ->setAmountTotalDiscount((int) ($quote->getShippingAddress()->getDiscountAmount() * 100))
+            ->setBasketReferenceId(sprintf('M2-S%dQ%d-%s', $quote->getStoreId(), $quote->getId(), date('YmdHis')));
+
+        /** @var \Magento\Quote\Model\Quote\Item $item */
+        foreach ($quote->getAllVisibleItems() as $item) {
+            $basketItem = new \Heidelpay\PhpBasketApi\Object\BasketItem();
+
+            $basketItem->setQuantity($item->getQty())
+                ->setVat((int) ($item->getTaxPercent() * 100))
+                ->setAmountPerUnit((int) ($item->getPrice() * 100))
+                ->setAmountVat((int) ($item->getTaxAmount() * 100))
+                ->setAmountNet((int) ($item->getRowTotal() * 100))
+                ->setAmountGross((int) ($item->getRowTotalInclTax() * 100))
+                ->setAmountDiscount((int) ($item->getDiscountAmount() * 100))
+                ->setTitle($item->getName())
+                ->setDescription($item->getDescription())
+                ->setArticleId($item->getSku())
+                ->setImageUrl(
+                    $this->imageHelperFactory->create()->init($item->getProduct(), 'category_page_list')->getUrl()
+                )
+                ->setBasketItemReferenceId(
+                    sprintf('M2-S%dQ%d-%s-x%d', $quote->getStoreId(), $quote->getId(), $item->getSku(), $item->getQty())
+                );
+
+            $basketRequest->getBasket()->addBasketItem($basketItem);
+        }
+
+        // stop the frontend environment emulation
+        $this->appEmulation->stopEnvironmentEmulation();
+
+        return $basketRequest;
+    }
+
+    /**
+     * @param Quote|null $quote
+     *
+     * @return null|string
+     * @throws \Heidelpay\PhpBasketApi\Exception\InvalidBasketitemPositionException
+     */
+    public function submitQuoteToBasketApi(Quote $quote = null)
+    {
+        if ($quote === null || $quote->isEmpty()) {
+            return null;
+        }
+
+        $config = $this->getHeidelpayAuthenticationConfig('', $quote->getStoreId());
+
+        // create a basketApiRequest instance by converting the quote and it's items
+        if (!$basketApiRequest = $this->convertQuoteToBasket($quote)) {
+            $this->_logger->warning('heidelpay - submitQuoteToBasketApi: basketApiRequest is null.');
+            return null;
+        }
+
+        $basketApiRequest->setAuthentication($config['USER.LOGIN'], $config['USER.PWD'], $config['SECURITY.SENDER']);
+
+        // add a new basket via api request by sending the addNewBasket request
+        $basketApiResponse = $basketApiRequest->addNewBasket();
+
+        // if the request wasn't successful, log the error message(s) and return null, because we got no BasketId.
+        if ($basketApiResponse->isFailure()) {
+            $this->_logger->warning($basketApiResponse->printMessage());
+            return null;
+        }
+
+        // TODO: remove debug log
+        $this->_logger->debug($basketApiResponse->printMessage() . ' Response: ' . $basketApiResponse->toJson());
+
+        return $basketApiResponse->getBasketId();
     }
 }

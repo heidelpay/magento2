@@ -5,6 +5,7 @@ namespace Heidelpay\Gateway\PaymentMethods;
 use Heidelpay\Gateway\Model\Config\Source\BookingMode;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
 use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
+use Heidelpay\PhpApi\ParameterGroups\BasketParameterGroup;
 use Heidelpay\PhpApi\Response;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Invoice;
@@ -460,6 +461,9 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
 
     /**
      * @param \Magento\Quote\Model\Quote $quote
+     * @throws \Heidelpay\PhpBasketApi\Exception\InvalidBasketitemPositionException
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Exception
      */
     public function getHeidelpayUrl($quote)
     {
@@ -529,6 +533,21 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
                 '_nosid' => true
             ])
         );
+
+        // submit the Quote to the Basket API if the payment method needs one.
+        if ($this->isCanBasketApi()) {
+            $basketId = $this->_paymentHelper->submitQuoteToBasketApi($quote);
+
+            if ($basketId === null) {
+                throw new \Magento\Framework\Exception\LocalizedException(__('Error!'));
+            }
+
+            $this->_logger->debug('Heidelpay: New basket id is ' . $basketId);
+
+            /** @var BasketParameterGroup $basketParameterGroup */
+            $basketParameterGroup = $this->_heidelpayPaymentMethod->getRequest()->getBasket();
+            $basketParameterGroup->set('id', $basketId);
+        }
     }
 
     /**
