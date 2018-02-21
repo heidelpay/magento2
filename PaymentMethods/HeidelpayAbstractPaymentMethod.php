@@ -99,6 +99,11 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
     protected $_paymentHelper;
 
     /**
+     * @var \Heidelpay\Gateway\Helper\BasketHelper
+     */
+    protected $basketHelper;
+
+    /**
      * @var \Magento\Framework\Locale\ResolverInterface
      */
     protected $_localResolver;
@@ -173,27 +178,28 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
     /**
      * heidelpay Abstract Payment method constructor
      *
-     * @param \Magento\Framework\Model\Context                        $context
-     * @param \Magento\Framework\Registry                             $registry
-     * @param \Magento\Framework\Api\ExtensionAttributesFactory       $extensionFactory
-     * @param \Magento\Framework\Api\AttributeValueFactory            $customAttributeFactory
-     * @param \Magento\Payment\Helper\Data                            $paymentData
-     * @param \Magento\Framework\App\Config\ScopeConfigInterface      $scopeConfig
-     * @param \Magento\Framework\App\RequestInterface                 $request
-     * @param \Magento\Framework\UrlInterface                         $urlinterface
-     * @param \Magento\Framework\Encryption\Encryptor                 $encryptor
-     * @param \Magento\Payment\Model\Method\Logger                    $logger
-     * @param \Magento\Framework\Locale\ResolverInterface             $localeResolver
-     * @param \Magento\Framework\App\ProductMetadataInterface         $productMetadata
-     * @param \Magento\Framework\Module\ResourceInterface             $moduleResource
-     * @param \Heidelpay\Gateway\Helper\Payment                       $paymentHelper
-     * @param \Magento\Sales\Helper\Data                              $salesHelper
-     * @param PaymentInformationCollectionFactory                     $paymentInformationCollectionFactory
-     * @param \Heidelpay\Gateway\Model\TransactionFactory             $transactionFactory
-     * @param HeidelpayTransactionCollectionFactory                   $transactionCollectionFactory
+     * @param \Magento\Framework\Model\Context $context
+     * @param \Magento\Framework\Registry $registry
+     * @param \Magento\Framework\Api\ExtensionAttributesFactory $extensionFactory
+     * @param \Magento\Framework\Api\AttributeValueFactory $customAttributeFactory
+     * @param \Magento\Payment\Helper\Data $paymentData
+     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
+     * @param \Magento\Framework\App\RequestInterface $request
+     * @param \Magento\Framework\UrlInterface $urlinterface
+     * @param \Magento\Framework\Encryption\Encryptor $encryptor
+     * @param \Magento\Payment\Model\Method\Logger $logger
+     * @param \Magento\Framework\Locale\ResolverInterface $localeResolver
+     * @param \Magento\Framework\App\ProductMetadataInterface $productMetadata
+     * @param \Magento\Framework\Module\ResourceInterface $moduleResource
+     * @param \Heidelpay\Gateway\Helper\Payment $paymentHelper
+     * @param \Heidelpay\Gateway\Helper\BasketHelper $basketHelper
+     * @param \Magento\Sales\Helper\Data $salesHelper
+     * @param PaymentInformationCollectionFactory $paymentInformationCollectionFactory
+     * @param \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory
+     * @param HeidelpayTransactionCollectionFactory $transactionCollectionFactory
      * @param \Magento\Framework\Model\ResourceModel\AbstractResource $resource
-     * @param \Magento\Framework\Data\Collection\AbstractDb           $resourceCollection
-     * @param array                                                   $data
+     * @param \Magento\Framework\Data\Collection\AbstractDb $resourceCollection
+     * @param array $data
      */
     public function __construct(
         \Magento\Framework\Model\Context $context,
@@ -210,6 +216,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         \Magento\Framework\App\ProductMetadataInterface $productMetadata,
         \Magento\Framework\Module\ResourceInterface $moduleResource,
         \Heidelpay\Gateway\Helper\Payment $paymentHelper,
+        \Heidelpay\Gateway\Helper\BasketHelper $basketHelper,
         \Magento\Sales\Helper\Data $salesHelper,
         PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
         \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory,
@@ -236,6 +243,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         $this->_requestHttp = $request;
         $this->_paymentHelper = $paymentHelper;
         $this->salesHelper = $salesHelper;
+        $this->basketHelper = $basketHelper;
 
         $this->_encryptor = $encryptor;
         $this->_localResolver = $localeResolver;
@@ -536,7 +544,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
 
         // submit the Quote to the Basket API if the payment method needs one.
         if ($this->isCanBasketApi()) {
-            $basketId = $this->_paymentHelper->submitQuoteToBasketApi($quote);
+            $basketId = $this->basketHelper->submitQuoteToBasketApi($quote);
 
             if ($basketId === null) {
                 throw new \Magento\Framework\Exception\LocalizedException(__('Error!'));

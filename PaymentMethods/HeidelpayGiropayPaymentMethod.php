@@ -54,6 +54,7 @@ class HeidelpayGiropayPaymentMethod extends HeidelpayAbstractPaymentMethod
      * @param \Magento\Framework\App\ProductMetadataInterface $productMetadata
      * @param \Magento\Framework\Module\ResourceInterface $moduleResource
      * @param \Heidelpay\Gateway\Helper\Payment $paymentHelper
+     * @param \Heidelpay\Gateway\Helper\BasketHelper $basketHelper
      * @param \Magento\Sales\Helper\Data $salesHelper
      * @param PaymentInformationCollectionFactory $paymentInformationCollectionFactory
      * @param \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory
@@ -78,6 +79,7 @@ class HeidelpayGiropayPaymentMethod extends HeidelpayAbstractPaymentMethod
         \Magento\Framework\App\ProductMetadataInterface $productMetadata,
         \Magento\Framework\Module\ResourceInterface $moduleResource,
         \Heidelpay\Gateway\Helper\Payment $paymentHelper,
+        \Heidelpay\Gateway\Helper\BasketHelper $basketHelper,
         \Magento\Sales\Helper\Data $salesHelper,
         PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
         \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory,
@@ -102,6 +104,7 @@ class HeidelpayGiropayPaymentMethod extends HeidelpayAbstractPaymentMethod
             $productMetadata,
             $moduleResource,
             $paymentHelper,
+            $basketHelper,
             $salesHelper,
             $paymentInformationCollectionFactory,
             $transactionFactory,
