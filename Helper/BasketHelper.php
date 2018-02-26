@@ -1,6 +1,7 @@
 <?php
 namespace Heidelpay\Gateway\Helper;
 
+use Heidelpay\Gateway\Gateway\Config\MainConfigInterface;
 use Heidelpay\Gateway\Wrapper\ItemWrapper;
 use Heidelpay\Gateway\Wrapper\QuoteWrapper;
 use Heidelpay\PhpBasketApi\Object\BasketItem;
@@ -45,26 +46,26 @@ class BasketHelper extends AbstractHelper
     private $imageHelperFactory;
 
     /**
-     * @var Payment $paymentHelper
+     * @var MainConfigInterface
      */
-    private $paymentHelper;
+    private $mainConfig;
 
     /**
      * @param Context $context
      * @param Emulation $appEmulation
      * @param ImageFactory $imageHelperFactory
-     * @param Payment $paymentHelper
+     * @param MainConfigInterface $mainConfig
      */
     public function __construct(
         Context $context,
         Emulation $appEmulation,
         /** @noinspection PhpUndefinedClassInspection */
         ImageFactory $imageHelperFactory,
-        Payment $paymentHelper
+        MainConfigInterface $mainConfig
     ) {
         $this->appEmulation = $appEmulation;
         $this->imageHelperFactory = $imageHelperFactory;
-        $this->paymentHelper = $paymentHelper;
+        $this->mainConfig = $mainConfig;
 
         parent::__construct($context);
     }
@@ -176,15 +177,17 @@ class BasketHelper extends AbstractHelper
             return null;
         }
 
-        $config = $this->paymentHelper->getHeidelpayAuthenticationConfig('', $quote->getStoreId());
-
         // create a basketApiRequest instance by converting the quote and it's items
         if (!$basketApiRequest = $this->convertQuoteToBasket($quote)) {
             $this->_logger->warning('heidelpay - submitQuoteToBasketApi: basketApiRequest is null.');
             return null;
         }
 
-        $basketApiRequest->setAuthentication($config['USER.LOGIN'], $config['USER.PWD'], $config['SECURITY.SENDER']);
+        $basketApiRequest->setAuthentication(
+            $this->mainConfig->getUserLogin(),
+            $this->mainConfig->getUserPasswd(),
+            $this->mainConfig->getSecuritySender()
+        );
 
         // add a new basket via api request by sending the addNewBasket request
         $basketApiResponse = $basketApiRequest->addNewBasket();
