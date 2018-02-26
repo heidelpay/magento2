@@ -19,7 +19,7 @@ namespace Heidelpay\Gateway\Wrapper;
 
 use Magento\Quote\Model\Quote\Item;
 
-class ItemWrapper
+class ItemWrapper extends BaseWrapper
 {
     /**
      * @var Item
