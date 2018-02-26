@@ -48,7 +48,13 @@ class QuoteWrapper extends BaseWrapper
      */
     public function getShippingTaxPercent()
     {
-        $tax = bcdiv(bcmul($this->totals['shipping_tax_amount'], 100, 10), $this->totals['shipping_amount']);
+        $shipping_amount = $this->totals['shipping_amount'];
+
+        if ((int)$shipping_amount === 0) {
+            return 0.0;
+        }
+
+        $tax = bcdiv(bcmul($this->totals['shipping_tax_amount'], 100, 10), $shipping_amount);
         return round($tax, 2);
     }
 
