@@ -1,21 +1,14 @@
 <?php
 /**
- * Short Summary
- *
- * Description
+ * This trait enables to dump all simple getter return values into an array extracting the keys from the getter names.
  *
  * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
  * @copyright Copyright © 2016-present Heidelberger Payment GmbH. All rights reserved.
  *
- * @link  http://dev.heidelpay.com/heidelpay-php-api/
- *
  * @author  Simon Gabriel <simon.gabriel@heidelpay.de>
  *
- * @package  Heidelpay
- * @subpackage PhpStorm
- * @category ${CATEGORY}
+ * @package  magento2
  */
-
 namespace Heidelpay\Gateway\Traits;
 
 use ReflectionMethod;

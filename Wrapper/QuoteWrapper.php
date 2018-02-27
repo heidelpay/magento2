@@ -1,19 +1,13 @@
 <?php
 /**
- * Short Summary
- *
- * Description
+ * This class wraps quote objects to provide the values already adapted for the communication with the basket-api.
  *
  * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
  * @copyright Copyright © 2016-present Heidelberger Payment GmbH. All rights reserved.
  *
- * @link  http://dev.heidelpay.com/heidelpay-php-api/
- *
  * @author  Simon Gabriel <simon.gabriel@heidelpay.de>
  *
- * @package  Heidelpay
- * @subpackage PhpStorm
- * @category ${CATEGORY}
+ * @package  magento2
  */
 namespace Heidelpay\Gateway\Wrapper;
 
