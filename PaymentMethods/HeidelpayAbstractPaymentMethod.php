@@ -6,8 +6,8 @@ use Heidelpay\Gateway\Gateway\Config\HgwMainConfigInterface;
 use Heidelpay\Gateway\Model\Config\Source\BookingMode;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
 use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
-use Heidelpay\PhpApi\ParameterGroups\BasketParameterGroup;
-use Heidelpay\PhpApi\Response;
+use Heidelpay\PhpPaymentApi\ParameterGroups\BasketParameterGroup;
+use Heidelpay\PhpPaymentApi\Response;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Order\Payment\Transaction;
@@ -112,7 +112,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
     /**
      * The used heidelpay payment method
      *
-     * @var \Heidelpay\PhpApi\PaymentMethods\AbstractPaymentMethod
+     * @var \Heidelpay\PhpPaymentApi\PaymentMethods\AbstractPaymentMethod
      */
     protected $_heidelpayPaymentMethod;
 
@@ -576,9 +576,9 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
     }
 
     /**
-     * Returns the heidelpay PhpApi Paymentmethod Instance.
+     * Returns the heidelpay PhpPaymentApi Paymentmethod Instance.
      *
-     * @return \Heidelpay\PhpApi\PaymentMethods\AbstractPaymentMethod
+     * @return \Heidelpay\PhpPaymentApi\PaymentMethods\AbstractPaymentMethod
      */
     public function getHeidelpayPaymentMethodInstance()
     {

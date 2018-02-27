@@ -4,7 +4,7 @@ namespace Heidelpay\Gateway\Controller\Index;
 
 use Heidelpay\Gateway\Helper\Payment as HeidelpayHelper;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
-use Heidelpay\PhpApi\Exceptions\HashVerificationException;
+use Heidelpay\PhpPaymentApi\Exceptions\HashVerificationException;
 use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderCommentSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
@@ -42,7 +42,7 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
     /** @var \Magento\Framework\Controller\Result\RawFactory */
     protected $resultFactory;
 
-    /** @var \Heidelpay\PhpApi\Response The heidelpay response object */
+    /** @var \Heidelpay\PhpPaymentApi\Response The heidelpay response object */
     protected $heidelpayResponse;
 
     /** @var \Heidelpay\Gateway\Model\TransactionFactory */
@@ -71,7 +71,7 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
      * @param \Magento\Customer\Model\Url $customerUrl
      * @param \Magento\Framework\Controller\Result\RawFactory $rawResultFactory
      * @param \Magento\Quote\Model\QuoteRepository $quoteRepository
-     * @param \Heidelpay\PhpApi\Response $heidelpayResponse
+     * @param \Heidelpay\PhpPaymentApi\Response $heidelpayResponse
      * @param PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
      * @param \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory
      */
@@ -93,7 +93,7 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
         \Magento\Customer\Model\Url $customerUrl,
         \Magento\Framework\Controller\Result\RawFactory $rawResultFactory,
         \Magento\Quote\Model\QuoteRepository $quoteRepository,
-        \Heidelpay\PhpApi\Response $heidelpayResponse,
+        \Heidelpay\PhpPaymentApi\Response $heidelpayResponse,
         PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
         \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory
     ) {

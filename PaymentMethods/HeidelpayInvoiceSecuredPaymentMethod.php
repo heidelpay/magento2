@@ -84,7 +84,7 @@ class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMetho
      * @param PaymentInformationCollectionFactory $paymentInformationCollectionFactory
      * @param \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory
      * @param HeidelpayTransactionCollectionFactory $transactionCollectionFactory
-     * @param \Heidelpay\PhpApi\PaymentMethods\InvoiceB2CSecuredPaymentMethod $invoiceB2CSecuredPaymentMethod
+     * @param \Heidelpay\PhpPaymentApi\PaymentMethods\InvoiceB2CSecuredPaymentMethod $invoiceB2CSecuredPaymentMethod
      * @param \Magento\Framework\Model\ResourceModel\AbstractResource|null $resource
      * @param \Magento\Framework\Data\Collection\AbstractDb|null $resourceCollection
      * @param array $data
@@ -109,7 +109,7 @@ class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMetho
         PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
         \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory,
         HeidelpayTransactionCollectionFactory $transactionCollectionFactory,
-        \Heidelpay\PhpApi\PaymentMethods\InvoiceB2CSecuredPaymentMethod $invoiceB2CSecuredPaymentMethod,
+        \Heidelpay\PhpPaymentApi\PaymentMethods\InvoiceB2CSecuredPaymentMethod $invoiceB2CSecuredPaymentMethod,
         \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
         array $data = []

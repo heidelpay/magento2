@@ -89,7 +89,7 @@ class HeidelpayCreditCardPaymentMethod extends HeidelpayAbstractPaymentMethod
      * @param PaymentInformationCollectionFactory $paymentInformationCollectionFactory
      * @param \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory
      * @param HeidelpayTransactionCollectionFactory $transactionCollectionFactory
-     * @param \Heidelpay\PhpApi\PaymentMethods\CreditCardPaymentMethod $creditCardPaymentMethod
+     * @param \Heidelpay\PhpPaymentApi\PaymentMethods\CreditCardPaymentMethod $creditCardPaymentMethod
      * @param \Magento\Framework\Model\ResourceModel\AbstractResource|null $resource
      * @param \Magento\Framework\Data\Collection\AbstractDb|null $resourceCollection
      * @param array $data
@@ -114,7 +114,7 @@ class HeidelpayCreditCardPaymentMethod extends HeidelpayAbstractPaymentMethod
         PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
         \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory,
         HeidelpayTransactionCollectionFactory $transactionCollectionFactory,
-        \Heidelpay\PhpApi\PaymentMethods\CreditCardPaymentMethod $creditCardPaymentMethod,
+        \Heidelpay\PhpPaymentApi\PaymentMethods\CreditCardPaymentMethod $creditCardPaymentMethod,
         \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
         array $data = []

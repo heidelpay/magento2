@@ -61,7 +61,7 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
      * @param PaymentInformationCollectionFactory $paymentInformationCollectionFactory
      * @param \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory
      * @param HeidelpayTransactionCollectionFactory $transactionCollectionFactory
-     * @param \Heidelpay\PhpApi\PaymentMethods\DirectDebitPaymentMethod $directDebitPaymentMethod
+     * @param \Heidelpay\PhpPaymentApi\PaymentMethods\DirectDebitPaymentMethod $directDebitPaymentMethod
      * @param \Magento\Framework\Model\ResourceModel\AbstractResource|null $resource
      * @param \Magento\Framework\Data\Collection\AbstractDb|null $resourceCollection
      * @param array $data
@@ -86,7 +86,7 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
         PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
         \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory,
         HeidelpayTransactionCollectionFactory $transactionCollectionFactory,
-        \Heidelpay\PhpApi\PaymentMethods\DirectDebitPaymentMethod $directDebitPaymentMethod,
+        \Heidelpay\PhpPaymentApi\PaymentMethods\DirectDebitPaymentMethod $directDebitPaymentMethod,
         \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
         array $data = []
@@ -124,7 +124,7 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
      * Fires the initial request to the heidelpay payment provider.
      *
      * @param \Magento\Quote\Model\Quote $quote
-     * @return \Heidelpay\PhpApi\Response
+     * @return \Heidelpay\PhpPaymentApi\Response
      */
     public function getHeidelpayUrl($quote)
     {

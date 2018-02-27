@@ -38,7 +38,7 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
     protected $order;
 
     /**
-     * @var \Heidelpay\PhpApi\Push
+     * @var \Heidelpay\PhpPaymentApi\Push
      */
     protected $heidelpayPush;
 
@@ -71,7 +71,7 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
      * @param \Magento\Customer\Model\Url $customerUrl
      * @param OrderRepository $orderRepository
      * @param \Magento\Sales\Api\Data\OrderInterface $order
-     * @param \Heidelpay\PhpApi\Push $heidelpayPush
+     * @param \Heidelpay\PhpPaymentApi\Push $heidelpayPush
      * @param HeidelpayTransactionCollectionFactory $collectionFactory
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
      */
@@ -93,7 +93,7 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
         \Magento\Customer\Model\Url $customerUrl,
         OrderRepository $orderRepository,
         \Magento\Sales\Api\Data\OrderInterface $order,
-        \Heidelpay\PhpApi\Push $heidelpayPush,
+        \Heidelpay\PhpPaymentApi\Push $heidelpayPush,
         HeidelpayTransactionCollectionFactory $collectionFactory,
         SearchCriteriaBuilder $searchCriteriaBuilder
     ) {
