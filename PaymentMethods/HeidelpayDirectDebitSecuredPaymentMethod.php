@@ -2,6 +2,7 @@
 
 namespace Heidelpay\Gateway\PaymentMethods;
 
+use Heidelpay\Gateway\Gateway\Config\HgwMainConfigInterface;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
 use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
 
@@ -46,7 +47,7 @@ class HeidelpayDirectDebitSecuredPaymentMethod extends HeidelpayAbstractPaymentM
      * @param \Magento\Framework\Api\ExtensionAttributesFactory $extensionFactory
      * @param \Magento\Framework\Api\AttributeValueFactory $customAttributeFactory
      * @param \Magento\Payment\Helper\Data $paymentData
-     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
+     * @param HgwMainConfigInterface $mainConfig
      * @param \Magento\Framework\App\RequestInterface $request
      * @param \Magento\Framework\UrlInterface $urlinterface
      * @param \Magento\Framework\Encryption\Encryptor $encryptor
@@ -71,7 +72,7 @@ class HeidelpayDirectDebitSecuredPaymentMethod extends HeidelpayAbstractPaymentM
         \Magento\Framework\Api\ExtensionAttributesFactory $extensionFactory,
         \Magento\Framework\Api\AttributeValueFactory $customAttributeFactory,
         \Magento\Payment\Helper\Data $paymentData,
-        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
+        HgwMainConfigInterface $mainConfig,
         \Magento\Framework\App\RequestInterface $request,
         \Magento\Framework\UrlInterface $urlinterface,
         \Magento\Framework\Encryption\Encryptor $encryptor,
@@ -96,7 +97,7 @@ class HeidelpayDirectDebitSecuredPaymentMethod extends HeidelpayAbstractPaymentM
             $extensionFactory,
             $customAttributeFactory,
             $paymentData,
-            $scopeConfig,
+            $mainConfig,
             $request,
             $urlinterface,
             $encryptor,

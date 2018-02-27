@@ -7,7 +7,6 @@ use Magento\Framework\App\Helper\Context;
 use Magento\Framework\HTTP\ZendClientFactory;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Invoice;
-use Magento\Store\Model\ScopeInterface;
 
 /**
  * Heidelpay payment helper
@@ -61,60 +60,6 @@ class Payment extends AbstractHelper
     public function splitPaymentCode($PAYMENT_CODE)
     {
         return preg_split('/\./', $PAYMENT_CODE);
-    }
-
-    /**
-     * Returns an array containing the heidelpay authentication data
-     * (sender-id, user login, password, transaction channel).
-     *
-     * @param string $code the payment method code
-     * @param int|string $storeId id of the store front
-     *
-     * @return array configuration form backend
-     */
-    public function getHeidelpayAuthenticationConfig($code = '', $storeId = null)
-    {
-        $path = 'payment/hgwmain/';
-        $config = [];
-
-        $config['SECURITY.SENDER'] = $this->scopeConfig->getValue(
-            $path . 'security_sender',
-            ScopeInterface::SCOPE_STORE,
-            $storeId
-        );
-
-        if ($this->scopeConfig->getValue($path . 'sandbox_mode', ScopeInterface::SCOPE_STORE, $storeId) == 0) {
-            $config['TRANSACTION.MODE'] = 'LIVE';
-        } else {
-            $config['TRANSACTION.MODE'] = 'CONNECTOR_TEST';
-        }
-
-        $config['USER.LOGIN'] = trim(
-            $this->scopeConfig->getValue(
-                $path . 'user_login',
-                ScopeInterface::SCOPE_STORE,
-                $storeId
-            )
-        );
-
-        $config['USER.PWD'] = trim(
-            $this->scopeConfig->getValue(
-                $path . 'user_passwd',
-                ScopeInterface::SCOPE_STORE,
-                $storeId
-            )
-        );
-
-        $path = 'payment/' . $code . '/';
-        $config['TRANSACTION.CHANNEL'] = trim(
-            $this->scopeConfig->getValue(
-                $path . 'channel',
-                ScopeInterface::SCOPE_STORE,
-                $storeId
-            )
-        );
-
-        return $config;
     }
 
     /**

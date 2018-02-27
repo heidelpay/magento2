@@ -12,7 +12,7 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Store\Model\ScopeInterface;
 use Psr\Log\LoggerInterface;
 
-class MainConfig implements MainConfigInterface
+class HgwMainConfig implements HgwMainConfigInterface
 {
     use DumpGetterReturnsTrait;
 
@@ -150,39 +150,10 @@ class MainConfig implements MainConfigInterface
     }
 
     /**
-     * Returns the sandbox url from config.
-     *
-     * @return mixed
+     * @return ScopeConfigInterface
      */
-    public function getConfigSandboxUrl()
+    public function getScopeConfig()
     {
-        return $this->getValue(self::CONFIG_SANDBOX_URL);
-    }
-
-    /**
-     * Returns the live url from config.
-     *
-     * @return mixed
-     */
-    public function getConfigLiveUrl()
-    {
-        return $this->getValue(self::CONFIG_LIVE_URL);
-    }
-
-    /**
-     * Returns sandbox url from config when in sandbox mode and otherwise the live url from config.
-     *
-     * @return mixed
-     */
-    public function getTargetUrl()
-    {
-        $url = $this->getConfigLiveUrl();
-        if ($this->isSandboxModeActive()) {
-            $this->logger->debug('Sandboxmode enabled');
-            $url = $this->getConfigSandboxUrl();
-        }
-        $this->logger->debug('Target url: ' . $url);
-
-        return $url;
+        return $this->scopeConfig;
     }
 }

@@ -1,7 +1,7 @@
 <?php
 namespace Heidelpay\Gateway\Helper;
 
-use Heidelpay\Gateway\Gateway\Config\MainConfigInterface;
+use Heidelpay\Gateway\Gateway\Config\HgwMainConfigInterface;
 use Heidelpay\Gateway\Wrapper\ItemWrapper;
 use Heidelpay\Gateway\Wrapper\QuoteWrapper;
 use Heidelpay\PhpBasketApi\Object\BasketItem;
@@ -46,7 +46,7 @@ class BasketHelper extends AbstractHelper
     private $imageHelperFactory;
 
     /**
-     * @var MainConfigInterface
+     * @var HgwMainConfigInterface
      */
     private $mainConfig;
 
@@ -54,14 +54,14 @@ class BasketHelper extends AbstractHelper
      * @param Context $context
      * @param Emulation $appEmulation
      * @param ImageFactory $imageHelperFactory
-     * @param MainConfigInterface $mainConfig
+     * @param HgwMainConfigInterface $mainConfig
      */
     public function __construct(
         Context $context,
         Emulation $appEmulation,
         /** @noinspection PhpUndefinedClassInspection */
         ImageFactory $imageHelperFactory,
-        MainConfigInterface $mainConfig
+        HgwMainConfigInterface $mainConfig
     ) {
         $this->appEmulation = $appEmulation;
         $this->imageHelperFactory = $imageHelperFactory;

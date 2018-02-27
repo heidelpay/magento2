@@ -2,6 +2,7 @@
 
 namespace Heidelpay\Gateway\PaymentMethods;
 
+use Heidelpay\Gateway\Gateway\Config\HgwMainConfigInterface;
 use Heidelpay\Gateway\Model\Config\Source\BookingMode;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
 use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
@@ -74,7 +75,7 @@ class HeidelpayDebitCardPaymentMethod extends HeidelpayAbstractPaymentMethod
      * @param \Magento\Framework\Api\ExtensionAttributesFactory $extensionFactory
      * @param \Magento\Framework\Api\AttributeValueFactory $customAttributeFactory
      * @param \Magento\Payment\Helper\Data $paymentData
-     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
+     * @param HgwMainConfigInterface $mainConfig
      * @param \Magento\Framework\App\RequestInterface $request
      * @param \Magento\Framework\UrlInterface $urlinterface
      * @param \Magento\Framework\Encryption\Encryptor $encryptor
@@ -99,7 +100,7 @@ class HeidelpayDebitCardPaymentMethod extends HeidelpayAbstractPaymentMethod
         \Magento\Framework\Api\ExtensionAttributesFactory $extensionFactory,
         \Magento\Framework\Api\AttributeValueFactory $customAttributeFactory,
         \Magento\Payment\Helper\Data $paymentData,
-        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
+        HgwMainConfigInterface $mainConfig,
         \Magento\Framework\App\RequestInterface $request,
         \Magento\Framework\UrlInterface $urlinterface,
         \Magento\Framework\Encryption\Encryptor $encryptor,
@@ -124,7 +125,7 @@ class HeidelpayDebitCardPaymentMethod extends HeidelpayAbstractPaymentMethod
             $extensionFactory,
             $customAttributeFactory,
             $paymentData,
-            $scopeConfig,
+            $mainConfig,
             $request,
             $urlinterface,
             $encryptor,
@@ -173,11 +174,7 @@ class HeidelpayDebitCardPaymentMethod extends HeidelpayAbstractPaymentMethod
         $url = explode('/', $this->urlBuilder->getUrl('/', ['_secure' => true]));
         $paymentFrameOrigin = $url[0] . '//' . $url[2];
         $preventAsyncRedirect = 'FALSE';
-        $cssPath = $this->_scopeConfig->getValue(
-            "payment/hgwmain/default_css",
-            \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
-            $this->getStore()
-        );
+        $cssPath = $this->mainConfig->getDefaultCss();
 
         // make an authorize request, if set...
         if ($this->getBookingMode() === BookingMode::AUTHORIZATION) {

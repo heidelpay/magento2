@@ -2,6 +2,7 @@
 
 namespace Heidelpay\Gateway\PaymentMethods;
 
+use Heidelpay\Gateway\Gateway\Config\HgwMainConfigInterface;
 use Heidelpay\Gateway\Model\Config\Source\BookingMode;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
 use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
@@ -128,20 +129,6 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
     protected $_encryptor;
 
     /**
-     * Productive payment server url
-     *
-     * @var string
-     */
-    protected $_live_url = 'https://heidelpay.hpcgw.net/ngw/post';
-
-    /**
-     * Sandbox payment server url
-     *
-     * @var string
-     */
-    protected $_sandbox_url = 'https://test-heidelpay.hpcgw.net/ngw/post';
-
-    /**
      * Product Metadata to receive Magento information
      *
      * @var \Magento\Framework\App\ProductMetadataInterface
@@ -176,6 +163,11 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
     protected $transactionCollectionFactory;
 
     /**
+     * @var HgwMainConfigInterface
+     */
+    protected $mainConfig;
+
+    /**
      * heidelpay Abstract Payment method constructor
      *
      * @param \Magento\Framework\Model\Context $context
@@ -183,7 +175,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
      * @param \Magento\Framework\Api\ExtensionAttributesFactory $extensionFactory
      * @param \Magento\Framework\Api\AttributeValueFactory $customAttributeFactory
      * @param \Magento\Payment\Helper\Data $paymentData
-     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
+     * @param HgwMainConfigInterface $mainConfig
      * @param \Magento\Framework\App\RequestInterface $request
      * @param \Magento\Framework\UrlInterface $urlinterface
      * @param \Magento\Framework\Encryption\Encryptor $encryptor
@@ -207,7 +199,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         \Magento\Framework\Api\ExtensionAttributesFactory $extensionFactory,
         \Magento\Framework\Api\AttributeValueFactory $customAttributeFactory,
         \Magento\Payment\Helper\Data $paymentData,
-        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
+        HgwMainConfigInterface $mainConfig,
         \Magento\Framework\App\RequestInterface $request,
         \Magento\Framework\UrlInterface $urlinterface,
         \Magento\Framework\Encryption\Encryptor $encryptor,
@@ -231,7 +223,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
             $extensionFactory,
             $customAttributeFactory,
             $paymentData,
-            $scopeConfig,
+            $mainConfig->getScopeConfig(),
             $logger,
             $resource,
             $resourceCollection,
@@ -253,6 +245,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         $this->paymentInformationCollectionFactory = $paymentInformationCollectionFactory;
         $this->transactionFactory = $transactionFactory;
         $this->transactionCollectionFactory = $transactionCollectionFactory;
+        $this->mainConfig = $mainConfig;
     }
 
     /**
@@ -602,41 +595,16 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
      */
     public function getMainConfig($code, $storeId = false)
     {
-        $path = "payment/hgwmain/";
         $config = [];
-
-        $config ['SECURITY.SENDER'] = $this->_scopeConfig->getValue(
-            $path . "security_sender",
-            \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
-            $storeId
-        );
-
-        if ($this->_scopeConfig->getValue($path . "sandbox_mode", StoreScopeInterface::SCOPE_STORE, $storeId) == 0) {
-            $config ['TRANSACTION.MODE'] = false;
-        } else {
-            $config ['TRANSACTION.MODE'] = true;
-        }
-
-        $config ['USER.LOGIN'] = trim(
-            $this->_scopeConfig->getValue(
-                $path . "user_login",
-                StoreScopeInterface::SCOPE_STORE,
-                $storeId
-            )
-        );
-
-        $config ['USER.PWD'] = trim(
-            $this->_scopeConfig->getValue(
-                $path . "user_passwd",
-                StoreScopeInterface::SCOPE_STORE,
-                $storeId
-            )
-        );
+        $config ['SECURITY.SENDER'] = $this->mainConfig->getSecuritySender();
+        $config ['TRANSACTION.MODE'] = $this->mainConfig->isSandboxModeActive();
+        $config ['USER.LOGIN'] = $this->mainConfig->getUserLogin();
+        $config ['USER.PWD'] = $this->mainConfig->getUserPasswd();
 
         $path = 'payment/' . $code . '/';
         $config ['TRANSACTION.CHANNEL'] = trim(
             $this->_scopeConfig->getValue(
-                $path . "channel",
+                $path . 'channel',
                 StoreScopeInterface::SCOPE_STORE,
                 $storeId
             )

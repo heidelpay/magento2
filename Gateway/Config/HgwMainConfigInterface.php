@@ -18,7 +18,9 @@
 
 namespace Heidelpay\Gateway\Gateway\Config;
 
-interface MainConfigInterface
+use Magento\Framework\App\Config\ScopeConfigInterface;
+
+interface HgwMainConfigInterface
 {
     /**
      * Returns true if the sandbox mode is enabled.
@@ -70,25 +72,11 @@ interface MainConfigInterface
     public function getConfigModel();
 
     /**
-     * Returns the sandbox url from config.
+     * Return ScopeConfig object.
      *
-     * @return mixed
+     * @return ScopeConfigInterface
      */
-    public function getConfigSandboxUrl();
-
-    /**
-     * Returns the live url from config.
-     *
-     * @return mixed
-     */
-    public function getConfigLiveUrl();
-
-    /**
-     * Returns sandbox url from config when in sandbox mode and otherwise the live url from config.
-     *
-     * @return mixed
-     */
-    public function getTargetUrl();
+    public function getScopeConfig();
 
     /**
      * Returns an array containing the getter results of this class.
