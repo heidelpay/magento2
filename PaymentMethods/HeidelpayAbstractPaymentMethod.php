@@ -17,7 +17,7 @@ use Magento\Store\Model\ScopeInterface as StoreScopeInterface;
  * All Heidelpay payment methods will extend this abstract payment method
  *
  * @license    Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
- * @copyright  Copyright © 2016-present Heidelberger Payment GmbH. All rights reserved.
+ * @copyright  Copyright © 2016-present heidelpay GmbH. All rights reserved.
  * @link       https://dev.heidelpay.de/magento
  * @author     Jens Richter
  *
@@ -504,7 +504,8 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         // add the Magento Version to the heidelpay request
         $this->_heidelpayPaymentMethod->getRequest()->getCriterion()->set(
             'SHOP.TYPE',
-            $this->productMetadata->getName() . ' ' . $this->productMetadata->getVersion()
+            $this->productMetadata->getName() . ' ' . $this->productMetadata->getVersion() . '-' .
+            $this->productMetadata->getEdition()
         );
 
         // add the module version to the heidelpay request
