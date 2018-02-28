@@ -11,7 +11,7 @@ use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as Heide
  * The heidelpay Direct Debit payment method.
  *
  * @license Use of this software requires acceptance of the License Agreement. See LICENSE file.
- * @copyright Copyright © 2016-present Heidelberger Payment GmbH. All rights reserved.
+ * @copyright Copyright © 2016-present heidelpay GmbH. All rights reserved.
  * @link https://dev.heidelpay.de/magento2
  *
  * @author Stephano Vogel

@@ -16,7 +16,7 @@ use Magento\Sales\Model\ResourceModel\Order\Collection;
  * Receives XML Push requests from the heidelpay Payment API and processes them.
  *
  * @license Use of this software requires acceptance of the License Agreement. See LICENSE file.
- * @copyright Copyright © 2016-present Heidelberger Payment GmbH. All rights reserved.
+ * @copyright Copyright © 2016-present heidelpay GmbH. All rights reserved.
  * @link https://dev.heidelpay.de/magento2
  *
  * @author Stephano Vogel

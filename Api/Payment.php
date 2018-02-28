@@ -11,7 +11,7 @@ use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory a
  * This is the controller where API REST requests to the heidelpay module are being processed.
  *
  * @license Use of this software requires acceptance of the License Agreement. See LICENSE file.
- * @copyright Copyright © 2016-present Heidelberger Payment GmbH. All rights reserved.
+ * @copyright Copyright © 2016-present heidelpay GmbH. All rights reserved.
  *
  * @link https://dev.heidelpay.de/magento2
  *
