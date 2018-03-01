@@ -7,7 +7,7 @@ namespace Heidelpay\Gateway\Block\Payment;
  * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
  * @copyright Copyright © 2016-present heidelpay GmbH. All rights reserved.
  *
- * @link  https://dev.heidelpay.com/magento2
+ * @link  http://dev.heidelpay.com/magento2
  *
  * @author  Jens Richter
  *
