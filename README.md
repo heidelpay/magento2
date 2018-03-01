@@ -4,7 +4,7 @@
 [![PHP 7.0](https://img.shields.io/badge/php-7.0-blue.svg)](http://www.php.net)
 [![PHP 7.1](https://img.shields.io/badge/php-7.1-blue.svg)](http://www.php.net)
 
-![Logo](https://dev.heidelpay.de/devHeidelpay_400_180.jpg)
+![Logo](http://dev.heidelpay.com/devHeidelpay_400_180.jpg)
 
 # Heidelpay payment extension for Magento2
 
@@ -22,7 +22,7 @@ Currently supported payment methods are:
 * Invoice (Secured) (B2C)
 * giropay
 
-For more information please visit -https://dev.heidelpay.de/magento2/
+For more information please visit -http://dev.heidelpay.com/magento2/
 
 ## SYSTEM REQUIREMENTS
 
@@ -35,7 +35,7 @@ You can find a copy of this license in [LICENSE.txt](LICENSE.txt).
 
 ## Release notes
 
-All versions greater than 16.10.17 are based on the heidelpay php-api. (https://github.com/heidelpay/php-api). Please visit https://dev.heidelpay.de/PhpApi/ for the developer documentation.
+All versions greater than 16.10.17 are based on the heidelpay php-api. (https://github.com/heidelpay/php-api). Please visit http://dev.heidelpay.com/PhpApi/ for the developer documentation.
 
 ## Installation
 
