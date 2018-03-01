@@ -4,6 +4,12 @@
 
 This project does not follow a versioning standard. Versions are crafted after the dates; for example, the version 17.7.25 was released on July, 25th in 2017
 
+## 18.3.1
+
+## Changed
+- Tlds from de to com.
+- Fixed links to point to the correct magento version.
+
 ## 18.2.28
 
 ## Changed
