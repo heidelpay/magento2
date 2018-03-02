@@ -42,24 +42,24 @@
     }
   },
   "support": {
-    "email": "support@heidelpay.de"
+    "email": "support@heidelpay.com"
   },
-  "homepage": "https://dev.heidelpay.de",
+  "homepage": "https://dev.heidelpay.com/magento2",
   "authors": [
     {
       "name": "Jens Richter",
-      "email": "development@heidelpay.de",
-      "homepage": "https://dev.heidelpay.de/magento2"
+      "email": "development@heidelpay.com",
+      "homepage": "https://dev.heidelpay.com"
     },
     {
       "name": "Stephano Vogel",
-      "email": "development@heidelpay.de",
-      "homepage": "https://dev.heidelpay.de/magento2"
+      "email": "development@heidelpay.com",
+      "homepage": "https://dev.heidelpay.com"
     },
     {
       "name": "Simon Gabriel",
-      "email": "development@heidelpay.de",
-      "homepage": "https://dev.heidelpay.de/magento2"
+      "email": "development@heidelpay.com",
+      "homepage": "https://dev.heidelpay.com"
     }
   ],
   "keywords": [
