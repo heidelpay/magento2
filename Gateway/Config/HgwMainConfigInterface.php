@@ -5,9 +5,9 @@
  * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
  * @copyright Copyright © 2016-present Heidelberger Payment GmbH. All rights reserved.
  *
- * @author  Simon Gabriel <simon.gabriel@heidelpay.de>
+ * @author  Simon Gabriel <development@heidelpay.com>
  *
- * @package  magento2
+ * @package  heidelpay/magento2
  */
 namespace Heidelpay\Gateway\Gateway\Config;
 

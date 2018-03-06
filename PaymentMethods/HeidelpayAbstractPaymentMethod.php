@@ -709,6 +709,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
      * @param int $storeId
      *
      * @return string|null
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function getBookingMode($storeId = null)
     {

@@ -24,10 +24,14 @@ use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as Heide
  */
 class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
 {
-    /** @var string heidelpay Gateway Paymentcode */
+    /**
+     * @var string heidelpay gateway payment code
+     */
     protected $_code = 'hgwdd';
 
-    /** @var bool */
+    /**
+     * @var bool
+     */
     protected $_canAuthorize = true;
 
     /**
@@ -129,6 +133,10 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
      *
      * @param \Magento\Quote\Model\Quote $quote
      * @return \Heidelpay\PhpPaymentApi\Response
+     * @throws \Exception
+     * @throws \Heidelpay\PhpBasketApi\Exception\InvalidBasketitemPositionException
+     * @throws \Heidelpay\PhpPaymentApi\Exceptions\UndefinedTransactionModeException
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function getHeidelpayUrl($quote)
     {
@@ -144,7 +152,7 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
         );
 
         // set some parameters inside the Abstract Payment method helper which are used for all requests,
-        // e.g. authentification, customer data, ...
+        // e.g. authentication, customer data, ...
         parent::getHeidelpayUrl($quote);
 
         // add IBAN and Bank account owner to the request.

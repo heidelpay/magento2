@@ -9,7 +9,7 @@ use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory a
 use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
 
 /**
- * Heidelpay dibit card payment method
+ * Heidelpay debit card payment method
  *
  * This is the payment class for heidelpay debit card
  *

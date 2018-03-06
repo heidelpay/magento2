@@ -1,9 +1,15 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: Simon.Gabriel
- * Date: 04.12.2017
- * Time: 17:50
+ * General payment config representation injected for HgwMainConfigInterface.
+ *
+ * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
+ * @copyright Copyright © 2016-present heidelpay GmbH. All rights reserved.
+ *
+ * @link  http://dev.heidelpay.com/
+ *
+ * @author  Simon Gabriel <development@heidelpay.com>
+ *
+ * @package  heidelpay/magento2
  */
 namespace Heidelpay\Gateway\Gateway\Config;
 
