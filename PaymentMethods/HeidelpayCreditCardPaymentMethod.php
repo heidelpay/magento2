@@ -2,6 +2,7 @@
 
 namespace Heidelpay\Gateway\PaymentMethods;
 
+use Heidelpay\Gateway\Gateway\Config\HgwCreditCardPaymentConfigInterface;
 use Heidelpay\Gateway\Gateway\Config\HgwMainConfigInterface;
 use Heidelpay\Gateway\Model\Config\Source\BookingMode;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
@@ -83,6 +84,7 @@ class HeidelpayCreditCardPaymentMethod extends HeidelpayAbstractPaymentMethod
      * @param \Magento\Framework\Locale\ResolverInterface $localeResolver
      * @param \Magento\Framework\App\ProductMetadataInterface $productMetadata
      * @param \Magento\Framework\Module\ResourceInterface $moduleResource
+     * @param HgwCreditCardPaymentConfigInterface $paymentConfig
      * @param \Heidelpay\Gateway\Helper\Payment $paymentHelper
      * @param \Heidelpay\Gateway\Helper\BasketHelper $basketHelper
      * @param \Magento\Sales\Helper\Data $salesHelper
@@ -108,6 +110,7 @@ class HeidelpayCreditCardPaymentMethod extends HeidelpayAbstractPaymentMethod
         \Magento\Framework\Locale\ResolverInterface $localeResolver,
         \Magento\Framework\App\ProductMetadataInterface $productMetadata,
         \Magento\Framework\Module\ResourceInterface $moduleResource,
+        HgwCreditCardPaymentConfigInterface $paymentConfig,
         \Heidelpay\Gateway\Helper\Payment $paymentHelper,
         \Heidelpay\Gateway\Helper\BasketHelper $basketHelper,
         \Magento\Sales\Helper\Data $salesHelper,
@@ -133,6 +136,7 @@ class HeidelpayCreditCardPaymentMethod extends HeidelpayAbstractPaymentMethod
             $localeResolver,
             $productMetadata,
             $moduleResource,
+            $paymentConfig,
             $paymentHelper,
             $basketHelper,
             $salesHelper,

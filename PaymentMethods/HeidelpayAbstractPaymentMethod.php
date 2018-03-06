@@ -2,7 +2,9 @@
 
 namespace Heidelpay\Gateway\PaymentMethods;
 
+use Heidelpay\Gateway\Gateway\Config\HgwBasePaymentConfigInterface;
 use Heidelpay\Gateway\Gateway\Config\HgwMainConfigInterface;
+use Heidelpay\Gateway\Gateway\Config\NewTestIF;
 use Heidelpay\Gateway\Model\Config\Source\BookingMode;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
 use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
@@ -168,6 +170,11 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
     protected $mainConfig;
 
     /**
+     * @var HgwBasePaymentConfigInterface
+     */
+    private $paymentConfig;
+
+    /**
      * heidelpay Abstract Payment method constructor
      *
      * @param \Magento\Framework\Model\Context $context
@@ -183,6 +190,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
      * @param \Magento\Framework\Locale\ResolverInterface $localeResolver
      * @param \Magento\Framework\App\ProductMetadataInterface $productMetadata
      * @param \Magento\Framework\Module\ResourceInterface $moduleResource
+     * @param HgwBasePaymentConfigInterface $paymentConfig
      * @param \Heidelpay\Gateway\Helper\Payment $paymentHelper
      * @param \Heidelpay\Gateway\Helper\BasketHelper $basketHelper
      * @param \Magento\Sales\Helper\Data $salesHelper
@@ -207,6 +215,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         \Magento\Framework\Locale\ResolverInterface $localeResolver,
         \Magento\Framework\App\ProductMetadataInterface $productMetadata,
         \Magento\Framework\Module\ResourceInterface $moduleResource,
+        $paymentConfig, // do not add Type or this wont work
         \Heidelpay\Gateway\Helper\Payment $paymentHelper,
         \Heidelpay\Gateway\Helper\BasketHelper $basketHelper,
         \Magento\Sales\Helper\Data $salesHelper,
@@ -246,6 +255,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         $this->transactionFactory = $transactionFactory;
         $this->transactionCollectionFactory = $transactionCollectionFactory;
         $this->mainConfig = $mainConfig;
+        $this->paymentConfig = $paymentConfig;
     }
 
     /**
@@ -311,17 +321,8 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
             );
         }
 
-        // get the configuration for the heidelpay Capture Request
-        $config = $this->getMainConfig($this->getCode(), $payment->getOrder()->getStoreId());
-
         // set authentification data
-        $this->_heidelpayPaymentMethod->getRequest()->authentification(
-            $config['SECURITY.SENDER'],
-            $config['USER.LOGIN'],
-            $config['USER.PWD'],
-            $config['TRANSACTION.CHANNEL'],
-            $config['TRANSACTION.MODE']
-        );
+        $this->performAuthentication();
 
         // set basket data
         $this->_heidelpayPaymentMethod->getRequest()->basketData(
@@ -400,17 +401,8 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
             );
         }
 
-        // get the configuration for the heidelpay Capture Request
-        $config = $this->getMainConfig($this->getCode(), $payment->getOrder()->getStoreId());
-
         // set authentification data
-        $this->_heidelpayPaymentMethod->getRequest()->authentification(
-            $config['SECURITY.SENDER'],
-            $config['USER.LOGIN'],
-            $config['USER.PWD'],
-            $config['TRANSACTION.CHANNEL'],
-            $config['TRANSACTION.MODE']
-        );
+        $this->performAuthentication();
 
         // set basket data
         $this->_heidelpayPaymentMethod->getRequest()->basketData(
@@ -468,15 +460,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
      */
     public function getHeidelpayUrl($quote)
     {
-        $config = $this->getMainConfig($this->getCode(), $this->getStore());
-
-        $this->_heidelpayPaymentMethod->getRequest()->authentification(
-            $config['SECURITY.SENDER'],        // SecuritySender
-            $config['USER.LOGIN'],             // UserLogin
-            $config['USER.PWD'],               // UserPassword
-            $config['TRANSACTION.CHANNEL'],    // TransactionChannel credit card without 3d secure
-            $config['TRANSACTION.MODE']        // Enable sandbox mode
-        );
+        $this->performAuthentication();
 
         $frontend = $this->getFrontend();
 
@@ -583,34 +567,6 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
     public function getHeidelpayPaymentMethodInstance()
     {
         return $this->_heidelpayPaymentMethod;
-    }
-
-    /**
-     * getMainConfig will return the backend configuration for the given payment method
-     *
-     * @param string $code    payment method name
-     * @param string $storeId id of the store front
-     *
-     * @return array configuration form backend
-     */
-    public function getMainConfig($code, $storeId = false)
-    {
-        $config = [];
-        $config ['SECURITY.SENDER'] = $this->mainConfig->getSecuritySender();
-        $config ['TRANSACTION.MODE'] = $this->mainConfig->isSandboxModeActive();
-        $config ['USER.LOGIN'] = $this->mainConfig->getUserLogin();
-        $config ['USER.PWD'] = $this->mainConfig->getUserPasswd();
-
-        $path = 'payment/' . $code . '/';
-        $config ['TRANSACTION.CHANNEL'] = trim(
-            $this->_scopeConfig->getValue(
-                $path . 'channel',
-                StoreScopeInterface::SCOPE_STORE,
-                $storeId
-            )
-        );
-
-        return $config;
     }
 
     /**
@@ -794,5 +750,39 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
     public function setCanBasketApi($canBasketApi)
     {
         $this->canBasketApi = $canBasketApi;
+    }
+
+    /**
+     * Set request authentication
+     */
+    private function performAuthentication()
+    {
+        $this->_heidelpayPaymentMethod->getRequest()->authentification(
+            $this->mainConfig->getSecuritySender(),
+            $this->mainConfig->getUserLogin(),
+            $this->mainConfig->getUserPasswd(),
+            $this->paymentConfig->getChannel(),
+            $this->mainConfig->isSandboxModeActive()
+        );
+    }
+
+    /**
+     * will return the main configuration
+     *
+     * @return HgwMainConfigInterface
+     */
+    public function getMainConfig()
+    {
+        return $this->mainConfig;
+    }
+
+    /**
+     * will return the payment config
+     *
+     * @return HgwBasePaymentConfigInterface
+     */
+    public function getConfig()
+    {
+        return $this->paymentConfig;
     }
 }

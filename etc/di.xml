@@ -12,7 +12,72 @@
     <type name="Magento\Shipping\Controller\Adminhtml\Order\Shipment\Save">
         <plugin name="HeidelpayGatewayShipmentSaveController" type="Heidelpay\Gateway\Controller\Adminhtml\Order\Shipment\Save" sortOrder="1"/>
     </type>
+
+    <!-- Config readers -->
+    <virtualType name="HgwInvoiceSecuredConfig" type="Heidelpay\Gateway\Gateway\Config\HgwInvoiceSecuredPaymentConfig">
+        <arguments>
+            <argument name="methodCode" xsi:type="const">Heidelpay\Gateway\PaymentMethods\HeidelpayInvoiceSecuredPaymentMethod::CODE</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="HgwCreditCardConfig" type="Heidelpay\Gateway\Gateway\Config\HgwCreditCardPaymentConfig">
+        <arguments>
+            <argument name="methodCode" xsi:type="const">Heidelpay\Gateway\PaymentMethods\HeidelpayCreditCardPaymentMethod::CODE</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="HgwDebitCardConfig" type="Heidelpay\Gateway\Gateway\Config\HgwDebitCardPaymentConfig">
+        <arguments>
+            <argument name="methodCode" xsi:type="const">Heidelpay\Gateway\PaymentMethods\HeidelpayDebitCardPaymentMethod::CODE</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="HgwGiropayConfig" type="Heidelpay\Gateway\Gateway\Config\HgwGiropayPaymentConfig">
+        <arguments>
+            <argument name="methodCode" xsi:type="const">Heidelpay\Gateway\PaymentMethods\HeidelpayGiropayPaymentMethod::CODE</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="HgwPrepaymentConfig" type="Heidelpay\Gateway\Gateway\Config\HgwPrepaymentPaymentConfig">
+        <arguments>
+            <argument name="methodCode" xsi:type="const">Heidelpay\Gateway\PaymentMethods\HeidelpayPrepaymentPaymentMethod::CODE</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="HgwSofortConfig" type="Heidelpay\Gateway\Gateway\Config\HgwSofortPaymentConfig">
+        <arguments>
+            <argument name="methodCode" xsi:type="const">Heidelpay\Gateway\PaymentMethods\HeidelpaySofortPaymentMethod::CODE</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="HgwDirectDebitConfig" type="Heidelpay\Gateway\Gateway\Config\HgwDirectDebitPaymentConfig">
+        <arguments>
+            <argument name="methodCode" xsi:type="const">Heidelpay\Gateway\PaymentMethods\HeidelpayDirectDebitPaymentMethod::CODE</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="HgwDirectDebitSecConfig" type="Heidelpay\Gateway\Gateway\Config\HgwDirectDebitSecPaymentConfig">
+        <arguments>
+            <argument name="methodCode" xsi:type="const">Heidelpay\Gateway\PaymentMethods\HeidelpayDirectDebitSecuredPaymentMethod::CODE</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="HgwInvoiceConfig" type="Heidelpay\Gateway\Gateway\Config\HgwInvoicePaymentConfig">
+        <arguments>
+            <argument name="methodCode" xsi:type="const">Heidelpay\Gateway\PaymentMethods\HeidelpayInvoicePaymentMethod::CODE</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="HgwPayPalConfig" type="Heidelpay\Gateway\Gateway\Config\HgwPayPalPaymentConfig">
+        <arguments>
+            <argument name="methodCode" xsi:type="const">Heidelpay\Gateway\PaymentMethods\HeidelpayPayPalPaymentMethod::CODE</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Preferences -->
     <preference for="Heidelpay\Gateway\Api\PaymentInterface" type="Heidelpay\Gateway\Api\Payment" />
     <preference for="Heidelpay\Gateway\Api\Data\PaymentInformationInterface" type="Heidelpay\Gateway\Model\PaymentInformation" />
     <preference for="Heidelpay\Gateway\Gateway\Config\HgwMainConfigInterface" type="Heidelpay\Gateway\Gateway\Config\HgwMainConfig" />
+
+    <preference for="Heidelpay\Gateway\Gateway\Config\HgwInvoiceSecuredPaymentConfigInterface" type="HgwInvoiceSecuredConfig" />
+    <preference for="Heidelpay\Gateway\Gateway\Config\HgwCreditCardPaymentConfigInterface" type="HgwCreditCardConfig" />
+    <preference for="Heidelpay\Gateway\Gateway\Config\HgwDebitCardPaymentConfigInterface" type="HgwDebitCardConfig" />
+    <preference for="Heidelpay\Gateway\Gateway\Config\HgwGiropayPaymentConfigInterface" type="HgwGiropayConfig" />
+    <preference for="Heidelpay\Gateway\Gateway\Config\HgwPrepaymentPaymentConfigInterface" type="HgwPrepaymentConfig" />
+    <preference for="Heidelpay\Gateway\Gateway\Config\HgwSofortPaymentConfigInterface" type="HgwSofortConfig" />
+    <preference for="Heidelpay\Gateway\Gateway\Config\HgwDirectDebitPaymentConfigInterface" type="HgwDirectDebitConfig" />
+    <preference for="Heidelpay\Gateway\Gateway\Config\HgwDirectDebitSecPaymentConfigInterface" type="HgwDirectDebitSecConfig" />
+    <preference for="Heidelpay\Gateway\Gateway\Config\HgwInvoicePaymentConfigInterface" type="HgwInvoiceConfig" />
+    <preference for="Heidelpay\Gateway\Gateway\Config\HgwPayPalPaymentConfigInterface" type="HgwPayPalConfig" />
 </config>
