@@ -10,7 +10,6 @@ namespace Heidelpay\Gateway\Gateway\Config;
 use Heidelpay\Gateway\Traits\DumpGetterReturnsTrait;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Store\Model\ScopeInterface;
-use Psr\Log\LoggerInterface;
 
 class HgwMainConfig implements HgwMainConfigInterface
 {
@@ -30,13 +29,10 @@ class HgwMainConfig implements HgwMainConfigInterface
     const CONFIG_LIVE_URL = 'live_url';
 
     /**
-     * @var LoggerInterface
-     */
-    private $logger;
-    /**
      * @var ScopeConfigInterface
      */
     private $scopeConfig;
+
     /**
      * @var string
      */
@@ -45,14 +41,11 @@ class HgwMainConfig implements HgwMainConfigInterface
     /**
      * @param ScopeConfigInterface $scopeConfig
      * @param string $pathPattern
-     * @param LoggerInterface $logger
      */
     public function __construct(
         ScopeConfigInterface $scopeConfig,
-        LoggerInterface $logger,
         $pathPattern = self::DEFAULT_PATH_PATTERN
     ) {
-        $this->logger = $logger;
         $this->scopeConfig = $scopeConfig;
         $this->pathPattern = $pathPattern;
     }
