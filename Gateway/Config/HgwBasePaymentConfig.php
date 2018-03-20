@@ -13,10 +13,13 @@
  */
 namespace Heidelpay\Gateway\Gateway\Config;
 
+use Heidelpay\Gateway\Traits\DumpGetterReturnsTrait;
 use \Magento\Payment\Gateway\Config\Config as BaseConfig;
 
 class HgwBasePaymentConfig extends BaseConfig implements HgwBasePaymentConfigInterface
 {
+    use DumpGetterReturnsTrait;
+
     const KEY_ACTIVE = 'active';
     const KEY_CHANNEL = 'channel';
     const KEY_ALLOW_SPECIFIC = 'allowspecific';
