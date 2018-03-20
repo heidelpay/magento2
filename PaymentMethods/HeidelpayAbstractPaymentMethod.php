@@ -4,17 +4,17 @@ namespace Heidelpay\Gateway\PaymentMethods;
 
 use Heidelpay\Gateway\Gateway\Config\HgwBasePaymentConfigInterface;
 use Heidelpay\Gateway\Gateway\Config\HgwMainConfigInterface;
-use Heidelpay\Gateway\Gateway\Config\NewTestIF;
 use Heidelpay\Gateway\Model\Config\Source\BookingMode;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
 use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
 use Heidelpay\PhpPaymentApi\ParameterGroups\BasketParameterGroup;
 use Heidelpay\PhpPaymentApi\Response;
+use Magento\Sales\Api\Data\TransactionInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Invoice;
-use Magento\Sales\Model\Order\Payment\Transaction;
 use Magento\Store\Model\ScopeInterface as StoreScopeInterface;
 use Heidelpay\Gateway\Block\Payment\HgwAbstract;
+use Heidelpay\PhpPaymentApi\PaymentMethods\PaymentMethodInterface;
 
 /**
  * Heidelpay  abstract payment method
@@ -114,7 +114,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
     /**
      * The used heidelpay payment method
      *
-     * @var \Heidelpay\PhpPaymentApi\PaymentMethods\AbstractPaymentMethod
+     * @var PaymentMethodInterface $_heidelpayPaymentMethod
      */
     protected $_heidelpayPaymentMethod;
 
@@ -215,7 +215,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         \Magento\Framework\Locale\ResolverInterface $localeResolver,
         \Magento\Framework\App\ProductMetadataInterface $productMetadata,
         \Magento\Framework\Module\ResourceInterface $moduleResource,
-        $paymentConfig, // do not add Type or this wont work
+        $paymentConfig /* do not add Type or this wont work */,
         \Heidelpay\Gateway\Helper\Payment $paymentHelper,
         \Heidelpay\Gateway\Helper\BasketHelper $basketHelper,
         \Magento\Sales\Helper\Data $salesHelper,
@@ -363,7 +363,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         $payment->setTransactionId($this->_heidelpayPaymentMethod->getResponse()->getPaymentReferenceId());
         $payment->setParentTransactionId($transactionInfo->getUniqueId());
         $payment->setIsTransactionClosed(true);
-        $payment->addTransaction(Transaction::TYPE_CAPTURE, null, true);
+        $payment->addTransaction(TransactionInterface::TYPE_CAPTURE, null, true);
 
         // set the last transaction id to the Pre-Authorization.
         $payment->setLastTransId($this->_heidelpayPaymentMethod->getResponse()->getPaymentReferenceId());
@@ -443,7 +443,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         $payment->setTransactionId($this->_heidelpayPaymentMethod->getResponse()->getPaymentReferenceId());
         $payment->setParentTransactionId($transactionInfo->getUniqueId());
         $payment->setIsTransactionClosed(true);
-        $payment->addTransaction(Transaction::TYPE_REFUND, null, true);
+        $payment->addTransaction(TransactionInterface::TYPE_REFUND, null, true);
 
         // set the last transaction id to the Pre-Authorization.
         $payment->setLastTransId($this->_heidelpayPaymentMethod->getResponse()->getPaymentReferenceId());
@@ -647,7 +647,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
     {
         $order->getPayment()->setTransactionId($data['IDENTIFICATION_UNIQUEID']);
         $order->getPayment()->setIsTransactionClosed(false);
-        $order->getPayment()->addTransaction(Transaction::TYPE_AUTH, null, true);
+        $order->getPayment()->addTransaction(TransactionInterface::TYPE_AUTH, null, true);
 
         $order->setState(Order::STATE_PENDING_PAYMENT)
             ->addStatusHistoryComment('heidelpay - ' . $message, Order::STATE_PENDING_PAYMENT)
@@ -699,7 +699,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
             $this->_paymentHelper->saveTransaction($invoice);
         }
 
-        $order->getPayment()->addTransaction(Transaction::TYPE_CAPTURE, null, true);
+        $order->getPayment()->addTransaction(TransactionInterface::TYPE_CAPTURE, null, true);
     }
 
     /**
