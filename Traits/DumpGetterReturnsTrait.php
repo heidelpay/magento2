@@ -21,7 +21,9 @@ trait DumpGetterReturnsTrait
 
         $class_name = get_class($this);
         $getters = array_filter(get_class_methods($class_name), function ($method) use ($class_name) {
-            $isGetter = 0 === strpos($method, 'get') || 0 === strpos($method, 'is');
+            $isGetter = 0 === strpos($method, 'get') ||
+                        0 === strpos($method, 'is') ||
+                        0 === strpos($method, 'has');
             $expectsArguments = (new ReflectionMethod($class_name, $method))->getNumberOfParameters() > 0;
             return $isGetter && !$expectsArguments;
         });
