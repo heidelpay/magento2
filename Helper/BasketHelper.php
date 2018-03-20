@@ -178,7 +178,9 @@ class BasketHelper extends AbstractHelper
         }
 
         // create a basketApiRequest instance by converting the quote and it's items
-        if (!$basketApiRequest = $this->convertQuoteToBasket($quote)) {
+        /** @var Request $basketApiRequest */
+        $basketApiRequest = $this->convertQuoteToBasket($quote);
+        if (!$basketApiRequest) {
             $this->_logger->warning('heidelpay - submitQuoteToBasketApi: basketApiRequest is null.');
             return null;
         }
