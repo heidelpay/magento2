@@ -60,7 +60,7 @@ class BasketApiTest extends AbstractController
      * @test
      * @throws \Heidelpay\PhpBasketApi\Exception\InvalidBasketitemPositionException
      */
-    public function verifySomething()
+    public function verifyBasketHasSameValueAsApiCall()
     {
         /** @var Session $magentoCustomerSession */
         $magentoCustomerSession = $this->getObject(Session::class);
