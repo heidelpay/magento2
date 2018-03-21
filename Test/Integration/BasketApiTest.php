@@ -131,8 +131,6 @@ class BasketApiTest extends AbstractController
     {
         // create product fixtures
         for ($idx = 1; $idx <= $number; $idx++) {
-            $price = mt_rand(1, 30000) / 100;
-            echo "\nPreis:" . $price;
             /** @var $product Product */
             $product = $this->createObject(Product::class);
             $product
@@ -145,7 +143,9 @@ class BasketApiTest extends AbstractController
                 ->setDescription('Description')
                 ->setVisibility(Visibility::VISIBILITY_BOTH)
                 ->setStatus(Status::STATUS_ENABLED)
-                ->setStockData(['use_config_manage_stock' => 1, 'qty' => 100, 'is_qty_decimal' => 0, 'is_in_stock' => 1])
+                ->setStockData(
+                    ['use_config_manage_stock' => 1, 'qty' => 100, 'is_qty_decimal' => 0, 'is_in_stock' => 1]
+                )
                 ->setUrlKey('url-key' . $idx)
                 ->save();
 
