@@ -15,19 +15,24 @@ use Heidelpay\Gateway\Helper\BasketHelper;
 use Heidelpay\Gateway\Helper\Payment;
 use Heidelpay\Gateway\Wrapper\QuoteWrapper;
 use Heidelpay\PhpBasketApi\Object\Basket;
+use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Type;
 use Magento\Catalog\Model\Product\Visibility;
 use Magento\Catalog\Model\Product;
+use Magento\Customer\Api\Data\CustomerInterface;
 use Magento\Customer\Api\Data\CustomerInterfaceFactory;
 use Magento\Customer\Model\Customer;
+use Magento\Customer\Model\Group;
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Quote\Api\CartItemRepositoryInterface;
 use Magento\Quote\Api\CartManagementInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Api\CouponManagementInterface;
+use Magento\Quote\Api\Data\AddressInterface;
 use Magento\Quote\Api\Data\CartItemInterface;
 use Magento\SalesRule\Api\RuleRepositoryInterface;
+use Magento\Tax\Model\ClassModel;
 use Magento\TestFramework\Helper\Bootstrap;
 use Magento\TestFramework\TestCase\AbstractController;
 use Magento\SalesRule\Model\Rule;
@@ -78,6 +83,11 @@ class BasketApiTest extends AbstractController
     private $basketHelper;
 
     /**
+     * @var AddressInterface $address
+     */
+    private $address;
+
+    /**
      * {@inheritDoc}
      */
     public function setUp()
@@ -99,9 +109,9 @@ class BasketApiTest extends AbstractController
     {
         return [
             'No coupon' => [null],
-            'fixed cart 20 EUR coupon' => ['COUPON_FIXED_CART_20_EUR']
-//            '20 percent coupon /wo shipping' => ['COUPON_20_PERC_WO_SHIPPING'],
-//            '20 percent coupon /w shipping' => ['COUPON_20_PERC_W_SHIPPING']
+            'fixed cart 20 EUR coupon' => ['COUPON_FIXED_CART_20_EUR'],
+            '20 percent coupon /wo shipping' => ['COUPON_20_PERC_WO_SHIPPING'],
+            '20 percent coupon /w shipping' => ['COUPON_20_PERC_W_SHIPPING']
         ];
     }
 
@@ -121,8 +131,47 @@ class BasketApiTest extends AbstractController
      */
     public function verifyBasketHasSameValueAsApiCall($couponCode)
     {
+        list($quote, $basket) = $this->performCheckout($couponCode);
 
-        $cartId = $this->cartManagement->createEmptyCart($this->customerFixture->getId());
+        $this->assertEquals(
+            (int)bcmul($this->paymentHelper->format($quote->getGrandTotal()), 100),
+            $basket->getAmountTotalNet() + $basket->getAmountTotalVat()
+        );
+    }
+
+    /**
+     * @dataProvider verifyBasketHasSameValueAsApiCallDP
+     *
+     * @magentoDbIsolation enabled
+     * @magentoAppIsolation enabled
+     * @magentoDataFixture couponFixtureProvider
+     * @magentoDataFixture taxFixtureProvider
+     * @magentoConfigFixture default/currency/options/default EUR
+     * @magentoConfigFixture default/currency/options/base EUR
+     * @magentoConfigFixture default_store currency/options/allow EUR
+     *
+     * @test
+     * @param $couponCode
+     * @throws \Heidelpay\PhpBasketApi\Exception\InvalidBasketitemPositionException
+     */
+    public function verifyBasketHasSameValueAsApiCallPlusTaxes($couponCode)
+    {
+        list($quote, $basket) = $this->performCheckout($couponCode);
+
+        $this->assertEquals(
+            (int)bcmul($this->paymentHelper->format($quote->getGrandTotal()), 100),
+            $basket->getAmountTotalNet() + $basket->getAmountTotalVat()
+        );
+    }
+
+    /**
+     * @param $couponCode
+     * @return array
+     * @throws \Heidelpay\PhpBasketApi\Exception\InvalidBasketitemPositionException
+     */
+    private function performCheckout($couponCode)
+    {
+        $cartId = $this->cartManagement->createEmptyCart();
 
         foreach ($this->productFixtures as $productFixture) {
             /** @var CartItemInterface $quoteItem */
@@ -139,13 +188,27 @@ class BasketApiTest extends AbstractController
 
         /**
          * @var Quote $quote
-          */
+         */
         $quote = $this->quoteRepository->get($cartId);
+        $quote->getShippingAddress()
+            ->setCustomerId($this->customerFixture->getId())
+            ->setFirstname('Linda')
+            ->setLastname('Heideich')
+            ->setCountryId('DE')
+            ->setPostcode('69115')
+            ->setCity('Heidelberg')
+            ->setTelephone(1234567890)
+            ->setFax(123456789)
+            ->setStreet('Vangerowstr. 18')
+            ->save();
 
         /** @var Basket $basket */
         $basket = $this->basketHelper->convertQuoteToBasket($quote)->getBasket();
 
         echo "\n getGrandTotal: " . $quote->getGrandTotal();
+        echo "\n getCustomerTaxvat: " . $quote->getCustomerTaxvat();
+        echo "\n getSubtotalWithDiscount: " . $quote->getSubtotalWithDiscount();
+        echo "\n getBaseGrandTotal: " . $quote->getBaseGrandTotal();
         echo "\n getAmountTotalNet: " . $basket->getAmountTotalNet();
         echo "\n getAmountTotalVat: " . $basket->getAmountTotalVat();
         echo "\n getAmountTotalDiscount: " . $basket->getAmountTotalDiscount();
@@ -153,11 +216,7 @@ class BasketApiTest extends AbstractController
         /** @var QuoteWrapper $basketTotals */
         $basketTotals = $this->createObject(QuoteWrapper::class, ['quote' => $quote]);
         echo "\n\n basket: " . print_r($basketTotals->dump(), 1);
-
-        $this->assertEquals(
-            (int)bcmul($this->paymentHelper->format($quote->getGrandTotal()), 100),
-            $basket->getAmountTotalNet() + $basket->getAmountTotalVat()
-        );
+        return array($quote, $basket);
     }
 
     //<editor-fold desc="Helper">
@@ -197,23 +256,27 @@ class BasketApiTest extends AbstractController
 
     private function generateCustomerFixture()
     {
-        /** @var CustomerFactory $customerFactory */
-        $customerFactory = $this->getObject('\Magento\Customer\Model\CustomerFactory');
+        /** @var \Magento\Tax\Model\ClassModel $customerTaxClass */
+        $customerTaxClass = $this->createObject(ClassModel::class);
+        $customerTaxClass->load('Retail Customer', 'class_name');
 
-        /** @var Customer $customer */
-        $customer = $customerFactory->create();
-        $customer
+        /** @var \Magento\Customer\Model\Group $customerGroup */
+        $customerGroup = $this->createObject(Group::class)
+            ->load('custom_group', 'customer_group_code');
+        $customerGroup->setTaxClassId($customerTaxClass->getId())->save();
+
+        $customerFactory = $this->getObject('\Magento\Customer\Model\CustomerFactory');
+        /** @var CustomerInterface $customer */
+        $customer = $customerFactory->create()
             ->setEmail('l.h@mail.com')
             ->setFirstname('Linda')
             ->setLastname('Heideich')
-            ->setPassword('123456789');
-        $customer->save();
+            ->setPassword('123456789')
+            ->setGroupId($customerGroup->getId())
+            ->save();
 
         $addressFactory = $this->getObject('\Magento\Customer\Model\AddressFactory');
-
-        /** @var Address $address */
-        $address = $addressFactory->create();
-        $address
+        $addressFactory->create()
             ->setCustomerId($customer->getId())
             ->setFirstname('Linda')
             ->setLastname('Heideich')
@@ -225,17 +288,21 @@ class BasketApiTest extends AbstractController
             ->setStreet('Vangerowstr. 18')
             ->setIsDefaultBilling('1')
             ->setIsDefaultShipping('1')
-            ->setSaveInAddressBook('1');
-        $address->save();
+            ->setSaveInAddressBook('1')
+            ->save();
 
         $this->customerFixture = $customer;
     }
 
     private function generateProductFixtures($number)
     {
+        /** @var ClassModel $productTaxClass */
+        $productTaxClass = $this->createObject(ClassModel::class);
+        $productTaxClass->load('Taxable Goods', 'class_name');
+
         // create product fixtures
         for ($idx = 1; $idx <= $number; $idx++) {
-            /** @var $product Product */
+            /** @var ProductInterface $product */
             $product = $this->createObject(Product::class);
             $product
                 ->setId($idx)
@@ -251,6 +318,7 @@ class BasketApiTest extends AbstractController
                     ['use_config_manage_stock' => 1, 'qty' => 100, 'is_qty_decimal' => 0, 'is_in_stock' => 1]
                 )
                 ->setUrlKey('url-key' . $idx)
+                ->setTaxClassId($productTaxClass->getId())
                 ->save();
 
             $this->productFixtures[] = $product;
@@ -265,6 +333,14 @@ class BasketApiTest extends AbstractController
         self::removeDefaultRules();
 
         require __DIR__ . '/_files/coupons.php';
+    }
+
+    /**
+     * Create tax fixtures.
+     */
+    public static function taxFixtureProvider()
+    {
+        require __DIR__ . '/_files/tax_classes.php';
     }
 
     /**
