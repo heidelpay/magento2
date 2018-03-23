@@ -21,23 +21,16 @@ use Magento\Catalog\Model\Product\Visibility;
 use Magento\Catalog\Model\Product;
 use Magento\Customer\Api\Data\CustomerInterfaceFactory;
 use Magento\Customer\Model\Customer;
-use Magento\Customer\Model\GroupManagement;
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Quote\Api\CartItemRepositoryInterface;
 use Magento\Quote\Api\CartManagementInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Api\CouponManagementInterface;
 use Magento\Quote\Api\Data\CartItemInterface;
-use Magento\Quote\Model\Quote\Address;
-use Magento\SalesRule\Api\Data\CouponInterface;
 use Magento\SalesRule\Api\RuleRepositoryInterface;
-use Magento\Store\Model\StoreManagerInterface;
 use Magento\TestFramework\Helper\Bootstrap;
 use Magento\TestFramework\TestCase\AbstractController;
-use Magento\SalesRule\Model\Coupon;
 use Magento\SalesRule\Model\Rule;
-use \Magento\SalesRule\Model\ResourceModel\Rule as ResourceRule;
-use Magento\SalesRule\Api\CouponRepositoryInterface;
 use \Magento\Quote\Model\Quote;
 
 class BasketApiTest extends AbstractController
@@ -68,11 +61,6 @@ class BasketApiTest extends AbstractController
      * @var CartItemRepositoryInterface $cartItemRepository
      */
     private $cartItemRepository;
-
-    /**
-     * @var RuleRepositoryInterface
-     */
-    private $ruleRepository;
 
     /**
      * @var CartRepositoryInterface $quoteRepo
@@ -109,8 +97,6 @@ class BasketApiTest extends AbstractController
      */
     public function verifyBasketHasSameValueAsApiCallDP()
     {
-        $this->createCouponFixtures();
-
         return [
             'No coupon' => [null],
             'fixed cart 20 EUR coupon' => ['COUPON_FIXED_CART_20_EUR']
@@ -124,6 +110,7 @@ class BasketApiTest extends AbstractController
      *
      * @magentoDbIsolation enabled
      * @magentoAppIsolation enabled
+     * @magentoDataFixture couponFixtureProvider
      * @magentoConfigFixture default/currency/options/default EUR
      * @magentoConfigFixture default/currency/options/base EUR
      * @magentoConfigFixture default_store currency/options/allow EUR
@@ -204,18 +191,6 @@ class BasketApiTest extends AbstractController
         }
         return $this->_objectManager;
     }
-
-    /**
-     * @return RuleRepositoryInterface|mixed
-     */
-    private function getRuleRepository()
-    {
-        if (!($this->ruleRepository instanceof RuleRepositoryInterface)) {
-            $this->ruleRepository = $this->createObject(RuleRepositoryInterface::class);
-        }
-
-        return $this->ruleRepository;
-    }
     //</editor-fold>
 
     //<editor-fold desc="Fixture Helpers">
@@ -283,63 +258,34 @@ class BasketApiTest extends AbstractController
     }
 
     /**
-     * Creates coupon fixtures
+     * Create coupon fixtures.
      */
-    private function createCouponFixtures()
+    public static function couponFixtureProvider()
     {
-        $this->removeDefaultRules();
-        $this->createCouponFixedCart20Eur();
+        self::removeDefaultRules();
+
+        require __DIR__ . '/_files/coupons.php';
     }
+
     /**
      * Remove default rules from shop.
      */
-    private function removeDefaultRules()
+    private static function removeDefaultRules()
     {
-        /** @var Array $rules */
-        $rules = $this->createObject(Rule::class)->getCollection();
+        /** @var ObjectManagerInterface $objectManager */
+        $objectManager = Bootstrap::getObjectManager();
 
-        /**
-         * @var Rule $rule
-         */
+        /** @var RuleRepositoryInterface $ruleRepository */
+        $ruleRepository = $objectManager->create(RuleRepositoryInterface::class);
+
+        /** @var Array $rules */
+        $rules = $objectManager->create(Rule::class)->getCollection();
+
+        /** @var Rule $rule */
         foreach ($rules as $rule) {
-            $this->getRuleRepository()->deleteById($rule->getRuleId());
+            $ruleRepository->deleteById($rule->getRuleId());
         }
     }
 
-    /**
-     * @return string Code
-     */
-    private function createCouponFixedCart20Eur()
-    {
-        /** @var Rule $salesRule */
-        $salesRule = $this->createObject(Rule::class);
-        $salesRule->setData(
-            [
-                'name' => '20€',
-                'is_active' => 1,
-                'customer_group_ids' => [GroupManagement::NOT_LOGGED_IN_ID],
-                'conditions' => [],
-                'coupon_type' => Rule::COUPON_TYPE_SPECIFIC,
-                'simple_action' => Rule::CART_FIXED_ACTION,
-                'discount_amount' => 20,
-                'discount_step' => 0,
-                'stop_rules_processing' => 1,
-                'website_ids' => [
-                    $this->getObject(StoreManagerInterface::class)->getWebsite()->getId()
-                ]
-            ]
-        );
-        $this->getObject(ResourceRule::class)->save($salesRule);
-
-        // Create coupon and assign "20% fixed discount" rule to this coupon.
-        /** @var CouponInterface $coupon */
-        $coupon = $this->createObject(Coupon::class);
-        $code = 'COUPON_FIXED_CART_20_EUR';
-        $coupon->setRuleId($salesRule->getId())
-            ->setCode($code)
-            ->setType(CouponInterface::TYPE_MANUAL);
-        $this->getObject(CouponRepositoryInterface::class)->save($coupon);
-        return $code;
-    }
     //</editor-fold>
 }
