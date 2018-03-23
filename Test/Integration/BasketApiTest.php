@@ -13,18 +13,32 @@ namespace Heidelpay\Gateway\Test\Integration;
 
 use Heidelpay\Gateway\Helper\BasketHelper;
 use Heidelpay\Gateway\Helper\Payment;
+use Heidelpay\Gateway\Wrapper\QuoteWrapper;
 use Heidelpay\PhpBasketApi\Object\Basket;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Type;
 use Magento\Catalog\Model\Product\Visibility;
 use Magento\Catalog\Model\Product;
-use Magento\Checkout\Model\Cart;
 use Magento\Customer\Api\Data\CustomerInterfaceFactory;
 use Magento\Customer\Model\Customer;
-use Magento\Customer\Model\Session;
+use Magento\Customer\Model\GroupManagement;
+use Magento\Framework\ObjectManagerInterface;
+use Magento\Quote\Api\CartItemRepositoryInterface;
+use Magento\Quote\Api\CartManagementInterface;
+use Magento\Quote\Api\CartRepositoryInterface;
+use Magento\Quote\Api\CouponManagementInterface;
+use Magento\Quote\Api\Data\CartItemInterface;
 use Magento\Quote\Model\Quote\Address;
+use Magento\SalesRule\Api\Data\CouponInterface;
+use Magento\SalesRule\Api\RuleRepositoryInterface;
+use Magento\Store\Model\StoreManagerInterface;
 use Magento\TestFramework\Helper\Bootstrap;
 use Magento\TestFramework\TestCase\AbstractController;
+use Magento\SalesRule\Model\Coupon;
+use Magento\SalesRule\Model\Rule;
+use \Magento\SalesRule\Model\ResourceModel\Rule as ResourceRule;
+use Magento\SalesRule\Api\CouponRepositoryInterface;
+use \Magento\Quote\Model\Quote;
 
 class BasketApiTest extends AbstractController
 {
@@ -41,55 +55,170 @@ class BasketApiTest extends AbstractController
     private $productFixtures = [];
 
     /**
+     * @var CouponManagementInterface $couponManagement
+     */
+    private $couponManagement;
+
+    /**
+     * @var CartManagementInterface $cartManagement
+     */
+    private $cartManagement;
+
+    /**
+     * @var CartItemRepositoryInterface $cartItemRepository
+     */
+    private $cartItemRepository;
+
+    /**
+     * @var RuleRepositoryInterface
+     */
+    private $ruleRepository;
+
+    /**
+     * @var CartRepositoryInterface $quoteRepo
+     */
+    private $quoteRepository;
+
+    /**
+     * @var Payment $paymentHelper
+     */
+    private $paymentHelper;
+
+    /**
+     * @var BasketHelper $basketHelper
+     */
+    private $basketHelper;
+
+    /**
      * {@inheritDoc}
      */
     public function setUp()
     {
-        $this->_objectManager = Bootstrap::getObjectManager();
         $this->generateCustomerFixture();
         $this->generateProductFixtures(self::NUMBER_OF_PRODUCTS);
+        $this->couponManagement = $this->createObject(CouponManagementInterface::class);
+        $this->cartManagement = $this->createObject(CartManagementInterface::class);
+        $this->cartItemRepository = $this->createObject(CartItemRepositoryInterface::class);
+        $this->quoteRepository = $this->getObject(CartRepositoryInterface::class);
+        $this->basketHelper = $this->getObject(BasketHelper::class);
+        $this->paymentHelper = $this->getObject(Payment::class);
     }
 
     /**
+     * @return array
+     */
+    public function verifyBasketHasSameValueAsApiCallDP()
+    {
+        $this->createCouponFixtures();
+
+        return [
+            'No coupon' => [null],
+            'fixed cart 20 EUR coupon' => ['COUPON_FIXED_CART_20_EUR']
+//            '20 percent coupon /wo shipping' => ['COUPON_20_PERC_WO_SHIPPING'],
+//            '20 percent coupon /w shipping' => ['COUPON_20_PERC_W_SHIPPING']
+        ];
+    }
+
+    /**
+     * @dataProvider verifyBasketHasSameValueAsApiCallDP
+     *
      * @magentoDbIsolation enabled
      * @magentoAppIsolation enabled
-     * @magentoConfigFixture  default  currency/options/allow EUR
-     * @magentoConfigFixture  default  currency/options/base EUR
-     * @magentoConfigFixture  default  currency/options/default EUR
+     * @magentoConfigFixture default/currency/options/default EUR
+     * @magentoConfigFixture default/currency/options/base EUR
+     * @magentoConfigFixture default_store currency/options/allow EUR
      *
      * @test
+     * @param $couponCode
      * @throws \Heidelpay\PhpBasketApi\Exception\InvalidBasketitemPositionException
      */
-    public function verifyBasketHasSameValueAsApiCall()
+    public function verifyBasketHasSameValueAsApiCall($couponCode)
     {
-        /** @var Session $magentoCustomerSession */
-        $magentoCustomerSession = $this->getObject(Session::class);
-        $loggedIn = $magentoCustomerSession->loginById($this->customerFixture->getId());
 
-        $this->assertTrue($loggedIn, 'Could not log in');
+        $cartId = $this->cartManagement->createEmptyCart($this->customerFixture->getId());
 
-        /** @var Cart $cart */
-        $cart = $this->createObject(Cart::class);
         foreach ($this->productFixtures as $productFixture) {
-            $cart = $cart->addProduct($productFixture, ['qty' => mt_rand(1, 3)]);
+            /** @var CartItemInterface $quoteItem */
+            $quoteItem = $this->createObject(CartItemInterface::class);
+            $quoteItem->setQuoteId($cartId);
+            $quoteItem->setProduct($productFixture);
+            $quoteItem->setQty(mt_rand(1, 3));
+            $this->cartItemRepository->save($quoteItem);
         }
-        $cart = $cart->save();
-        $quote = $cart->getQuote();
 
-        /** @var BasketHelper $basketHelper */
-        $basketHelper = $this->getObject(BasketHelper::class);
+        if ($couponCode !== null) {
+            $this->couponManagement->set($cartId, $couponCode);
+        }
 
-        /** @var Payment $paymentHelper */
-        $paymentHelper = $this->getObject(Payment::class);
+        /**
+         * @var Quote $quote
+          */
+        $quote = $this->quoteRepository->get($cartId);
 
         /** @var Basket $basket */
-        $basket = $basketHelper->convertQuoteToBasket($quote)->getBasket();
+        $basket = $this->basketHelper->convertQuoteToBasket($quote)->getBasket();
+
+        echo "\n getGrandTotal: " . $quote->getGrandTotal();
+        echo "\n getAmountTotalNet: " . $basket->getAmountTotalNet();
+        echo "\n getAmountTotalVat: " . $basket->getAmountTotalVat();
+        echo "\n getAmountTotalDiscount: " . $basket->getAmountTotalDiscount();
+
+        /** @var QuoteWrapper $basketTotals */
+        $basketTotals = $this->createObject(QuoteWrapper::class, ['quote' => $quote]);
+        echo "\n\n basket: " . print_r($basketTotals->dump(), 1);
 
         $this->assertEquals(
-            (int)bcmul($paymentHelper->format($quote->getGrandTotal()), 100),
+            (int)bcmul($this->paymentHelper->format($quote->getGrandTotal()), 100),
             $basket->getAmountTotalNet() + $basket->getAmountTotalVat()
         );
     }
+
+    //<editor-fold desc="Helper">
+
+    /**
+     * @param string $class
+     * @return mixed
+     */
+    private function getObject($class)
+    {
+        return $this->getObjectManager()->get($class);
+    }
+
+    /**
+     * @param string $class
+     * @param array $params
+     * @return mixed
+     */
+    private function createObject($class, array $params = [])
+    {
+        return $this->getObjectManager()->create($class, $params);
+    }
+
+    /**
+     * @return ObjectManagerInterface
+     */
+    private function getObjectManager()
+    {
+        if (!($this->_objectManager instanceof ObjectManagerInterface)) {
+            $this->_objectManager = Bootstrap::getObjectManager();
+        }
+        return $this->_objectManager;
+    }
+
+    /**
+     * @return RuleRepositoryInterface|mixed
+     */
+    private function getRuleRepository()
+    {
+        if (!($this->ruleRepository instanceof RuleRepositoryInterface)) {
+            $this->ruleRepository = $this->createObject(RuleRepositoryInterface::class);
+        }
+
+        return $this->ruleRepository;
+    }
+    //</editor-fold>
+
+    //<editor-fold desc="Fixture Helpers">
 
     private function generateCustomerFixture()
     {
@@ -154,20 +283,63 @@ class BasketApiTest extends AbstractController
     }
 
     /**
-     * @param string $class
-     * @return mixed
+     * Creates coupon fixtures
      */
-    private function getObject($class)
+    private function createCouponFixtures()
     {
-        return $this->_objectManager->get($class);
+        $this->removeDefaultRules();
+        $this->createCouponFixedCart20Eur();
+    }
+    /**
+     * Remove default rules from shop.
+     */
+    private function removeDefaultRules()
+    {
+        /** @var Array $rules */
+        $rules = $this->createObject(Rule::class)->getCollection();
+
+        /**
+         * @var Rule $rule
+         */
+        foreach ($rules as $rule) {
+            $this->getRuleRepository()->deleteById($rule->getRuleId());
+        }
     }
 
     /**
-     * @param string $class
-     * @return mixed
+     * @return string Code
      */
-    private function createObject($class)
+    private function createCouponFixedCart20Eur()
     {
-        return $this->_objectManager->create($class);
+        /** @var Rule $salesRule */
+        $salesRule = $this->createObject(Rule::class);
+        $salesRule->setData(
+            [
+                'name' => '20€',
+                'is_active' => 1,
+                'customer_group_ids' => [GroupManagement::NOT_LOGGED_IN_ID],
+                'conditions' => [],
+                'coupon_type' => Rule::COUPON_TYPE_SPECIFIC,
+                'simple_action' => Rule::CART_FIXED_ACTION,
+                'discount_amount' => 20,
+                'discount_step' => 0,
+                'stop_rules_processing' => 1,
+                'website_ids' => [
+                    $this->getObject(StoreManagerInterface::class)->getWebsite()->getId()
+                ]
+            ]
+        );
+        $this->getObject(ResourceRule::class)->save($salesRule);
+
+        // Create coupon and assign "20% fixed discount" rule to this coupon.
+        /** @var CouponInterface $coupon */
+        $coupon = $this->createObject(Coupon::class);
+        $code = 'COUPON_FIXED_CART_20_EUR';
+        $coupon->setRuleId($salesRule->getId())
+            ->setCode($code)
+            ->setType(CouponInterface::TYPE_MANUAL);
+        $this->getObject(CouponRepositoryInterface::class)->save($coupon);
+        return $code;
     }
+    //</editor-fold>
 }
