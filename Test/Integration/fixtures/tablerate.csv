@@ -1,0 +1,4 @@
+country,region,zip,order_subtotal,price
+DE,*,*,0,15
+DE,*,*,50,10
+DE,*,*,100,5.9

@@ -29,7 +29,6 @@ use Magento\Quote\Api\CartItemRepositoryInterface;
 use Magento\Quote\Api\CartManagementInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Api\CouponManagementInterface;
-use Magento\Quote\Api\Data\AddressInterface;
 use Magento\Quote\Api\Data\CartItemInterface;
 use Magento\SalesRule\Api\RuleRepositoryInterface;
 use Magento\Tax\Model\ClassModel;
@@ -37,6 +36,7 @@ use Magento\TestFramework\Helper\Bootstrap;
 use Magento\TestFramework\TestCase\AbstractController;
 use Magento\SalesRule\Model\Rule;
 use \Magento\Quote\Model\Quote;
+use Magento\OfflineShippingSampleData\Model\Tablerate;
 
 class BasketApiTest extends AbstractController
 {
@@ -83,15 +83,16 @@ class BasketApiTest extends AbstractController
     private $basketHelper;
 
     /**
-     * @var AddressInterface $address
-     */
-    private $address;
-
-    /**
      * {@inheritDoc}
      */
     public function setUp()
     {
+        /**
+         * @var Tablerate $tablerate
+         */
+        $tablerate = $this->getObject(Tablerate::class);
+        $tablerate->install(['Heidelpay_Gateway::Test/Integration/fixtures/tablerate.csv']);
+
         $this->generateCustomerFixture();
         $this->generateProductFixtures(self::NUMBER_OF_PRODUCTS);
         $this->couponManagement = $this->createObject(CouponManagementInterface::class);
@@ -200,6 +201,7 @@ class BasketApiTest extends AbstractController
             ->setTelephone(1234567890)
             ->setFax(123456789)
             ->setStreet('Vangerowstr. 18')
+            ->setShippingMethod('tablerate_bestway')
             ->save();
 
         /** @var Basket $basket */
