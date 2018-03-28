@@ -15,6 +15,14 @@ use Magento\Quote\Model\Quote;
 
 class QuoteWrapper extends BaseWrapper
 {
+    const FIELD_DISCOUNT_AMOUNT = 'discount_amount';
+    const FIELD_SHIPPING_AMOUNT = 'shipping_amount';
+    const FIELD_SHIPPING_TAX_AMOUNT = 'shipping_tax_amount';
+    const FIELD_SHIPPING_INCL_TAX = 'shipping_incl_tax';
+    const FIELD_BASE_SHIPPING_DISCOUNT_AMOUNT = 'base_shipping_discount_amount';
+    const FIELD_SUBTOTAL_WITH_DISCOUNT = 'subtotal_with_discount';
+    const FIELD_TAX_AMOUNT = 'tax_amount';
+
     /**
      * @var Quote
      */
@@ -31,8 +39,10 @@ class QuoteWrapper extends BaseWrapper
      */
     public function __construct(Quote $quote)
     {
+        bcscale(10);
         $this->setQuote($quote);
         $this->totals = $quote->getShippingAddress()->toArray();
+        ksort($this->totals);
     }
 
     /**
@@ -42,14 +52,14 @@ class QuoteWrapper extends BaseWrapper
      */
     public function getShippingTaxPercent()
     {
-        $shipping_amount = $this->totals['shipping_amount'];
+        $shipping_amount = $this->getShippingAmountRaw();
 
         if ((int)$shipping_amount === 0) {
             return 0.0;
         }
 
-        $tax = bcdiv(bcmul($this->totals['shipping_tax_amount'], 100, 10), $shipping_amount);
-        return round($tax, 2);
+        $taxPercentageRaw = bcdiv($this->getShippingTaxAmountRaw(), $shipping_amount);
+        return round($taxPercentageRaw, 2);
     }
 
     /**
@@ -76,6 +86,7 @@ class QuoteWrapper extends BaseWrapper
      */
     public function getActualTaxAmount()
     {
+
         return $this->getActualSubtotalTax() + $this->getActualShippingTax();
     }
 
@@ -84,7 +95,15 @@ class QuoteWrapper extends BaseWrapper
      */
     public function getTotalDiscountAmount()
     {
-        return (int)round(bcmul(abs($this->totals['discount_amount']), 100, 10));
+        return (int)round(bcmul($this->getTotalDiscountAmountRaw(), 100));
+    }
+
+    /**
+     * @return int
+     */
+    public function getTotalDiscountAmountRaw()
+    {
+        return abs($this->totals[self::FIELD_DISCOUNT_AMOUNT]);
     }
 
     /**
@@ -96,49 +115,89 @@ class QuoteWrapper extends BaseWrapper
     }
 
     /**
-     * @return int
+     * @return mixed
      */
     public function getShippingAmount()
     {
-        return (int)round(bcmul($this->totals['shipping_amount'], 100, 10));
+        return $this->fetchNormalizeValue(self::FIELD_SHIPPING_AMOUNT);
     }
 
     /**
-     * @return int
+     * @return float
+     */
+    public function getShippingAmountRaw()
+    {
+        return $this->fetchNormalizeValue(self::FIELD_SHIPPING_AMOUNT, true);
+    }
+
+    /**
+     * @return mixed
      */
     public function getShippingTaxAmount()
     {
-        return (int)round(bcmul($this->totals['shipping_tax_amount'], 100, 10));
+        return $this->fetchNormalizeValue(self::FIELD_SHIPPING_TAX_AMOUNT);
     }
 
     /**
-     * @return int
+     * @return float
+     */
+    public function getShippingTaxAmountRaw()
+    {
+        return $this->fetchNormalizeValue(self::FIELD_SHIPPING_TAX_AMOUNT, true);
+    }
+
+    /**
+     * @return mixed
      */
     public function getShippingInclTax()
     {
-        return (int)round(bcmul($this->totals['shipping_incl_tax'], 100, 10));
+        return $this->fetchNormalizeValue(self::FIELD_SHIPPING_INCL_TAX);
     }
 
     /**
-     * @return int
+     * @return float
      */
-    private function getShippingDiscountAmount()
+    public function getShippingInclTaxRaw()
     {
-        return (int)round(bcmul($this->totals['base_shipping_discount_amount'], 100, 10));
+        return $this->fetchNormalizeValue(self::FIELD_SHIPPING_INCL_TAX, true);
     }
 
     /**
-     * @return int
+     * @return mixed
      */
-    private function getSubtotalWithDiscount()
+    public function getShippingDiscountAmount()
     {
-        return (int)round(bcmul($this->totals['subtotal_with_discount'], 100, 10));
+        return $this->fetchNormalizeValue(self::FIELD_BASE_SHIPPING_DISCOUNT_AMOUNT);
+    }
+
+    /**
+     * @return float
+     */
+    public function getShippingDiscountAmountRaw()
+    {
+        return $this->fetchNormalizeValue(self::FIELD_BASE_SHIPPING_DISCOUNT_AMOUNT, true);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSubtotalWithDiscount()
+    {
+        return $this->fetchNormalizeValue(self::FIELD_SUBTOTAL_WITH_DISCOUNT);
+    }
+
+    /**
+     * @return float
+     */
+    public function getSubtotalWithDiscountRaw()
+    {
+        return $this->fetchNormalizeValue(self::FIELD_SUBTOTAL_WITH_DISCOUNT, true);
     }
 
     /**
      * @param Quote $quote
      */
-    private function setQuote($quote)
+    public function setQuote($quote)
     {
         $quote->collectTotals();
         $this->quote = $quote;
@@ -147,15 +206,15 @@ class QuoteWrapper extends BaseWrapper
     /**
      * @return float|int
      */
-    private function getActualShippingTax()
+    public function getActualShippingTax()
     {
-        return (int)round(bcdiv(bcmul($this->getShippingInclDiscount(), $this->getShippingTaxPercent(), 10), 100, 10));
+        return (int)round(bcmul($this->getShippingInclDiscount(), $this->getShippingTaxPercent()));
     }
 
     /**
      * @return int
      */
-    private function getActualSubtotalTax()
+    public function getActualSubtotalTax()
     {
         return $this->getTaxAmount() - $this->getShippingTaxAmount();
     }
@@ -163,7 +222,15 @@ class QuoteWrapper extends BaseWrapper
     /**
      * @return int
      */
-    private function getShippingInclDiscount()
+    public function getActualSubtotalTaxRaw()
+    {
+        return $this->getTaxAmountRaw() - $this->getShippingTaxAmountRaw();
+    }
+
+    /**
+     * @return int
+     */
+    public function getShippingInclDiscount()
     {
         return $this->getShippingAmount() - $this->getShippingDiscountAmount();
     }
@@ -171,8 +238,44 @@ class QuoteWrapper extends BaseWrapper
     /**
      * @return int
      */
-    private function getTaxAmount()
+    public function getShippingInclDiscountRaw()
     {
-        return (int)round(bcmul($this->totals['tax_amount'], 100, 10));
+        return $this->getShippingAmountRaw() - $this->getShippingDiscountAmountRaw();
     }
+
+    /**
+     * @return int
+     */
+    public function getTaxAmount()
+    {
+        return $this->fetchNormalizeValue(self::FIELD_TAX_AMOUNT);
+    }
+
+    /**
+     * @return int
+     */
+    public function getTaxAmountRaw()
+    {
+        return $this->fetchNormalizeValue(self::FIELD_TAX_AMOUNT, true);
+    }
+
+    //<editor-fold desc="Helpers">
+
+    /**
+     * @param string $field
+     * @param bool $raw
+     * @return mixed
+     */
+    private function fetchNormalizeValue($field, $raw = false)
+    {
+        $value = $this->totals[$field];
+
+        if (!$raw) {
+            $value = (int)round(bcmul($value, 100));
+        }
+
+        return $value;
+    }
+
+    //</editor-fold>
 }

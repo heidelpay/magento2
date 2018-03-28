@@ -29,15 +29,17 @@ trait DumpGetterReturnsTrait
         });
 
         foreach ($getters as $getter) {
-            $getterResults[$this->getPropertyFromGetter($getter)] = $this->$getter();
+            $getterResults[$this->getPropertyFromGetter($getter)] = (string)$this->$getter();
         }
+
+        ksort($getterResults);
 
         return $getterResults;
     }
 
     /**
-     * @param $getterName
-     * @return bool|string
+     * @param string $getterName
+     * @return mixed
      */
     private function getPropertyFromGetter($getterName)
     {
