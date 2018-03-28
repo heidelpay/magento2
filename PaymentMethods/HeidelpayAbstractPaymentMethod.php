@@ -44,7 +44,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
      *
      * @var string
      */
-    protected $_code = 'hgwabstract';
+    protected $_code = self::CODE;
 
     /**
      * @var boolean

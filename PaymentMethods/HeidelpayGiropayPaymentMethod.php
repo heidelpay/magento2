@@ -23,8 +23,16 @@ use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as Heide
  */
 class HeidelpayGiropayPaymentMethod extends HeidelpayAbstractPaymentMethod
 {
-    /** @var string heidelpay Gateway Paymentcode */
-    protected $_code = 'hgwgp';
+    /**
+     * Payment Code
+     * @var string PayentCode
+     */
+    const CODE = 'hgwgp';
+
+    /**
+     * @var string heidelpay gateway payment code
+     */
+    protected $_code = self::CODE;
 
     /** @var bool */
     protected $_canAuthorize = true;

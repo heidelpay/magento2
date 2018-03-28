@@ -34,7 +34,7 @@ class HeidelpayDebitCardPaymentMethod extends HeidelpayAbstractPaymentMethod
      * Payment Code
      * @var string PayentCode
      */
-    protected $_code = 'hgwdc';
+    protected $_code = self::CODE;
 
     /**
      * isGateway

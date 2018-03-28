@@ -33,7 +33,7 @@ class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMetho
      * Payment Code
      * @var string
      */
-    protected $_code = 'hgwivs';
+    protected $_code = self::CODE;
 
     /**
      * Info Block Class (used for Order/Invoice details)

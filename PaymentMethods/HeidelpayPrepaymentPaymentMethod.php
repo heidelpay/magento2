@@ -33,7 +33,7 @@ class HeidelpayPrepaymentPaymentMethod extends HeidelpayAbstractPaymentMethod
      * Payment Code
      * @var string PayentCode
      */
-    protected $_code = 'hgwpp';
+    protected $_code = self::CODE;
 
     /**
      * Info Block Class (used for Order/Invoice details)

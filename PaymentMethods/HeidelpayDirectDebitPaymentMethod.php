@@ -25,9 +25,15 @@ use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as Heide
 class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
 {
     /**
+     * Payment Code
+     * @var string PayentCode
+     */
+    const CODE = 'hgwdd';
+
+    /**
      * @var string heidelpay gateway payment code
      */
-    protected $_code = 'hgwdd';
+    protected $_code = self::CODE;
 
     /**
      * @var bool

@@ -34,7 +34,7 @@ class HeidelpayPayPalPaymentMethod extends HeidelpayAbstractPaymentMethod
      * Payment Code
      * @var string PayentCode
      */
-    protected $_code = 'hgwpal';
+    protected $_code = self::CODE;
 
     /**
      * isGateway
