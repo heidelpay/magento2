@@ -6,14 +6,12 @@ use Heidelpay\Gateway\Wrapper\ItemWrapper;
 use Heidelpay\Gateway\Wrapper\QuoteWrapper;
 use Heidelpay\PhpBasketApi\Object\BasketItem;
 use Heidelpay\PhpBasketApi\Request;
-use /** @noinspection PhpUndefinedClassInspection */
-    Magento\Catalog\Helper\ImageFactory;
+use Magento\Catalog\Helper\ImageFactory;
 use Magento\Framework\App\Area;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\App\ObjectManager;
-use /** @noinspection PhpUndefinedClassInspection */
-    Magento\Framework\HTTP\ZendClientFactory;
+use Magento\Framework\HTTP\ZendClientFactory;
 use Magento\Quote\Model\Quote;
 use Magento\Store\Model\App\Emulation;
 
@@ -59,7 +57,6 @@ class BasketHelper extends AbstractHelper
     public function __construct(
         Context $context,
         Emulation $appEmulation,
-        /** @noinspection PhpUndefinedClassInspection */
         ImageFactory $imageHelperFactory,
         HgwMainConfigInterface $mainConfig
     ) {
