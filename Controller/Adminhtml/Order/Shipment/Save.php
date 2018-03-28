@@ -2,8 +2,10 @@
 
 namespace Heidelpay\Gateway\Controller\Adminhtml\Order\Shipment;
 
+use Heidelpay\Gateway\Gateway\Config\HgwBasePaymentConfigInterface;
+use Heidelpay\Gateway\Gateway\Config\HgwMainConfigInterface;
 use Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod;
-use Heidelpay\PhpApi\TransactionTypes\FinalizeTransactionType;
+use Heidelpay\PhpPaymentApi\TransactionTypes\FinalizeTransactionType;
 use Magento\Sales\Model\Order;
 
 /**
@@ -95,21 +97,23 @@ class Save extends \Magento\Shipping\Controller\Adminhtml\Order\Shipment\Save
 
         // only fire the shipping when a heidelpay payment method is used.
         if ($method instanceof HeidelpayAbstractPaymentMethod) {
-            // get the php-api instance.
+            // get the php-payment-api instance.
             $heidelpayMethod = $method->getHeidelpayPaymentMethodInstance();
 
             // if the payment method uses the Finalize Transaction type, we'll send a FIN request to the payment api.
             if (in_array(FinalizeTransactionType::class, class_uses($heidelpayMethod))) {
-                // get the heidelpay configuration for the given payment method and store.
-                $paymentConfig = $method->getMainConfig($method->getCode(), $method->getStore());
+                /** @var HgwMainConfigInterface $mainConfig */
+                $mainConfig = $method->getMainConfig();
 
-                // set the authentification data
+                /** @var HgwBasePaymentConfigInterface $methodConfig */
+                $methodConfig = $method->getConfig();
+
                 $heidelpayMethod->getRequest()->authentification(
-                    $paymentConfig['SECURITY.SENDER'],
-                    $paymentConfig['USER.LOGIN'],
-                    $paymentConfig['USER.PWD'],
-                    $paymentConfig['TRANSACTION.CHANNEL'],
-                    $paymentConfig['TRANSACTION.MODE']
+                    $mainConfig->getSecuritySender(),
+                    $mainConfig->getUserLogin(),
+                    $mainConfig->getUserPasswd(),
+                    $methodConfig->getChannel(),
+                    $mainConfig->isSandboxModeActive()
                 );
 
                 // set the basket data (for amount and currency and a secret hash for fraud checking)
@@ -121,7 +125,7 @@ class Save extends \Magento\Shipping\Controller\Adminhtml\Order\Shipment\Save
                 );
 
                 // send the finalize request
-                /** @var \Heidelpay\PhpApi\Response $response */
+                /** @var \Heidelpay\PhpPaymentApi\Response $response */
                 $heidelpayMethod->finalize($order->getPayment()->getLastTransId());
 
                 // if the response isn't successful, redirect back to the order view.

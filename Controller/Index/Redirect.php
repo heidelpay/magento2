@@ -29,7 +29,7 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
     protected $resultPageFactory;
     protected $logger;
 
-    /** @var \Heidelpay\PhpApi\Response The heidelpay response class */
+    /** @var \Heidelpay\PhpPaymentApi\Response The heidelpay response class */
     protected $heidelpayResponse;
 
     /** @var \Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory */
@@ -57,7 +57,7 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
      * @param OrderCommentSender $orderCommentSender
      * @param \Magento\Framework\Encryption\Encryptor $encryptor
      * @param \Magento\Customer\Model\Url $customerUrl
-     * @param \Heidelpay\PhpApi\Response $heidelpayResponse
+     * @param \Heidelpay\PhpPaymentApi\Response $heidelpayResponse
      * @param \Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory $transactionCollectionFactory
      */
     public function __construct(
@@ -77,7 +77,7 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
         OrderCommentSender $orderCommentSender,
         \Magento\Framework\Encryption\Encryptor $encryptor,
         \Magento\Customer\Model\Url $customerUrl,
-        \Heidelpay\PhpApi\Response $heidelpayResponse,
+        \Heidelpay\PhpPaymentApi\Response $heidelpayResponse,
         \Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory $transactionCollectionFactory
     ) {
         parent::__construct(
