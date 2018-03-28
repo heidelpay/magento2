@@ -21,19 +21,6 @@ class HgwMainConfig implements HgwMainConfigInterface
 {
     use DumpGetterReturnsTrait;
 
-    const DEFAULT_PATH_PATTERN = 'payment/hgwmain/';
-
-    const FLAG_SANDBOXMODE = 'sandbox_mode';
-    const FLAG_ACTIVE = 'active';
-
-    const CONFIG_SECURITY_SENDER = 'security_sender';
-    const CONFIG_USER_LOGIN = 'user_login';
-    const CONFIG_USER_PASSWD = 'user_passwd';
-    const CONFIG_DEFAULT_CSS = 'default_css';
-    const CONFIG_MODEL = 'model';
-    const CONFIG_SANDBOX_URL = 'sandbox_url';
-    const CONFIG_LIVE_URL = 'live_url';
-
     /**
      * @var ScopeConfigInterface
      */
@@ -50,7 +37,7 @@ class HgwMainConfig implements HgwMainConfigInterface
      */
     public function __construct(
         ScopeConfigInterface $scopeConfig,
-        $pathPattern = self::DEFAULT_PATH_PATTERN
+        $pathPattern = HgwMainConfigInterface::DEFAULT_PATH_PATTERN
     ) {
         $this->scopeConfig = $scopeConfig;
         $this->pathPattern = $pathPattern;
@@ -85,7 +72,7 @@ class HgwMainConfig implements HgwMainConfigInterface
      */
     public function isSandboxModeActive()
     {
-        return $this->isSetFlag(self::FLAG_SANDBOXMODE);
+        return $this->isSetFlag(HgwMainConfigInterface::FLAG_SANDBOXMODE);
     }
 
     /**
@@ -95,7 +82,7 @@ class HgwMainConfig implements HgwMainConfigInterface
      */
     public function isActive()
     {
-        return $this->isSetFlag(self::FLAG_ACTIVE);
+        return $this->isSetFlag(HgwMainConfigInterface::FLAG_ACTIVE);
     }
 
     /**
@@ -105,7 +92,7 @@ class HgwMainConfig implements HgwMainConfigInterface
      */
     public function getSecuritySender()
     {
-        return $this->getValue(self::CONFIG_SECURITY_SENDER);
+        return $this->getValue(HgwMainConfigInterface::CONFIG_SECURITY_SENDER);
     }
 
     /**
@@ -115,7 +102,7 @@ class HgwMainConfig implements HgwMainConfigInterface
      */
     public function getUserLogin()
     {
-        return $this->getValue(self::CONFIG_USER_LOGIN);
+        return $this->getValue(HgwMainConfigInterface::CONFIG_USER_LOGIN);
     }
 
     /**
@@ -125,7 +112,7 @@ class HgwMainConfig implements HgwMainConfigInterface
      */
     public function getUserPasswd()
     {
-        return $this->getValue(self::CONFIG_USER_PASSWD);
+        return $this->getValue(HgwMainConfigInterface::CONFIG_USER_PASSWD);
     }
 
     /**
@@ -135,7 +122,7 @@ class HgwMainConfig implements HgwMainConfigInterface
      */
     public function getDefaultCss()
     {
-        return $this->getValue(self::CONFIG_DEFAULT_CSS);
+        return $this->getValue(HgwMainConfigInterface::CONFIG_DEFAULT_CSS);
     }
 
     /**
@@ -145,7 +132,7 @@ class HgwMainConfig implements HgwMainConfigInterface
      */
     public function getConfigModel()
     {
-        return $this->getValue(self::CONFIG_MODEL);
+        return $this->getValue(HgwMainConfigInterface::CONFIG_MODEL);
     }
 
     /**
