@@ -79,7 +79,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
     /**
      * @var boolean
      */
-    private $canBasketApi = false;
+    private $usingBasketApi = false;
 
     /**
      * @var string
@@ -520,7 +520,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         );
 
         // submit the Quote to the Basket API if the payment method needs one.
-        if ($this->isCanBasketApi()) {
+        if ($this->isUsingBasketApi()) {
             $basketId = $this->basketHelper->submitQuoteToBasketApi($quote);
 
             if ($basketId === null) {
@@ -740,17 +740,17 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
     /**
      * @return bool
      */
-    public function isCanBasketApi()
+    public function isUsingBasketApi()
     {
-        return $this->canBasketApi;
+        return $this->usingBasketApi;
     }
 
     /**
-     * @param bool $canBasketApi
+     * @param bool $usingBasketApi
      */
-    public function setCanBasketApi($canBasketApi)
+    public function setUsingBasketApi($usingBasketApi)
     {
-        $this->canBasketApi = $canBasketApi;
+        $this->usingBasketApi = $usingBasketApi;
     }
 
     /**
