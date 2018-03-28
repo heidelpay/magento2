@@ -29,7 +29,14 @@ trait DumpGetterReturnsTrait
         });
 
         foreach ($getters as $getter) {
-            $getterResults[$this->getPropertyFromGetter($getter)] = (string)$this->$getter();
+            $getterResult = $this->$getter();
+            if (is_object($getterResult)) {
+                continue;
+            }
+            if (is_array($getterResult)) {
+                $getterResult = print_r($getterResult, true);
+            }
+            $getterResults[$this->getPropertyFromGetter($getter)] = (string)$getterResult;
         }
 
         ksort($getterResults);
