@@ -178,7 +178,7 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
                 $paidAmount = (float)$this->heidelpayPush->getResponse()->getPresentation()->getAmount();
                 $dueLeft = (float)($order->getTotalDue() - $paidAmount);
 
-                $state = Order::STATE_COMPLETE;
+                $state = Order::STATE_PROCESSING;
                 $comment = 'heidelpay - Purchase Complete';
 
                 // if payment is not complete
