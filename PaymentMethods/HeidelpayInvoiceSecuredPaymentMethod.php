@@ -144,7 +144,7 @@ class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMetho
         );
 
         $this->_heidelpayPaymentMethod = $invoiceB2CSecuredPaymentMethod;
-        $this->setCanBasketApi(true);
+        $this->setUsingBasketApi(true);
     }
 
     /**

@@ -15,6 +15,19 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 
 interface HgwMainConfigInterface
 {
+    const DEFAULT_PATH_PATTERN = 'payment/hgwmain/';
+
+    const FLAG_SANDBOXMODE = 'sandbox_mode';
+    const FLAG_ACTIVE = 'active';
+
+    const CONFIG_SECURITY_SENDER = 'security_sender';
+    const CONFIG_USER_LOGIN = 'user_login';
+    const CONFIG_USER_PASSWD = 'user_passwd';
+    const CONFIG_DEFAULT_CSS = 'default_css';
+    const CONFIG_MODEL = 'model';
+    const CONFIG_SANDBOX_URL = 'sandbox_url';
+    const CONFIG_LIVE_URL = 'live_url';
+
     /**
      * Returns true if the sandbox mode is enabled.
      *
