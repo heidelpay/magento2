@@ -40,6 +40,13 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
     const CODE = 'hgwabstract';
 
     /**
+     * PaymentCode
+     *
+     * @var string
+     */
+    protected $_code = self::CODE;
+
+    /**
      * @var boolean
      */
     protected $_isGateway = true;
@@ -219,8 +226,6 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
         array $data = []
     ) {
-        $this->_code = static::CODE;
-
         parent::__construct(
             $context,
             $registry,

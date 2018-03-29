@@ -31,6 +31,12 @@ class HeidelpayCreditCardPaymentMethod extends HeidelpayAbstractPaymentMethod
     const CODE = 'hgwcc';
 
     /**
+     * Payment Code
+     * @var string PayentCode
+     */
+    protected $_code = self::CODE;
+
+    /**
      * isGateway
      * @var boolean
      */

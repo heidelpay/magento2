@@ -31,6 +31,11 @@ class HeidelpayDirectDebitSecuredPaymentMethod extends HeidelpayAbstractPaymentM
     const CODE = 'hgwdds';
 
     /**
+     * @var string heidelpay gateway payment code
+     */
+    protected $_code = self::CODE;
+
+    /**
      * @var bool
      */
     protected $_canAuthorize = true;
