@@ -30,12 +30,6 @@ class HeidelpaySofortPaymentMethod extends HeidelpayAbstractPaymentMethod
     const CODE = 'hgwsue';
 
     /**
-     * Payment Code
-     * @var string PayentCode
-     */
-    protected $_code = self::CODE;
-
-    /**
      * isGateway
      * @var boolean
      */
