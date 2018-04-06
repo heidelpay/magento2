@@ -48,9 +48,19 @@ class QuoteWrapper extends BaseWrapper
     /**
      * Calculate shipping tax in percent
      *
-     * @return float shipping tax in percent
+     * @return int shipping tax in percent
      */
     public function getShippingTaxPercent()
+    {
+        return (int)round(bcmul($this->getShippingTaxFactor(), 100));
+    }
+
+    /**
+     * Calculate shipping tax factor
+     *
+     * @return float shipping tax factor
+     */
+    public function getShippingTaxFactor()
     {
         $shipping_amount = $this->getShippingAmountRaw();
 
@@ -58,8 +68,7 @@ class QuoteWrapper extends BaseWrapper
             return 0.0;
         }
 
-        $taxPercentageRaw = bcdiv($this->getShippingTaxAmountRaw(), $shipping_amount);
-        return round($taxPercentageRaw, 2);
+        return bcdiv($this->getShippingTaxAmountRaw(), $shipping_amount);
     }
 
     /**
@@ -208,7 +217,7 @@ class QuoteWrapper extends BaseWrapper
      */
     public function getActualShippingTax()
     {
-        return (int)round(bcmul($this->getShippingInclDiscount(), $this->getShippingTaxPercent()));
+        return (int)round(bcmul($this->getShippingInclDiscount(), $this->getShippingTaxFactor()));
     }
 
     /**
