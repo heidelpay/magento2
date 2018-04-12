@@ -4,6 +4,22 @@
 
 This project does not follow a versioning standard. Versions are crafted after the dates; for example, the version 17.7.25 was released on July, 25th in 2017
 
+## 18.4.12
+
+## Added
+- BasketApi support in general and activated it for InvoiceSecuredPaymentMethod.
+- Basket helper class to provide for general BasketApi support.
+- Trait to be able to dump getter results from a class to an array.
+- BasketApi integration tests.
+- Refactored payment method classes with regards to the payment code. 
+
+## Changed
+- Refactored configuration reading (heidelpay main and payment specific config) in order to inject it where needed.
+- Replaced obsolete PhpApi with PhpPaymentApi.
+
+## Fixed
+- Set Order to the correct state when receiving a receipt via push.
+
 ## 18.3.1
 
 ## Changed

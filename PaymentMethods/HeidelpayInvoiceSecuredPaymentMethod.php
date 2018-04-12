@@ -2,6 +2,8 @@
 
 namespace Heidelpay\Gateway\PaymentMethods;
 
+use Heidelpay\Gateway\Gateway\Config\HgwInvoiceSecuredPaymentConfigInterface;
+use Heidelpay\Gateway\Gateway\Config\HgwMainConfigInterface;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
 use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
 
@@ -31,7 +33,7 @@ class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMetho
      * Payment Code
      * @var string
      */
-    protected $_code = 'hgwivs';
+    protected $_code = self::CODE;
 
     /**
      * Info Block Class (used for Order/Invoice details)
@@ -69,7 +71,7 @@ class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMetho
      * @param \Magento\Framework\Api\ExtensionAttributesFactory $extensionFactory
      * @param \Magento\Framework\Api\AttributeValueFactory $customAttributeFactory
      * @param \Magento\Payment\Helper\Data $paymentData
-     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
+     * @param HgwMainConfigInterface $mainConfig
      * @param \Magento\Framework\App\RequestInterface $request
      * @param \Magento\Framework\UrlInterface $urlinterface
      * @param \Magento\Framework\Encryption\Encryptor $encryptor
@@ -77,12 +79,14 @@ class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMetho
      * @param \Magento\Framework\Locale\ResolverInterface $localeResolver
      * @param \Magento\Framework\App\ProductMetadataInterface $productMetadata
      * @param \Magento\Framework\Module\ResourceInterface $moduleResource
+     * @param HgwInvoiceSecuredPaymentConfigInterface $paymentConfig
      * @param \Heidelpay\Gateway\Helper\Payment $paymentHelper
+     * @param \Heidelpay\Gateway\Helper\BasketHelper $basketHelper
      * @param \Magento\Sales\Helper\Data $salesHelper
      * @param PaymentInformationCollectionFactory $paymentInformationCollectionFactory
      * @param \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory
      * @param HeidelpayTransactionCollectionFactory $transactionCollectionFactory
-     * @param \Heidelpay\PhpApi\PaymentMethods\InvoiceB2CSecuredPaymentMethod $invoiceB2CSecuredPaymentMethod
+     * @param \Heidelpay\PhpPaymentApi\PaymentMethods\InvoiceB2CSecuredPaymentMethod $invoiceB2CSecuredPaymentMethod
      * @param \Magento\Framework\Model\ResourceModel\AbstractResource|null $resource
      * @param \Magento\Framework\Data\Collection\AbstractDb|null $resourceCollection
      * @param array $data
@@ -93,7 +97,7 @@ class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMetho
         \Magento\Framework\Api\ExtensionAttributesFactory $extensionFactory,
         \Magento\Framework\Api\AttributeValueFactory $customAttributeFactory,
         \Magento\Payment\Helper\Data $paymentData,
-        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
+        HgwMainConfigInterface $mainConfig,
         \Magento\Framework\App\RequestInterface $request,
         \Magento\Framework\UrlInterface $urlinterface,
         \Magento\Framework\Encryption\Encryptor $encryptor,
@@ -101,12 +105,14 @@ class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMetho
         \Magento\Framework\Locale\ResolverInterface $localeResolver,
         \Magento\Framework\App\ProductMetadataInterface $productMetadata,
         \Magento\Framework\Module\ResourceInterface $moduleResource,
+        HgwInvoiceSecuredPaymentConfigInterface $paymentConfig,
         \Heidelpay\Gateway\Helper\Payment $paymentHelper,
+        \Heidelpay\Gateway\Helper\BasketHelper $basketHelper,
         \Magento\Sales\Helper\Data $salesHelper,
         PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
         \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory,
         HeidelpayTransactionCollectionFactory $transactionCollectionFactory,
-        \Heidelpay\PhpApi\PaymentMethods\InvoiceB2CSecuredPaymentMethod $invoiceB2CSecuredPaymentMethod,
+        \Heidelpay\PhpPaymentApi\PaymentMethods\InvoiceB2CSecuredPaymentMethod $invoiceB2CSecuredPaymentMethod,
         \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
         array $data = []
@@ -117,7 +123,7 @@ class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMetho
             $extensionFactory,
             $customAttributeFactory,
             $paymentData,
-            $scopeConfig,
+            $mainConfig,
             $request,
             $urlinterface,
             $encryptor,
@@ -125,7 +131,9 @@ class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMetho
             $localeResolver,
             $productMetadata,
             $moduleResource,
+            $paymentConfig,
             $paymentHelper,
+            $basketHelper,
             $salesHelper,
             $paymentInformationCollectionFactory,
             $transactionFactory,
@@ -136,6 +144,7 @@ class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMetho
         );
 
         $this->_heidelpayPaymentMethod = $invoiceB2CSecuredPaymentMethod;
+        $this->setUsingBasketApi(true);
     }
 
     /**

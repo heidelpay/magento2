@@ -1,10 +1,10 @@
 <?php
-
 namespace Heidelpay\Gateway\Helper;
 
 use Heidelpay\MessageCodeMapper\MessageCodeMapper;
+use Magento\Framework\App\Helper\AbstractHelper;
+use Magento\Framework\App\Helper\Context;
 use Magento\Framework\HTTP\ZendClientFactory;
-use Magento\Payment\Model\Method\Logger;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Invoice;
 
@@ -24,16 +24,13 @@ use Magento\Sales\Model\Order\Invoice;
  * @subpackage Magento2
  * @category   Magento2
  */
-class Payment extends \Magento\Framework\App\Helper\AbstractHelper
+class Payment extends AbstractHelper
 {
     protected $_invoiceOrderEmail = true;
     protected $_debug = false;
 
     /** @var ZendClientFactory */
     protected $httpClientFactory;
-
-    /** @var Logger */
-    protected $log;
 
     /** @var \Magento\Framework\DB\TransactionFactory */
     protected $transactionFactory;
@@ -42,21 +39,22 @@ class Payment extends \Magento\Framework\App\Helper\AbstractHelper
     protected $localeResolver;
 
     /**
-     * @param ZendClientFactory                        $httpClientFactory
-     * @param Logger                                   $logger
+     * @param Context $context
+     * @param \Magento\Framework\HTTP\ZendClientFactory $httpClientFactory
      * @param \Magento\Framework\DB\TransactionFactory $transactionFactory
-     * @param \Magento\Framework\Locale\Resolver       $localeResolver
+     * @param \Magento\Framework\Locale\Resolver $localeResolver
      */
     public function __construct(
-        ZendClientFactory $httpClientFactory,
-        Logger $logger,
+        Context $context,
+        \Magento\Framework\HTTP\ZendClientFactory $httpClientFactory,
         \Magento\Framework\DB\TransactionFactory $transactionFactory,
         \Magento\Framework\Locale\Resolver $localeResolver
     ) {
         $this->httpClientFactory = $httpClientFactory;
-        $this->log = $logger;
         $this->transactionFactory = $transactionFactory;
         $this->localeResolver = $localeResolver;
+
+        parent::__construct($context);
     }
 
     public function splitPaymentCode($PAYMENT_CODE)
@@ -73,7 +71,7 @@ class Payment extends \Magento\Framework\App\Helper\AbstractHelper
     {
         $paymentCode = $this->splitPaymentCode($data['PAYMENT_CODE']);
 
-        $message = (!empty($message)) ? $message : $data['PROCESSING_RETURN'];
+        $message = !empty($message) ? $message : $data['PROCESSING_RETURN'];
 
         $quoteID = ($order->getLastQuoteId() === false)
             ? $order->getQuoteId()
@@ -115,6 +113,7 @@ class Payment extends \Magento\Framework\App\Helper\AbstractHelper
      * @param string|null $errorCode
      *
      * @return string
+     * @throws \Heidelpay\MessageCodeMapper\Exceptions\MissingLocaleFileException
      */
     public function handleError($errorCode = null)
     {

@@ -2,6 +2,8 @@
 
 namespace Heidelpay\Gateway\PaymentMethods;
 
+use Heidelpay\Gateway\Gateway\Config\HgwDirectDebitPaymentConfigInterface;
+use Heidelpay\Gateway\Gateway\Config\HgwMainConfigInterface;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
 use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
 
@@ -22,10 +24,20 @@ use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as Heide
  */
 class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
 {
-    /** @var string heidelpay Gateway Paymentcode */
-    protected $_code = 'hgwdd';
+    /**
+     * Payment Code
+     * @var string PayentCode
+     */
+    const CODE = 'hgwdd';
 
-    /** @var bool */
+    /**
+     * @var string heidelpay gateway payment code
+     */
+    protected $_code = self::CODE;
+
+    /**
+     * @var bool
+     */
     protected $_canAuthorize = true;
 
     /**
@@ -46,7 +58,7 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
      * @param \Magento\Framework\Api\ExtensionAttributesFactory $extensionFactory
      * @param \Magento\Framework\Api\AttributeValueFactory $customAttributeFactory
      * @param \Magento\Payment\Helper\Data $paymentData
-     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
+     * @param HgwMainConfigInterface $mainConfig
      * @param \Magento\Framework\App\RequestInterface $request
      * @param \Magento\Framework\UrlInterface $urlinterface
      * @param \Magento\Framework\Encryption\Encryptor $encryptor
@@ -54,12 +66,14 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
      * @param \Magento\Framework\Locale\ResolverInterface $localeResolver
      * @param \Magento\Framework\App\ProductMetadataInterface $productMetadata
      * @param \Magento\Framework\Module\ResourceInterface $moduleResource
+     * @param HgwDirectDebitPaymentConfigInterface $paymentConfig
      * @param \Heidelpay\Gateway\Helper\Payment $paymentHelper
+     * @param \Heidelpay\Gateway\Helper\BasketHelper $basketHelper
      * @param \Magento\Sales\Helper\Data $salesHelper
      * @param PaymentInformationCollectionFactory $paymentInformationCollectionFactory
      * @param \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory
      * @param HeidelpayTransactionCollectionFactory $transactionCollectionFactory
-     * @param \Heidelpay\PhpApi\PaymentMethods\DirectDebitPaymentMethod $directDebitPaymentMethod
+     * @param \Heidelpay\PhpPaymentApi\PaymentMethods\DirectDebitPaymentMethod $directDebitPaymentMethod
      * @param \Magento\Framework\Model\ResourceModel\AbstractResource|null $resource
      * @param \Magento\Framework\Data\Collection\AbstractDb|null $resourceCollection
      * @param array $data
@@ -70,7 +84,7 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
         \Magento\Framework\Api\ExtensionAttributesFactory $extensionFactory,
         \Magento\Framework\Api\AttributeValueFactory $customAttributeFactory,
         \Magento\Payment\Helper\Data $paymentData,
-        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
+        HgwMainConfigInterface $mainConfig,
         \Magento\Framework\App\RequestInterface $request,
         \Magento\Framework\UrlInterface $urlinterface,
         \Magento\Framework\Encryption\Encryptor $encryptor,
@@ -78,12 +92,14 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
         \Magento\Framework\Locale\ResolverInterface $localeResolver,
         \Magento\Framework\App\ProductMetadataInterface $productMetadata,
         \Magento\Framework\Module\ResourceInterface $moduleResource,
+        HgwDirectDebitPaymentConfigInterface $paymentConfig,
         \Heidelpay\Gateway\Helper\Payment $paymentHelper,
+        \Heidelpay\Gateway\Helper\BasketHelper $basketHelper,
         \Magento\Sales\Helper\Data $salesHelper,
         PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
         \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory,
         HeidelpayTransactionCollectionFactory $transactionCollectionFactory,
-        \Heidelpay\PhpApi\PaymentMethods\DirectDebitPaymentMethod $directDebitPaymentMethod,
+        \Heidelpay\PhpPaymentApi\PaymentMethods\DirectDebitPaymentMethod $directDebitPaymentMethod,
         \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
         array $data = []
@@ -94,7 +110,7 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
             $extensionFactory,
             $customAttributeFactory,
             $paymentData,
-            $scopeConfig,
+            $mainConfig,
             $request,
             $urlinterface,
             $encryptor,
@@ -102,7 +118,9 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
             $localeResolver,
             $productMetadata,
             $moduleResource,
+            $paymentConfig,
             $paymentHelper,
+            $basketHelper,
             $salesHelper,
             $paymentInformationCollectionFactory,
             $transactionFactory,
@@ -120,7 +138,11 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
      * Fires the initial request to the heidelpay payment provider.
      *
      * @param \Magento\Quote\Model\Quote $quote
-     * @return \Heidelpay\PhpApi\Response
+     * @return \Heidelpay\PhpPaymentApi\Response
+     * @throws \Exception
+     * @throws \Heidelpay\PhpBasketApi\Exception\InvalidBasketitemPositionException
+     * @throws \Heidelpay\PhpPaymentApi\Exceptions\UndefinedTransactionModeException
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function getHeidelpayUrl($quote)
     {
@@ -136,7 +158,7 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
         );
 
         // set some parameters inside the Abstract Payment method helper which are used for all requests,
-        // e.g. authentification, customer data, ...
+        // e.g. authentication, customer data, ...
         parent::getHeidelpayUrl($quote);
 
         // add IBAN and Bank account owner to the request.

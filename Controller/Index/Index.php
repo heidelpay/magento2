@@ -84,7 +84,7 @@ class Index extends \Heidelpay\Gateway\Controller\HgwAbstract
         $payment = $quote->getPayment()->getMethodInstance();
 
         // get the response object from the initial request.
-        /** @var \Heidelpay\PhpApi\Response $response */
+        /** @var \Heidelpay\PhpPaymentApi\Response $response */
         $response = $payment->getHeidelpayUrl($quote);
 
         $this->_logger->debug('Heidelpay init respose : ' . print_r($response, 1));
