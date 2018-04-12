@@ -4,7 +4,7 @@
 
 This project does not follow a versioning standard. Versions are crafted after the dates; for example, the version 17.7.25 was released on July, 25th in 2017
 
-## 18.4.3
+## 18.4.12
 
 ## Added
 - BasketApi support in general and activated it for InvoiceSecuredPaymentMethod.
