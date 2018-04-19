@@ -6,14 +6,11 @@ use Heidelpay\Gateway\Wrapper\ItemWrapper;
 use Heidelpay\Gateway\Wrapper\QuoteWrapper;
 use Heidelpay\PhpBasketApi\Object\BasketItem;
 use Heidelpay\PhpBasketApi\Request;
-use Magento\Catalog\Helper\ImageFactory;
-use Magento\Framework\App\Area;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\HTTP\ZendClientFactory;
 use Magento\Quote\Model\Quote;
-use Magento\Store\Model\App\Emulation;
 
 /**
  * Heidelpay basket helper
@@ -34,34 +31,18 @@ use Magento\Store\Model\App\Emulation;
 class BasketHelper extends AbstractHelper
 {
     /**
-     * @var Emulation $appEmulation
-     */
-    private $appEmulation;
-
-    /**
-     * @var ImageFactory $imageHelperFactory
-     */
-    private $imageHelperFactory;
-
-    /**
      * @var HgwMainConfigInterface
      */
     private $mainConfig;
 
     /**
      * @param Context $context
-     * @param Emulation $appEmulation
-     * @param ImageFactory $imageHelperFactory
      * @param HgwMainConfigInterface $mainConfig
      */
     public function __construct(
         Context $context,
-        Emulation $appEmulation,
-        ImageFactory $imageHelperFactory,
         HgwMainConfigInterface $mainConfig
     ) {
-        $this->appEmulation = $appEmulation;
-        $this->imageHelperFactory = $imageHelperFactory;
         $this->mainConfig = $mainConfig;
 
         parent::__construct($context);
@@ -81,13 +62,6 @@ class BasketHelper extends AbstractHelper
         if ($quote === null || $quote->isEmpty()) {
             return null;
         }
-
-        // we emulate that we are in the frontend to get frontend product images.
-        $this->appEmulation->startEnvironmentEmulation(
-            $quote->getStoreId(),
-            Area::AREA_FRONTEND,
-            true
-        );
 
         /** @var QuoteWrapper $basketTotals */
         $basketTotals = ObjectManager::getInstance()->create(QuoteWrapper::class, ['quote' => $quote]);
@@ -121,11 +95,6 @@ class BasketHelper extends AbstractHelper
                 ->setArticleId($item->getSku())
                 ->setBasketItemReferenceId($itemTotals->getReferenceId($basketReferenceId));
 
-            /** @noinspection PhpUndefinedMethodInspection */
-            $basketItem->setImageUrl(
-                $this->imageHelperFactory->create()->init($item->getProduct(), 'category_page_list')->getUrl()
-            );
-
             $basketRequest->getBasket()->addBasketItem($basketItem);
         }
 
@@ -155,9 +124,6 @@ class BasketHelper extends AbstractHelper
                 ->setBasketItemReferenceId($itemCount);
             $basketRequest->getBasket()->addBasketItem($discountPosition);
         }
-
-        // stop the frontend environment emulation
-        $this->appEmulation->stopEnvironmentEmulation();
 
         return $basketRequest;
     }
