@@ -4,31 +4,36 @@
 
 This project does not follow a versioning standard. Versions are crafted after the dates; for example, the version 17.7.25 was released on July, 25th in 2017
 
+## 18.4.23
+
+### Fixed
+- A bug which resulted in an error in some circumstances when a customer was paying via invoice secured payment method.
+
 ## 18.4.12
 
-## Added
+### Added
 - BasketApi support in general and activated it for InvoiceSecuredPaymentMethod.
 - Basket helper class to provide for general BasketApi support.
 - Trait to be able to dump getter results from a class to an array.
 - BasketApi integration tests.
 - Refactored payment method classes with regards to the payment code. 
 
-## Changed
+### Changed
 - Refactored configuration reading (heidelpay main and payment specific config) in order to inject it where needed.
 - Replaced obsolete PhpApi with PhpPaymentApi.
 
-## Fixed
+### Fixed
 - Set Order to the correct state when receiving a receipt via push.
 
 ## 18.3.1
 
-## Changed
+### Changed
 - Tlds from de to com.
 - Fixed links to point to the correct magento version.
 
 ## 18.2.28
 
-## Changed
+### Changed
 - Renamed 'Heidelberger Payment GmbH' to 'heidelpay GmbH' due to re-branding.
 
 ## 18.1.24
