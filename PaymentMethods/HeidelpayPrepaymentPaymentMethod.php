@@ -131,7 +131,6 @@ class HeidelpayPrepaymentPaymentMethod extends HeidelpayAbstractPaymentMethod
             $localeResolver,
             $productMetadata,
             $moduleResource,
-            $paymentConfig,
             $paymentHelper,
             $basketHelper,
             $salesHelper,
@@ -140,6 +139,7 @@ class HeidelpayPrepaymentPaymentMethod extends HeidelpayAbstractPaymentMethod
             $transactionCollectionFactory,
             $resource,
             $resourceCollection,
+            $paymentConfig,
             $data
         );
 

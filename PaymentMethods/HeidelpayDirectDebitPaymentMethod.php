@@ -118,7 +118,6 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
             $localeResolver,
             $productMetadata,
             $moduleResource,
-            $paymentConfig,
             $paymentHelper,
             $basketHelper,
             $salesHelper,
@@ -127,6 +126,7 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
             $transactionCollectionFactory,
             $resource,
             $resourceCollection,
+            $paymentConfig,
             $data
         );
 

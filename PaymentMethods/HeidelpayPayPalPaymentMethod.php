@@ -136,7 +136,6 @@ class HeidelpayPayPalPaymentMethod extends HeidelpayAbstractPaymentMethod
             $localeResolver,
             $productMetadata,
             $moduleResource,
-            $paymentConfig,
             $paymentHelper,
             $basketHelper,
             $salesHelper,
@@ -145,6 +144,7 @@ class HeidelpayPayPalPaymentMethod extends HeidelpayAbstractPaymentMethod
             $transactionCollectionFactory,
             $resource,
             $resourceCollection,
+            $paymentConfig,
             $data
         );
 

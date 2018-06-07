@@ -4,6 +4,11 @@
 
 This project does not follow a versioning standard. Versions are crafted after the dates; for example, the version 17.7.25 was released on July, 25th in 2017
 
+## 18.6.7
+
+### Fixed
+- A bug which resulted in a problem in developer mode forcing the shop-owner to perform di:compile on install.
+
 ## 18.4.23
 
 ### Fixed
