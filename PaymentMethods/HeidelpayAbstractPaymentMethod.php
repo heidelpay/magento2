@@ -190,7 +190,6 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
      * @param \Magento\Framework\Locale\ResolverInterface $localeResolver
      * @param \Magento\Framework\App\ProductMetadataInterface $productMetadata
      * @param \Magento\Framework\Module\ResourceInterface $moduleResource
-     * @param HgwBasePaymentConfigInterface $paymentConfig
      * @param \Heidelpay\Gateway\Helper\Payment $paymentHelper
      * @param \Heidelpay\Gateway\Helper\BasketHelper $basketHelper
      * @param \Magento\Sales\Helper\Data $salesHelper
@@ -199,6 +198,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
      * @param HeidelpayTransactionCollectionFactory $transactionCollectionFactory
      * @param \Magento\Framework\Model\ResourceModel\AbstractResource $resource
      * @param \Magento\Framework\Data\Collection\AbstractDb $resourceCollection
+     * @param HgwBasePaymentConfigInterface $paymentConfig
      * @param array $data
      */
     public function __construct(
@@ -215,7 +215,6 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         \Magento\Framework\Locale\ResolverInterface $localeResolver,
         \Magento\Framework\App\ProductMetadataInterface $productMetadata,
         \Magento\Framework\Module\ResourceInterface $moduleResource,
-        $paymentConfig /* do not add Type or this wont work */,
         \Heidelpay\Gateway\Helper\Payment $paymentHelper,
         \Heidelpay\Gateway\Helper\BasketHelper $basketHelper,
         \Magento\Sales\Helper\Data $salesHelper,
@@ -224,6 +223,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         HeidelpayTransactionCollectionFactory $transactionCollectionFactory,
         \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
+        $paymentConfig = null /* do not add Type or this wont work */,
         array $data = []
     ) {
         parent::__construct(
