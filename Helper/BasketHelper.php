@@ -154,6 +154,9 @@ class BasketHelper extends AbstractHelper
             $this->mainConfig->getSecuritySender()
         );
 
+        // set sandboxmode according to configured mode
+        $basketApiRequest->setIsSandboxMode($this->mainConfig->isSandboxModeActive());
+
         // add a new basket via api request by sending the addNewBasket request
         $basketApiResponse = $basketApiRequest->addNewBasket();
 
