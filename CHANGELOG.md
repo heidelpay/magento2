@@ -4,7 +4,7 @@
 
 This project does not follow a versioning standard. Versions are crafted after the dates; for example, the version 17.7.25 was released on July, 25th in 2017
 
-## 18.6.8
+## 18.6.11
 
 ### Fixed
 - An issue which resulted in basked requests always being performed in sandbox mode.
