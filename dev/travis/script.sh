@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-echo '==> Doing phpcs tests with MEQP2 Standard setting.'
-./vendor/bin/phpcs . --ignore=vendor/ --standard=MEQP2;
+#echo '==> Doing phpcs tests with MEQP2 Standard setting.'
+#./vendor/bin/phpcs . --ignore=vendor/ --standard=MEQP2;
 
 cd ../magento-ce
 #echo '==> Doing unit tests.';
@@ -11,7 +11,7 @@ cd ../magento-ce
 #php bin/magento dev:tests:run integration
 
 echo '==> Prepare Custom integration tests.'
-cp vendor/heidelpay/magento2/phpunit.xml.dist ./dev/tests/integration/phpunit.xml
+cp ./vendor/heidelpay/magento2/phpunit.xml.dist ./dev/tests/integration/phpunit.xml
 
 echo '==> Perform Custom integration tests.'
-php bin/magento dev:tests:run integration
+php bin/magento dev:tests:run integration -vvv
