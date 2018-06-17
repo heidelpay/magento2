@@ -13,7 +13,7 @@ cd ../magento-ce
 echo '==> Prepare Custom integration tests.'
 cp ./vendor/heidelpay/magento2/phpunit.xml.dist ./dev/tests/integration/phpunit.xml
 pwd
-cd ./dev/test/integration
+cd ./dev/tests/integration
 ls -la
 cat phpunit.xml
 pwd
