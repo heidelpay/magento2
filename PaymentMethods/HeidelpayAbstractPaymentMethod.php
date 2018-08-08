@@ -281,6 +281,12 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
      */
     public function getConfigData($field, $storeId = null)
     {
+        // in order to avoid the order mail to be sent twice,
+        // once by us and once by the SubmitObserver.
+        if ($field === 'order_place_redirect_url') {
+            return 'dummy_redirect_url';
+        }
+
         $path = 'payment/' . $this->getCode() . '/' . $field;
 
         return $this->_scopeConfig->getValue($path, StoreScopeInterface::SCOPE_STORE, $storeId);
