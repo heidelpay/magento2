@@ -4,6 +4,8 @@ namespace Heidelpay\Gateway\Controller\Index;
 
 use Heidelpay\Gateway\Helper\Payment as HeidelpayHelper;
 use Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod;
+use Magento\Framework\App\Action\Context;
+use Magento\Framework\Escaper;
 use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderCommentSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
@@ -16,21 +18,15 @@ use Magento\Sales\Model\Order\Email\Sender\OrderSender;
  * @link http://dev.heidelpay.com/magento2
  * @author Jens Richter
  *
- * @package heidelpay
- * @subpackage magento2
- * @category magento2
+ * @package heidelpay\magento2\controllers
  */
 class Index extends \Heidelpay\Gateway\Controller\HgwAbstract
 {
-    protected $resultPageFactory;
-    protected $logger;
-
-    /** @var \Magento\Framework\Escaper */
-    protected $escaper;
-
+    /** @var Escaper */
+    private $escaper;
 
     public function __construct(
-        \Magento\Framework\App\Action\Context $context,
+        Context $context,
         \Magento\Customer\Model\Session $customerSession,
         \Magento\Checkout\Model\Session $checkoutSession,
         \Magento\Sales\Model\OrderFactory $orderFactory,
@@ -45,7 +41,7 @@ class Index extends \Heidelpay\Gateway\Controller\HgwAbstract
         OrderCommentSender $orderCommentSender,
         \Magento\Framework\Encryption\Encryptor $encryptor,
         \Magento\Customer\Model\Url $customerUrl,
-        \Magento\Framework\Escaper $escaper
+        Escaper $escaper
     ) {
         parent::__construct(
             $context,
@@ -68,13 +64,19 @@ class Index extends \Heidelpay\Gateway\Controller\HgwAbstract
         $this->escaper = $escaper;
     }
 
+    /**
+     * {@inheritDoc}
+     * @throws \Heidelpay\PhpBasketApi\Exception\InvalidBasketitemPositionException
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Exception
+     */
     public function execute()
     {
         $session = $this->getCheckout();
         $quote = $session->getQuote();
 
         if (!$quote->getId()) {
-            $message = __("An unexpected error occurred. Please contact us to get further information.");
+            $message = __('An unexpected error occurred. Please contact us to get further information.');
             $this->messageManager->addErrorMessage($this->escaper->escapeHtml($message));
 
             return $this->_redirect('checkout/cart/', ['_secure' => true]);
@@ -87,7 +89,7 @@ class Index extends \Heidelpay\Gateway\Controller\HgwAbstract
         /** @var \Heidelpay\PhpPaymentApi\Response $response */
         $response = $payment->getHeidelpayUrl($quote);
 
-        $this->_logger->debug('Heidelpay init respose : ' . print_r($response, 1));
+        $this->_logger->debug('Heidelpay init response : ' . print_r($response, 1));
 
         if ($response->isSuccess()) {
             // redirect to payment url, if it uses redirecting

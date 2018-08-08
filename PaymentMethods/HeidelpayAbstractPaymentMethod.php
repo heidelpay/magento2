@@ -8,6 +8,7 @@ use Heidelpay\Gateway\Model\Config\Source\BookingMode;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
 use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
 use Heidelpay\PhpPaymentApi\ParameterGroups\BasketParameterGroup;
+use Heidelpay\PhpPaymentApi\PaymentMethods\AbstractPaymentMethod;
 use Heidelpay\PhpPaymentApi\Response;
 use Magento\Sales\Api\Data\TransactionInterface;
 use Magento\Sales\Model\Order;
@@ -15,6 +16,7 @@ use Magento\Sales\Model\Order\Invoice;
 use Magento\Store\Model\ScopeInterface as StoreScopeInterface;
 use Heidelpay\Gateway\Block\Payment\HgwAbstract;
 use Heidelpay\PhpPaymentApi\PaymentMethods\PaymentMethodInterface;
+use Magento\Store\Model\ScopeInterface;
 
 /**
  * Heidelpay  abstract payment method
@@ -278,6 +280,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
      * @param integer $storeId
      *
      * @return string config value
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function getConfigData($field, $storeId = null)
     {
@@ -407,7 +410,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
             );
         }
 
-        // set authentification data
+        // set authentication data
         $this->performAuthentication();
 
         // set basket data
@@ -568,7 +571,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
     /**
      * Returns the heidelpay PhpPaymentApi Paymentmethod Instance.
      *
-     * @return \Heidelpay\PhpPaymentApi\PaymentMethods\AbstractPaymentMethod
+     * @return AbstractPaymentMethod|PaymentMethodInterface
      */
     public function getHeidelpayPaymentMethodInstance()
     {
@@ -661,9 +664,9 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
     }
 
     /**
-     *
-     * @param array                      $data
+     * @param array $data
      * @param \Magento\Sales\Model\Order $order
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function processingTransactionProcessing($data, &$order)
     {
@@ -723,7 +726,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
 
         return $this->_scopeConfig->getValue(
             'payment/' . $this->getCode() . '/bookingmode',
-            \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+            ScopeInterface::SCOPE_STORE,
             $store
         );
     }
