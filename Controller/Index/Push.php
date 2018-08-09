@@ -2,8 +2,10 @@
 
 namespace Heidelpay\Gateway\Controller\Index;
 
-use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
 use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
+use Magento\Sales\Model\Order\Email\Sender\OrderCommentSender;
+use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\Order\Payment\Transaction;
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\OrderRepository;
@@ -21,39 +23,20 @@ use Magento\Sales\Model\ResourceModel\Order\Collection;
  *
  * @author Stephano Vogel
  *
- * @package heidelpay
- * @subpackage magento2
- * @category magento2
+ * @package heidelpay\magento2\controllers
  */
 class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
 {
-    /**
-     * @var OrderRepository $orderRepository
-     */
-    protected $orderRepository;
+    /** @var OrderRepository $orderRepository */
+    private $orderRepository;
 
-    /**
-     * @var \Magento\Sales\Api\Data\OrderInterface
-     */
-    protected $order;
+    /** @var \Heidelpay\PhpPaymentApi\Push */
+    private $heidelpayPush;
 
-    /**
-     * @var \Heidelpay\PhpPaymentApi\Push
-     */
-    protected $heidelpayPush;
-
-    /**
-     * @var HeidelpayTransactionCollectionFactory
-     */
-    protected $transactionCollectionFactory;
-    /**
-     * @var SearchCriteriaBuilder
-     */
+    /** @var SearchCriteriaBuilder */
     private $searchCriteriaBuilder;
 
     /**
-     * Push constructor.
-     *
      * @param \Magento\Framework\App\Action\Context $context
      * @param \Magento\Customer\Model\Session $customerSession
      * @param \Magento\Checkout\Model\Session $checkoutSession
@@ -64,15 +47,13 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
      * @param \Magento\Quote\Api\CartRepositoryInterface $quoteObject
      * @param \Magento\Framework\View\Result\PageFactory $resultPageFactory
      * @param \Heidelpay\Gateway\Helper\Payment $paymentHelper
-     * @param \Magento\Sales\Model\Order\Email\Sender\OrderSender $orderSender
-     * @param \Magento\Sales\Model\Order\Email\Sender\InvoiceSender $invoiceSender
-     * @param \Magento\Sales\Model\Order\Email\Sender\OrderCommentSender $orderCommentSender
+     * @param OrderSender $orderSender
+     * @param InvoiceSender $invoiceSender
+     * @param OrderCommentSender $orderCommentSender
      * @param \Magento\Framework\Encryption\Encryptor $encryptor
      * @param \Magento\Customer\Model\Url $customerUrl
      * @param OrderRepository $orderRepository
-     * @param \Magento\Sales\Api\Data\OrderInterface $order
      * @param \Heidelpay\PhpPaymentApi\Push $heidelpayPush
-     * @param HeidelpayTransactionCollectionFactory $collectionFactory
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
      */
     public function __construct(
@@ -86,15 +67,13 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
         \Magento\Quote\Api\CartRepositoryInterface $quoteObject,
         \Magento\Framework\View\Result\PageFactory $resultPageFactory,
         \Heidelpay\Gateway\Helper\Payment $paymentHelper,
-        \Magento\Sales\Model\Order\Email\Sender\OrderSender $orderSender,
-        \Magento\Sales\Model\Order\Email\Sender\InvoiceSender $invoiceSender,
-        \Magento\Sales\Model\Order\Email\Sender\OrderCommentSender $orderCommentSender,
+        OrderSender $orderSender,
+        InvoiceSender $invoiceSender,
+        OrderCommentSender $orderCommentSender,
         \Magento\Framework\Encryption\Encryptor $encryptor,
         \Magento\Customer\Model\Url $customerUrl,
         OrderRepository $orderRepository,
-        \Magento\Sales\Api\Data\OrderInterface $order,
         \Heidelpay\PhpPaymentApi\Push $heidelpayPush,
-        HeidelpayTransactionCollectionFactory $collectionFactory,
         SearchCriteriaBuilder $searchCriteriaBuilder
     ) {
         parent::__construct(
@@ -116,13 +95,14 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
         );
 
         $this->orderRepository = $orderRepository;
-        $this->order = $order;
-
         $this->heidelpayPush = $heidelpayPush;
-        $this->transactionCollectionFactory = $collectionFactory;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
     }
 
+    /**
+     * @return \Magento\Framework\App\ResponseInterface|\Magento\Framework\Controller\ResultInterface|void
+     * @throws \Heidelpay\PhpPaymentApi\Exceptions\XmlResponseParserException
+     */
     public function execute()
     {
         /** @var \Magento\Framework\App\Request\Http $request */
@@ -176,7 +156,7 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
                 $order = $orderList->getFirstItem();
 
                 $paidAmount = (float)$this->heidelpayPush->getResponse()->getPresentation()->getAmount();
-                $dueLeft = (float)($order->getTotalDue() - $paidAmount);
+                $dueLeft = $order->getTotalDue() - $paidAmount;
 
                 $state = Order::STATE_PROCESSING;
                 $comment = 'heidelpay - Purchase Complete';

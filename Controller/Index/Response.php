@@ -4,7 +4,13 @@ namespace Heidelpay\Gateway\Controller\Index;
 
 use Heidelpay\Gateway\Helper\Payment as HeidelpayHelper;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
+use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory;
+use Heidelpay\Gateway\Model\TransactionFactory;
 use Heidelpay\PhpPaymentApi\Exceptions\HashVerificationException;
+use Heidelpay\PhpPaymentApi\Response as HeidelpayResponse;
+use Magento\Quote\Model\Quote;
+use Magento\Quote\Model\QuoteRepository;
+use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderCommentSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
@@ -27,29 +33,21 @@ use Magento\Sales\Model\Order\Email\Sender\OrderSender;
  *
  * @author Jens Richter
  *
- * @package heidelpay
- * @subpackage magento2
- * @category magento2
+ * @package heidelpay\magento2\controllers
  */
 class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
 {
-    protected $resultPageFactory;
-    protected $logger;
+    /** @var QuoteRepository */
+    private $quoteRepository;
 
-    /** @var \Magento\Quote\Model\QuoteRepository */
-    protected $quoteRepository;
+    /** @var HeidelpayResponse The heidelpay response object */
+    private $heidelpayResponse;
 
-    /** @var \Magento\Framework\Controller\Result\RawFactory */
-    protected $resultFactory;
+    /** @var TransactionFactory */
+    private $transactionFactory;
 
-    /** @var \Heidelpay\PhpPaymentApi\Response The heidelpay response object */
-    protected $heidelpayResponse;
-
-    /** @var \Heidelpay\Gateway\Model\TransactionFactory */
-    protected $transactionFactory;
-
-    /** @var \Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory */
-    protected $paymentInformationCollectionFactory;
+    /** @var CollectionFactory */
+    private $paymentInformationCollectionFactory;
 
     /**
      * heidelpay Response constructor.
@@ -70,10 +68,9 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
      * @param \Magento\Framework\Encryption\Encryptor $encryptor
      * @param \Magento\Customer\Model\Url $customerUrl
      * @param \Magento\Framework\Controller\Result\RawFactory $rawResultFactory
-     * @param \Magento\Quote\Model\QuoteRepository $quoteRepository
-     * @param \Heidelpay\PhpPaymentApi\Response $heidelpayResponse
+     * @param QuoteRepository $quoteRepository
      * @param PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
-     * @param \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory
+     * @param TransactionFactory $transactionFactory
      */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
@@ -92,10 +89,9 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
         \Magento\Framework\Encryption\Encryptor $encryptor,
         \Magento\Customer\Model\Url $customerUrl,
         \Magento\Framework\Controller\Result\RawFactory $rawResultFactory,
-        \Magento\Quote\Model\QuoteRepository $quoteRepository,
-        \Heidelpay\PhpPaymentApi\Response $heidelpayResponse,
+        QuoteRepository $quoteRepository,
         PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
-        \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory
+        TransactionFactory $transactionFactory
     ) {
         parent::__construct(
             $context,
@@ -117,13 +113,13 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
 
         $this->resultFactory = $rawResultFactory;
         $this->quoteRepository = $quoteRepository;
-        $this->heidelpayResponse = $heidelpayResponse;
         $this->paymentInformationCollectionFactory = $paymentInformationCollectionFactory;
         $this->transactionFactory = $transactionFactory;
     }
 
     /**
      * @inheritdoc
+     * @throws \Exception
      */
     public function execute()
     {
@@ -148,13 +144,13 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
         if (!$this->getRequest()->isPost()) {
             $this->_logger->warning('Heidelpay - Response: Request is not POST.');
 
-            // return the result now, no further processing.
+            // no further processing.
             return $result;
         }
 
         // initialize the Response object with data from the request.
         try {
-            $this->heidelpayResponse->splitArray($this->getRequest()->getParams());
+            $this->heidelpayResponse = HeidelpayResponse::fromPost($this->getRequest()->getParams());
         } catch (\Exception $e) {
             $this->_logger->error(
                 'Heidelpay - Response: Cannot initialize response object from Post Request. ' . $e->getMessage()
@@ -174,11 +170,11 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
         try {
             $this->heidelpayResponse->verifySecurityHash($secret, $identificationTransactionId);
         } catch (HashVerificationException $e) {
-            $this->_logger->critical("Heidelpay Response - HashVerification Exception: " . $e->getMessage());
+            $this->_logger->critical('Heidelpay Response - HashVerification Exception: ' . $e->getMessage());
             $this->_logger->critical(
-                "Heidelpay Response - Received request form server "
+                'Heidelpay Response - Received request form server '
                 . $this->getRequest()->getServer('REMOTE_ADDR')
-                . " with an invalid hash. This could be some kind of manipulation."
+                . ' with an invalid hash. This could be some kind of manipulation.'
             );
             $this->_logger->critical(
                 'Heidelpay Response - Reference secret hash: '
@@ -193,10 +189,10 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
             . print_r($this->heidelpayResponse, true)
         );
 
-        /** @var \Magento\Sales\Model\Order $order */
+        /** @var Order $order */
         $order = null;
 
-        /** @var \Magento\Quote\Model\Quote $quote */
+        /** @var Quote $quote */
         $quote = null;
 
         $data = $this->getRequest()->getParams();
@@ -247,7 +243,7 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
         if ($this->heidelpayResponse->isSuccess()) {
             try {
                 // get the quote by transactionid from the heidelpay response
-                /** @var \Magento\Quote\Model\Quote $quote */
+                /** @var Quote $quote */
                 $quote = $this->quoteRepository->get($this->heidelpayResponse->getIdentification()->getTransactionId());
                 $quote->collectTotals();
 
