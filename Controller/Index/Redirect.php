@@ -3,6 +3,10 @@
 namespace Heidelpay\Gateway\Controller\Index;
 
 use Heidelpay\Gateway\Helper\Payment as HeidelpayHelper;
+use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory;
+use Heidelpay\PhpPaymentApi\Response;
+use Magento\Sales\Helper\Data;
+use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderCommentSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
@@ -20,23 +24,18 @@ use Magento\Sales\Model\Order\Email\Sender\OrderSender;
  * @link http://dev.heidelpay.com/magento2
  * @author Jens Richter
  *
- * @package heidelpay
- * @subpackage magento2
- * @category magento2
+ * @package heidelpay\magento2\controllers
  */
 class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
 {
-    protected $resultPageFactory;
-    protected $logger;
+    /** @var Response The heidelpay response class */
+    private $heidelpayResponse;
 
-    /** @var \Heidelpay\PhpPaymentApi\Response The heidelpay response class */
-    protected $heidelpayResponse;
+    /** @var CollectionFactory */
+    private $transactionCollectionFactory;
 
-    /** @var \Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory */
-    protected $transactionCollectionFactory;
-
-    /** @var \Magento\Sales\Helper\Data */
-    protected $salesHelper;
+    /** @var Data */
+    private $salesHelper;
 
     /**
      * heidelpay Redirect constructor.
@@ -51,14 +50,13 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
      * @param \Magento\Quote\Api\CartRepositoryInterface $quoteObject
      * @param \Magento\Framework\View\Result\PageFactory $resultPageFactory
      * @param HeidelpayHelper $paymentHelper
-     * @param \Magento\Sales\Helper\Data $salesHelper
+     * @param Data $salesHelper
      * @param OrderSender $orderSender
      * @param InvoiceSender $invoiceSender
      * @param OrderCommentSender $orderCommentSender
      * @param \Magento\Framework\Encryption\Encryptor $encryptor
      * @param \Magento\Customer\Model\Url $customerUrl
-     * @param \Heidelpay\PhpPaymentApi\Response $heidelpayResponse
-     * @param \Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory $transactionCollectionFactory
+     * @param CollectionFactory $transactionCollectionFactory
      */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
@@ -71,14 +69,13 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
         \Magento\Quote\Api\CartRepositoryInterface $quoteObject,
         \Magento\Framework\View\Result\PageFactory $resultPageFactory,
         HeidelpayHelper $paymentHelper,
-        \Magento\Sales\Helper\Data $salesHelper,
+        Data $salesHelper,
         OrderSender $orderSender,
         InvoiceSender $invoiceSender,
         OrderCommentSender $orderCommentSender,
         \Magento\Framework\Encryption\Encryptor $encryptor,
         \Magento\Customer\Model\Url $customerUrl,
-        \Heidelpay\PhpPaymentApi\Response $heidelpayResponse,
-        \Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory $transactionCollectionFactory
+        CollectionFactory $transactionCollectionFactory
     ) {
         parent::__construct(
             $context,
@@ -98,11 +95,14 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
             $customerUrl
         );
 
-        $this->heidelpayResponse = $heidelpayResponse;
         $this->transactionCollectionFactory = $transactionCollectionFactory;
         $this->salesHelper = $salesHelper;
     }
 
+    /**
+     * @return \Magento\Framework\App\ResponseInterface|\Magento\Framework\Controller\ResultInterface
+     * @throws \Heidelpay\MessageCodeMapper\Exceptions\MissingLocaleFileException
+     */
     public function execute()
     {
         $session = $this->getCheckout();
@@ -133,20 +133,21 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
 
             // display the customer-friendly message for the customer
             $this->messageManager->addErrorMessage(
-                __("An unexpected error occurred. Please contact us to get further information.")
+                __('An unexpected error occurred. Please contact us to get further information.')
             );
 
             return $this->_redirect('checkout/cart/', ['_secure' => true]);
         }
 
         // initialize the Response object with data from the transaction.
-        $this->heidelpayResponse = $this->heidelpayResponse->splitArray($data);
+        $this->heidelpayResponse = Response::fromPost($data);
 
         // set Parameters for success page
         if ($this->heidelpayResponse->isSuccess()) {
             // lock the quote
             $session->getQuote()->setIsActive(false)->save();
 
+            /** @var Order $order */
             $order = null;
 
             try {
@@ -172,10 +173,9 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
                 }
             }
 
-
             $session->clearHelperData();
 
-            // set QouteIds
+            // set QuoteIds
             $session->setLastQuoteId($quoteId)
                 ->setLastSuccessQuoteId($quoteId);
 
