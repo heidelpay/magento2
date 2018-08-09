@@ -4,6 +4,11 @@
 
 This project does not follow a versioning standard. Versions are crafted after the dates; for example, the version 17.7.25 was released on July, 25th in 2017
 
+## 18.8.9
+
+### Fixed
+- An issue which resulted in the order mail being sent twice.
+
 ## 18.6.11
 
 ### Fixed
