@@ -1,0 +1,80 @@
+<div class="payment-method" data-bind="css: {'_active': (getCode() == isChecked())}">
+    <div class="payment-method-title field choice">
+        <input type="radio"
+               name="payment[method]"
+               class="radio"
+               data-bind="attr: {'id': getCode()}, value: getCode(), checked: isChecked, click: selectPaymentMethod, visible: isRadioButtonVisible()"/>
+        <label data-bind="attr: {'for': getCode()}" class="label">
+            <span data-bind="text: getTitle()"></span>
+        </label>
+    </div>
+
+
+    <div class="payment-method-content">
+        <!-- ko foreach: getRegion('messages') -->
+        <!-- ko template: getTemplate() --><!-- /ko -->
+        <!--/ko-->
+        <div class="payment-method-billing-address">
+            <!-- ko foreach: $parent.getRegion(getBillingAddressFormName()) -->
+            <!-- ko template: getTemplate() --><!-- /ko -->
+            <!--/ko-->
+        </div>
+        <form id="hgw-ideal-form" class="form form-hgw-ideal" data-role="hgw-ideal-form">
+            <fieldset class="fieldset payment method" data-bind='attr: {id: "payment_form_" + getCode()}'>
+                <div class="field required">
+                    <label for="hgw_holder" class="label">
+                        <span><!-- ko i18n: 'Bank Account Holder'--><!-- /ko --></span>
+                    </label>
+                    <div class="control">
+                        <fieldset class="fieldset">
+                            <div class="fields">
+                                <!-- Full Name Input Field -->
+                                <div class="field" style="float: left; margin-right: 10px; width: 60%;">
+                                    <input type="text" id="hgw_holder"
+                                           name="payment[hgw_fullname]"
+                                           data-validate="{required: true}"
+                                           data-bind='value: hgwHolder' />
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+                <!-- Date of birth input fields -->
+                <div class="field required">
+                    <div class="control">
+                        <fieldset class="fieldset">
+                            <div class="fields">
+                                <div class="field required" style="float: left; margin-right: 10px;">
+                                    <label for="hgw_bank_name" class="label">
+                                        <span><!-- ko i18n: 'Bank' --><!-- /ko --></span>
+                                    </label>
+                                    <select name="payment[hgw_bank_name]" id="hgw_bank_name"
+                                            data-bind="attr: {title: hgwBankSelection}, value: hgwBankSelection, options: hgwBrandValues"
+                                            data-validate="{required: true}"
+                                    >
+                                    </select>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+        <div class="actions-toolbar">
+            <div class="primary">
+                <button data-role="review-save"
+                        type="submit"
+                        data-bind="
+                        attr: {title: $t('Place Order')},
+                        enable: (getCode() == isChecked()),
+                        click: placeOrder,
+                        css: {disabled: !isPlaceOrderActionAllowed()}
+                        "
+                        class="action primary checkout"
+                        disabled>
+                    <span data-bind="i18n: 'Place Order'"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

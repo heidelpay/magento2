@@ -462,12 +462,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
     {
         $this->performAuthentication();
 
-        $frontend = $this->getFrontend();
-
-        $this->_heidelpayPaymentMethod->getRequest()->async(
-            $frontend['LANGUAGE'],                 // Language code for the Frame
-            $frontend['RESPONSE_URL']              // Response url from your application
-        );
+        $this->setAsync();
 
         $user = $this->getUser($quote);
         $this->_heidelpayPaymentMethod->getRequest()->customerAddress(
@@ -767,6 +762,11 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         );
     }
 
+    public function setInitialRequest()
+    {
+        $this->performAuthentication();
+    }
+
     /**
      * will return the main configuration
      *
@@ -785,5 +785,15 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
     public function getConfig()
     {
         return $this->paymentConfig;
+    }
+
+    public function setAsync()
+    {
+        $frontend = $this->getFrontend();
+
+        $this->_heidelpayPaymentMethod->getRequest()->async(
+            $frontend['LANGUAGE'],                 // Language code for the Frame
+            $frontend['RESPONSE_URL']              // Response url from your application
+        );
     }
 }
