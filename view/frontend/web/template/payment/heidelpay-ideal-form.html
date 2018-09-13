@@ -49,7 +49,15 @@
                                         <span><!-- ko i18n: 'Bank' --><!-- /ko --></span>
                                     </label>
                                     <select name="payment[hgw_bank_name]" id="hgw_bank_name"
-                                            data-bind="attr: {title: hgwBankSelection}, value: hgwBankSelection, options: hgwBrandValues"
+                                            data-bind="attr: {title: hgwBankSelection},
+                                                value: hgwBankSelection,
+                                                options: hgwBrandValues,
+                                                optionsValue: function(item) {
+                                                return item.value
+                                                },
+                                                optionsText: function(brands) {
+                                                    return brands.name
+                                                }"
                                             data-validate="{required: true}"
                                     >
                                     </select>

@@ -762,9 +762,23 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         );
     }
 
-    public function setInitialRequest()
+    /**
+     * Function to provide additional formDate.
+     * Should be overwritten by child classes if needed.
+     * @param Response $response
+     * @return array
+     */
+    public function prepareAdditionalFormData(Response $response)
+    {
+    }
+
+    /*
+     * Setup initialreques without customer data.
+     */
+    public function setupInitialRequest()
     {
         $this->performAuthentication();
+        $this->setAsync();
     }
 
     /**
@@ -787,6 +801,9 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         return $this->paymentConfig;
     }
 
+    /**
+     * Set the parameter for async modus.
+     */
     public function setAsync()
     {
         $frontend = $this->getFrontend();

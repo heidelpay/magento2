@@ -23,13 +23,13 @@ define(
 
             defaults: {
                 template: 'Heidelpay_Gateway/payment/heidelpay-ideal-form',
-                hgwBankSelection: 'INGBNL2A',
+                hgwBankSelection: '',
                 hgwBrandValues: [null],
                 hgwBrandNames: [null],
                 hgwHolder: ''
             },
 
-            // set observers to update values in frontend when variable is changed.
+            // set observers to update values in frontend when values are changed.
             initObservable: function() {
                 this._super()
                     .observe([
@@ -40,7 +40,6 @@ define(
             },
 
             getData: function () {
-                console.log(this.hgwBankSelection)
                 return {
                     'method': this.item.method,
                     'additional_data': {
@@ -56,13 +55,11 @@ define(
                 this.hgwHolder(this.getFullName());
                 this.setAvailableBanks();
 
-                console.log(this.hgwBrandNames);
 
                 $( document ).ajaxStop(function() {
                     return this;
                 });
             },
-
 
             getCode: function () {
                 return 'hgwidl';
@@ -70,11 +67,7 @@ define(
 
             setAvailableBanks: function () {
                 var method = this.item.method;
-                var payment = window.checkoutConfig.payment;
-                console.log(method);
-                console.log(payment);
 
-                //if (payment !== undefined) {
                     $.ajax({
                         showLoader: true,
                         url: url.build('hgw/index/initializepayment'),
@@ -86,22 +79,18 @@ define(
                         context: this
                     }).done(function (data) {
                         var response = JSON.parse(data);
+
+
                         // set the iDeal brand information, which comes from the payment
                         if (response !== null) {
-                            this.hgwBrandValues(response.brandValues);
+                            this.hgwBrandValues(response);
                             this.hgwBrandNames(response.brandNames);
-                            console.log('json done');
-                            console.log(response.brandValues);
-                            console.log(response.brandNames);
+
                             return this;
                         }
                         return this;
                     }).fail(function (response) {
                         console.log('response fail: ' + response);
-                        // errorProcessor.process(response, this.messageContainer);
-                        // fullScreenLoader.stopLoader();
-                        // alert ("Error");
-                        // window.location.replace(url.build('checkout/'));
                     });
                 //}
             }

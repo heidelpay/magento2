@@ -83,8 +83,6 @@ class InitializePayment extends Action
         $session = $this->getCheckoutSession();
         $quote = $session->getQuote();
 
-        $this->logger->debug('Heidelpay: Issue initial payment request...');
-
         if (!$quote->getId()) {
             $this->logger->error('Heidelpay: Quote not found in session.');
             throw new NotFoundException(new Phrase($this->escaper->escapeHtml($error_message)));
@@ -113,59 +111,21 @@ class InitializePayment extends Action
 
         // get the response object from the initial request.
         try {
-            // todo-simon: payment methods wieder abstrahieren und dann hier die abstrakte klasse type hinten
             /** @var PaymentApiResponse $response */
             $response = $paymentMethodInstance->initMethod($quote);
-            $this->logger->debug('initialResponse ' . print_r($response, 1));
         } catch (CommandException $e) {
             $postData = [
                 $e->getLogMessage()
             ];
-            $this->logger->debug('Request failed: ');
             return $result->setData($postData)->setHttpResponseCode(500);
         }
 
-        //TODO: remove brand-check when initial request for iDeal is async.
         if ((!$response instanceof PaymentApiResponse || !$response->isSuccess()) && empty($response->getConfig()->getBrands())) {
             $this->logger->error('Heidelpay: Initial request did not succeed.');
             throw new \RuntimeException($this->escaper->escapeHtml($error_message));
         }
 
-        // todo-simon: what to do. if not redirect?
-//        // redirect to payment url, if it uses redirecting
-//        if ($paymentMethodInstance->activeRedirect() === true) {
-//            return $this->_redirect($response->getPaymentFormUrl());
-//        }
-//
-//            $resultPage = $this->_resultPageFactory->create();
-//            $resultPage->getConfig()->getTitle()->prepend(__('Please confirm your payment:'));
-//            $resultPage->getLayout()->getBlock('heidelpay_gateway')->setHgwUrl(
-//                $response->getPaymentFormUrl()
-//            );
-//            $resultPage->getLayout()->getBlock('heidelpay_gateway')->setHgwCode($payment->getCode());
-//
-//            return $resultPage;
-
-        $brands = $response->getConfig()->getBrands();
-        $this->logger->debug('brand origin: ' . print_r($brands, 1));
-
-        $bankNamesList = [];
-        $bankValueList = [];
-
-        foreach ($brands as $brandValue => $brandName) {
-            $bankValueList[] = $brandValue;
-            $bankNamesList[] = $brandName;
-        }
-
-        $this->logger->debug('brand values: ' . print_r($bankValueList, 1));
-        $this->logger->debug('brand names: ' . print_r($bankNamesList, 1));
-
-        $postData = [
-            'brandValues' => $bankValueList,
-            'brandNames' => $bankNamesList
-        ];
-        $this->logger->debug('postData: ' . print_r($postData, 1));
-        $this->logger->debug('postData: json' . print_r(json_encode($postData), 1));
+        $postData = $paymentMethodInstance->prepareAdditionalFormData($response);
 
         return $result->setData(json_encode($postData));
     }

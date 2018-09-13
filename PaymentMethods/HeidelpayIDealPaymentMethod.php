@@ -8,10 +8,11 @@
 
 namespace Heidelpay\Gateway\PaymentMethods;
 
-use Heidelpay\Gateway\Gateway\Config\HgwMainConfigInterface;
 use Heidelpay\Gateway\Gateway\Config\HgwIDealPaymentConfigInterface;
+use Heidelpay\Gateway\Gateway\Config\HgwMainConfigInterface;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
 use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
+use Heidelpay\PhpPaymentApi\Response;
 
 class HeidelpayIDealPaymentMethod extends HeidelpayAbstractPaymentMethod
 {
@@ -22,6 +23,7 @@ class HeidelpayIDealPaymentMethod extends HeidelpayAbstractPaymentMethod
     protected $_canAuthorize = true;
 
     protected $_isGateway = true;
+
 
     public function __construct(
         \Magento\Framework\Model\Context $context,
@@ -48,7 +50,8 @@ class HeidelpayIDealPaymentMethod extends HeidelpayAbstractPaymentMethod
         \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
         array $data = []
-    ) {
+    )
+    {
         parent::__construct(
             $context,
             $registry,
@@ -76,6 +79,30 @@ class HeidelpayIDealPaymentMethod extends HeidelpayAbstractPaymentMethod
         );
 
         $this->_heidelpayPaymentMethod = $iDealPaymentMethod;
+    }
+
+    /**
+     * Provide necessary information for bank selection
+     * @param Response $response
+     * @return array
+     */
+    public function prepareAdditionalFormData(Response $response)
+    {
+        $brands = $response->getConfig()->getBrands();
+        $bankList = [];
+
+        /**
+         * build array object for javascript frontend
+         */
+        foreach ($brands as $brandValue => $brandName) {
+            $bank = [];
+            $bank['value'] = $brandValue;
+            $bank['name'] = $brandName;
+
+            $bankList[] = $bank;
+        }
+
+        return $bankList;
     }
 
     public function getHeidelpayUrl($quote)
@@ -108,7 +135,7 @@ class HeidelpayIDealPaymentMethod extends HeidelpayAbstractPaymentMethod
                 ->setHolder($paymentInfo->getAdditionalData()->hgw_holder);
         }
 
-        // send the init request with the debit method.
+        // send the init request with the authorize method.
         $this->_heidelpayPaymentMethod->authorize();
 
         // return the response object
@@ -120,11 +147,12 @@ class HeidelpayIDealPaymentMethod extends HeidelpayAbstractPaymentMethod
         return true;
     }
 
+    /*
+     * Send an authorize request to get a response which contains list of available banks.
+     */
     public function initMethod()
     {
-        $this->setInitialRequest();
-        //$this->_heidelpayPaymentMethod->getRequest()->getFrontend()->setEnabled('FALSE');
-
+        $this->setupInitialRequest();
         return $this->_heidelpayPaymentMethod->authorize()->getResponse();
     }
 }
