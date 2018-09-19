@@ -4,6 +4,12 @@
 
 This project does not follow a versioning standard. Versions are crafted after the dates; for example, the version 17.7.25 was released on July, 25th in 2017
 
+## 18.9.20
+
+### Fixed
+- An issue which resulted in an error on checkout with secured payment methods with magento security patch SUPEE-10888 (Magento Version 2.2.6).
+- An issue concerning the versions of the dependencies.
+
 ## 18.8.9
 
 ### Fixed

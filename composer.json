@@ -12,9 +12,9 @@
     "magento/module-payment": "^100.0.0 | ^101.0.0",
     "magento/module-backend": "^100.0.0 | ^101.0.0",
     "magento/framework": "^100.0.0 | ^101.0.0",
-    "heidelpay/php-message-code-mapper": "~1.0.0",
-    "heidelpay/php-basket-api": "~1.0.1",
-    "heidelpay/php-payment-api": "~1.4.0"
+    "heidelpay/php-message-code-mapper": "~1.0",
+    "heidelpay/php-basket-api": "~1.0",
+    "heidelpay/php-payment-api": "~1.4"
   },
   "require-dev": {
     "magento/marketplace-eqp": "~1.0.5",
