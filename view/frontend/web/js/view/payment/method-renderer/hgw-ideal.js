@@ -25,7 +25,6 @@ define(
                 template: 'Heidelpay_Gateway/payment/heidelpay-ideal-form',
                 hgwBankSelection: '',
                 hgwBrandValues: [null],
-                hgwBrandNames: [null],
                 hgwHolder: ''
             },
 
@@ -33,7 +32,7 @@ define(
             initObservable: function() {
                 this._super()
                     .observe([
-                        'hgwBrandValues', 'hgwBrandNames', 'hgwBankSelection', 'hgwHolder'
+                        'hgwBrandValues', 'hgwBankSelection', 'hgwHolder'
                     ]);
 
                 return this;
@@ -80,19 +79,21 @@ define(
                     }).done(function (data) {
                         var response = JSON.parse(data);
 
+                    // set the iDeal brand information, which comes from the payment
+                    if (response !== null) {
+                        this.hgwBrandValues(response);
+                    }
 
-                        // set the iDeal brand information, which comes from the payment
-                        if (response !== null) {
-                            this.hgwBrandValues(response);
-                            this.hgwBrandNames(response.brandNames);
+                    return this;
+                }).fail(function (response) {
+                    console.log('request failed: no banks available');
+                });
 
-                            return this;
-                        }
-                        return this;
-                    }).fail(function (response) {
-                        console.log('response fail: ' + response);
-                    });
-                //}
+            },
+            validate: function() {
+                var form = $('#hgw-ideal-form');
+
+                return form.validation() && form.validation('isValid');
             }
         });
     }

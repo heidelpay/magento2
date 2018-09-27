@@ -772,13 +772,14 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
     }
 
     /**
-     * Function to provide additional formDate.
+     * Function to provide additional form data.
      * Should be overwritten by child classes if needed.
      * @param Response $response
      * @return array
      */
     public function prepareAdditionalFormData(Response $response)
     {
+        return [];
     }
 
     /*

@@ -113,14 +113,14 @@ class InitializePayment extends Action
         try {
             /** @var PaymentApiResponse $response */
             $response = $paymentMethodInstance->initMethod($quote);
-        } catch (CommandException $e) {
+        } catch (\Exception $e) {
             $postData = [
                 $e->getLogMessage()
             ];
             return $result->setData($postData)->setHttpResponseCode(500);
         }
 
-        if ((!$response instanceof PaymentApiResponse || !$response->isSuccess()) && empty($response->getConfig()->getBrands())) {
+        if ((!$response instanceof PaymentApiResponse || !$response->isSuccess())) {
             $this->logger->error('Heidelpay: Initial request did not succeed.');
             throw new \RuntimeException($this->escaper->escapeHtml($error_message));
         }

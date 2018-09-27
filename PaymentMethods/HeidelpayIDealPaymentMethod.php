@@ -82,9 +82,8 @@ class HeidelpayIDealPaymentMethod extends HeidelpayAbstractPaymentMethod
     }
 
     /**
-     * Provide necessary information for bank selection
-     * @param Response $response
-     * @return array
+     * @inheritdoc
+     * Prepare necessary information for bank selection
      */
     public function prepareAdditionalFormData(Response $response)
     {
