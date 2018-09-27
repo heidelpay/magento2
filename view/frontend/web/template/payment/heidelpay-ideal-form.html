@@ -39,7 +39,7 @@
                         </fieldset>
                     </div>
                 </div>
-                <!-- Date of birth input fields -->
+                <!-- Brand selection input field -->
                 <div class="field required">
                     <div class="control">
                         <fieldset class="fieldset">
@@ -52,11 +52,16 @@
                                             data-bind="attr: {title: hgwBankSelection},
                                                 value: hgwBankSelection,
                                                 options: hgwBrandValues,
-                                                optionsValue: function(item) {
-                                                return item.value
+                                                optionsCaption: '',
+                                                optionsValue: function(brands) {
+                                                    if(brands) {
+                                                        return brands.value
+                                                    }
                                                 },
                                                 optionsText: function(brands) {
-                                                    return brands.name
+                                                    if(brands) {
+                                                        return brands.name
+                                                    }
                                                 }"
                                             data-validate="{required: true}"
                                     >
@@ -68,18 +73,17 @@
                 </div>
             </fieldset>
         </form>
-        <div class="actions-toolbar">
+        <div class="actions-toolbar" id="review-buttons-container">
             <div class="primary">
-                <button data-role="review-save"
+                <button class="action primary checkout"
                         type="submit"
                         data-bind="
+                        click: placeOrder,
                         attr: {title: $t('Place Order')},
                         enable: (getCode() == isChecked()),
-                        click: placeOrder,
                         css: {disabled: !isPlaceOrderActionAllowed()}
                         "
-                        class="action primary checkout"
-                        disabled>
+                        data-role="review-save">
                     <span data-bind="i18n: 'Place Order'"></span>
                 </button>
             </div>
