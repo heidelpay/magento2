@@ -21,6 +21,7 @@ Currently supported payment methods are:
 * Invoice
 * Invoice (Secured) (B2C)
 * giropay
+* iDeal
 
 For more information please visit -http://dev.heidelpay.com/magento2/
 
