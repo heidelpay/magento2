@@ -469,9 +469,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
      */
     public function getHeidelpayUrl($quote)
     {
-        $this->performAuthentication();
-
-        $this->setAsync();
+        $this->setupInitialRequest();
 
         $user = $this->getUser($quote);
         $this->_heidelpayPaymentMethod->getRequest()->customerAddress(

@@ -109,6 +109,10 @@ class HeidelpayIDealPaymentMethod extends HeidelpayAbstractPaymentMethod
             $bankList[] = $bank;
         }
 
+        if (empty($bankList)) {
+            $this->_logger->warning('heidelpay - iDeal config: brand list is empty');
+        }
+
         return $bankList;
     }
 
