@@ -469,14 +469,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
      */
     public function getHeidelpayUrl($quote)
     {
-        $this->performAuthentication();
-
-        $frontend = $this->getFrontend();
-
-        $this->_heidelpayPaymentMethod->getRequest()->async(
-            $frontend['LANGUAGE'],                 // Language code for the Frame
-            $frontend['RESPONSE_URL']              // Response url from your application
-        );
+        $this->setupInitialRequest();
 
         $user = $this->getUser($quote);
         $this->_heidelpayPaymentMethod->getRequest()->customerAddress(
@@ -777,6 +770,26 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
     }
 
     /**
+     * Function to provide additional form data.
+     * Should be overwritten by child classes if needed.
+     * @param Response $response
+     * @return array
+     */
+    public function prepareAdditionalFormData(Response $response)
+    {
+        return [];
+    }
+
+    /*
+     * Setup initialreques without customer data.
+     */
+    public function setupInitialRequest()
+    {
+        $this->performAuthentication();
+        $this->setAsync();
+    }
+
+    /**
      * will return the main configuration
      *
      * @return HgwMainConfigInterface
@@ -794,5 +807,18 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
     public function getConfig()
     {
         return $this->paymentConfig;
+    }
+
+    /**
+     * Set the parameter for async modus.
+     */
+    public function setAsync()
+    {
+        $frontend = $this->getFrontend();
+
+        $this->_heidelpayPaymentMethod->getRequest()->async(
+            $frontend['LANGUAGE'],                 // Language code for the Frame
+            $frontend['RESPONSE_URL']              // Response url from your application
+        );
     }
 }
