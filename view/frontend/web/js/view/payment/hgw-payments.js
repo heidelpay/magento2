@@ -48,6 +48,10 @@ define(
             {
                 type: 'hgwivs',
                 component: 'Heidelpay_Gateway/js/view/payment/method-renderer/hgw-invoicesecured'
+            },
+            {
+                type: 'hgwidl',
+                component: 'Heidelpay_Gateway/js/view/payment/method-renderer/hgw-ideal'
             }
         );
         return Component.extend({});
