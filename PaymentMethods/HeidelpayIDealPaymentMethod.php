@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: David.Owusu
- * Date: 04.09.2018
- * Time: 13:54
- */
 
 namespace Heidelpay\Gateway\PaymentMethods;
 
@@ -14,6 +8,20 @@ use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory a
 use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
 use Heidelpay\PhpPaymentApi\Response;
 
+/**
+ * Heidelpay iDeal payment method
+ *
+ * This is the payment class for heidelpay iDeal
+ *
+ * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
+ * @copyright Copyright © 2016-present heidelpay GmbH. All rights reserved.
+ * @link http://dev.heidelpay.com/magento2
+ * @author David Owusu
+ *
+ * @package heidelpay
+ * @subpackage magento2
+ * @category magento2
+ */
 class HeidelpayIDealPaymentMethod extends HeidelpayAbstractPaymentMethod
 {
     const CODE = 'hgwidl';

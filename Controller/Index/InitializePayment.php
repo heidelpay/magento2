@@ -3,9 +3,9 @@
  * This controller calls the initialization transaction if existing and necessary for the selected payment method.
  *
  * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
- * @copyright Copyright © 2016-present Heidelberger Payment GmbH. All rights reserved.
- * @link https://dev.heidelpay.de/magento
- * @author Simon Gabriel
+ * @copyright Copyright © 2016-present heidelpay GmbH. All rights reserved.
+ * @link https://dev.heidelpay.de/magento2
+ * @author David Owusu
  *
  * @package heidelpay
  * @subpackage magento2
