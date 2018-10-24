@@ -4,6 +4,12 @@
 
 This project does not follow a versioning standard. Versions are crafted after the dates; for example, the version 17.7.25 was released on July, 25th in 2017
 
+## xx.xx.xx
+
+### Fixed
+- iDEAL: Add missing checkbox for terms of conditions.
+- iDEAL: Set correct default channel for test system.
+
 ## 18.10.1
 
 ### Added
