@@ -149,28 +149,12 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
 
             /** @var Order $order */
             $order = null;
-
             try {
                 $order = $this->_orderFactory->create()->loadByAttribute('quote_id', $quoteId);
-
-                // send order confirmation to the customer
-                $this->_orderSender->send($order);
             } catch (\Exception $e) {
                 $this->_logger->error(
                     'Heidelpay - Redirect: Cannot receive order or send order confirmation E-Mail. ' . $e->getMessage()
                 );
-            }
-
-            // Check send Invoice Mail enabled
-            if ($this->salesHelper->canSendNewInvoiceEmail($session->getQuote()->getStore()->getId())) {
-                // send invoice(s) to the customer
-                if (!$order->canInvoice()) {
-                    $invoices = $order->getInvoiceCollection();
-
-                    foreach ($invoices as $invoice) {
-                        $this->_invoiceSender->send($invoice);
-                    }
-                }
             }
 
             $session->clearHelperData();
@@ -191,7 +175,35 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
             $this->_checkoutSession->setHeidelpayInfo($additionalPaymentInformation);
 
             $this->_logger->debug('Heidelpay - Redirect: Redirecting customer to success page.');
-            return $this->_redirect('checkout/onepage/success', ['_secure' => true]);
+
+            // set response
+            $response = $this->_redirect('checkout/onepage/success', ['_secure' => true]);
+
+            try {
+                // send order confirmation to the customer
+                if ($order && $order->getId()) {
+                    $this->_orderSender->send($order);
+                }
+            } catch (\Exception $e) {
+                $this->_logger->error(
+                    'Heidelpay - Redirect: Cannot receive order or send order confirmation E-Mail. ' . $e->getMessage()
+                );
+            }
+
+            // Check send Invoice Mail enabled
+            if ($this->salesHelper->canSendNewInvoiceEmail($session->getQuote()->getStore()->getId())) {
+                // send invoice(s) to the customer
+                if (!$order->canInvoice()) {
+                    $invoices = $order->getInvoiceCollection();
+
+                    foreach ($invoices as $invoice) {
+                        $this->_invoiceSender->send($invoice);
+                    }
+                }
+            }
+
+            // return response
+            return $response;
         }
 
         // unlock the quote in case of error
