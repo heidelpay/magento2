@@ -153,7 +153,7 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
                 $order = $this->_orderFactory->create()->loadByAttribute('quote_id', $quoteId);
             } catch (\Exception $e) {
                 $this->_logger->error(
-                    'Heidelpay - Redirect: Cannot receive order or send order confirmation E-Mail. ' . $e->getMessage()
+                    'Heidelpay - Redirect: Cannot receive order.' . $e->getMessage()
                 );
             }
 
@@ -186,7 +186,7 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
                 }
             } catch (\Exception $e) {
                 $this->_logger->error(
-                    'Heidelpay - Redirect: Cannot receive order or send order confirmation E-Mail. ' . $e->getMessage()
+                    'Heidelpay - Redirect: Cannot send order confirmation E-Mail. ' . $e->getMessage()
                 );
             }
 
