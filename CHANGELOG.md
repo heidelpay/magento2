@@ -7,6 +7,7 @@ This project does not follow a versioning standard. Versions are crafted after t
 ## xx.xx.xx
 
 ### Fixed
+- Fixed a bug which resulted in an problem when sending the new order mail which resulted in the customer being redirected to an empty cart instead of the success page.
 - iDEAL: Add missing checkbox for terms of conditions.
 - iDEAL: Set correct default channel for test system.
 
