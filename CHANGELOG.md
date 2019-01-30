@@ -11,6 +11,9 @@ This project does not follow a versioning standard. Versions are crafted after t
 - iDEAL: Add missing checkbox for terms of conditions.
 - iDEAL: Set correct default channel for test system.
 
+### Added
+- Support information to readme.
+
 ## 18.10.1
 
 ### Added
