@@ -62,3 +62,18 @@ All versions greater than 18.3.1 are based on the heidelpay php-payment-api. (ht
 ```php -f bin/magento setup:static-content:deploy```
 
 and you are ready to go.
+
+## Support
+For any issues or questions please get in touch with our support.
+
+#### Web page
+https://dev.heidelpay.com/
+ 
+#### Email
+support@heidelpay.com
+ 
+#### Phone
++49 (0)6221/6471-100
+
+#### Twitter
+@devHeidelpay

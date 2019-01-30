@@ -44,23 +44,6 @@
     "email": "support@heidelpay.com"
   },
   "homepage": "https://dev.heidelpay.com/magento2",
-  "authors": [
-    {
-      "name": "Jens Richter",
-      "email": "development@heidelpay.com",
-      "homepage": "https://dev.heidelpay.com"
-    },
-    {
-      "name": "Stephano Vogel",
-      "email": "development@heidelpay.com",
-      "homepage": "https://dev.heidelpay.com"
-    },
-    {
-      "name": "Simon Gabriel",
-      "email": "development@heidelpay.com",
-      "homepage": "https://dev.heidelpay.com"
-    }
-  ],
   "keywords": [
     "magento",
     "magento2",
