@@ -124,7 +124,7 @@
                 <active>0</active>
                 <payment_action>authorize</payment_action>
                 <title><![CDATA[iDeal]]></title>
-                <channel>31HA07BC8142C5A171749A60D979B6E4</channel>
+                <channel>31HA07BC8142C5A171744B56E61281E5</channel>
                 <allowspecific>1</allowspecific>
                 <recognition>never</recognition>
                 <specificcountry>NL</specificcountry>
