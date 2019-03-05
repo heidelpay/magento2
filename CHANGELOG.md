@@ -4,6 +4,12 @@
 
 This project does not follow a versioning standard. Versions are crafted after the dates; for example, the version 17.7.25 was released on July, 25th in 2017
 
+## 19.xx.xx
+
+### Changed
+- improved response handling if Post data are empty: Customer gets redirected to cart with an error message. Wording of
+log entry was changed for a better understanding.
+
 ## 19.1.30
 
 ### Fixed

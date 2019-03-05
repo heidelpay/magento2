@@ -139,13 +139,17 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
         // the payment just wants a url as result, so we set the content to the redirectUrl.
         $result->setContents($redirectUrl);
 
-        // if there is no post request, just do nothing and return the redirectUrl instantly, so an
-        // error message can be shown to the customer (which will be created in the redirect controller)
+        // if there is no post request, just redirect to the redirectUrl instantly, so an
+        // error message can be shown to the customer.
         if (!$this->getRequest()->isPost()) {
-            $this->_logger->warning('Heidelpay - Response: Request is not POST.');
+            $this->_logger->warning(
+                'Heidelpay - Response: There has been an error fetching the RedirectURL by the payment.'
+                . ' Please make sure the ResponseURL (' . $this->_url->getCurrentUrl()
+                . ') is accessible from the internet.'
+            );
 
-            // no further processing.
-            return $result;
+            // no further processing and redirect.
+            return $this->_redirect($redirectUrl);
         }
 
         // initialize the Response object with data from the request.
