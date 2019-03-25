@@ -7,8 +7,9 @@ This project does not follow a versioning standard. Versions are crafted after t
 ## 19.xx.xx
 
 ### Changed
-- improved response handling if Post data are empty: Customer gets redirected to cart with an error message. Wording of
+- Improved response handling if Post data is empty: Customer gets redirected to cart with an error message. Wording of
 log entry was changed for a better understanding.
+- Removed static version from composer command in installation manual.  
 
 ## 19.1.30
 

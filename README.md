@@ -45,7 +45,7 @@ All versions greater than 18.3.1 are based on the heidelpay php-payment-api. (ht
 
 ### Install the heidelpay Magento 2 composer package
 
-```composer require "heidelpay/magento2:17.10.12"```
+```composer require "heidelpay/magento2"```
 
 ### Enable the extension in Magento 2
 
