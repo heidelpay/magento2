@@ -66,7 +66,12 @@ class ItemWrapper extends BaseWrapper
      */
     public function getTaxAmount()
     {
-        return (int)floor(bcmul($this->item->getTaxAmount(), 100, 10));
+        // calculate the tax amount manually since the amount given by magento ist not reliable sometimes.
+        return (int)floor(bcdiv(
+            bcmul($this->getRowTotalInclTax(), $this->getTaxPercent(), 10),
+            $this->getTaxPercent() + 100,
+            10
+        ));
     }
 
     /**
