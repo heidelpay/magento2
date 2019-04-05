@@ -5,7 +5,8 @@
 This project does not follow a versioning standard. Versions are crafted after the dates; for example, the version 17.7.25 was released on July, 25th in 2017
 
 ## 19.xx.xx
-
+### Fixed
+- Fix an issue that prevented an invoice to be (partly) refunded twice.
 ### Changed
 - Improved response handling if Post data is empty: Customer gets redirected to cart with an error message. Wording of
 log entry was changed for a better understanding.
