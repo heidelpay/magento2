@@ -6,7 +6,9 @@ This project does not follow a versioning standard. Versions are crafted after t
 
 ## 19.xx.xx
 ### Fixed
-- Fix an issue that prevented an invoice to be (partly) refunded twice.
+- An issue where the tax amount provided by magento is not correct. That can cause the finalize to fail.
+- An issue that prevented an invoice to be (partly) refunded twice.
+
 ### Changed
 - Improved response handling if Post data is empty: Customer gets redirected to cart with an error message. Wording of
 log entry was changed for a better understanding.
