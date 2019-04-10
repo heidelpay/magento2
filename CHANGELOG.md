@@ -5,7 +5,8 @@
 This project does not follow a versioning standard. Versions are crafted after the dates; for example, the version 17.7.25 was released on July, 25th in 2017
 
 ## 19.xx.xx
-
+### Fixed
+- Fixed an issue where the tax amount provided by magento is not correct. That can cause the finalize to fail.
 ### Changed
 - Improved response handling if Post data is empty: Customer gets redirected to cart with an error message. Wording of
 log entry was changed for a better understanding.
