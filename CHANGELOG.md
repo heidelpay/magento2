@@ -8,6 +8,7 @@ This project does not follow a versioning standard. Versions are crafted after t
 ### Fixed
 - An issue where the tax amount provided by magento is not correct. That can cause the finalize to fail.
 - An issue that prevented an invoice to be (partly) refunded twice.
+- An issue where different curencies can cause that order is created in base currency.
 
 ### Changed
 - Improved response handling if Post data is empty: Customer gets redirected to cart with an error message. Wording of
