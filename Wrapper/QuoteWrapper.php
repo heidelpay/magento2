@@ -95,8 +95,8 @@ class QuoteWrapper extends BaseWrapper
      */
     public function getActualTaxAmount()
     {
-        $totalAmount = (int)floor(bcmul($this->quote->getGrandTotal(), 100, 10));
-        return $totalAmount - $this->getSubtotalWithDiscountAndShipping();      //brutto amount - netto amount
+
+        return $this->getActualSubtotalTax() + $this->getActualShippingTax();
     }
 
     /**
