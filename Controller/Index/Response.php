@@ -252,8 +252,9 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
                 // get the quote by transactionid from the heidelpay response
                 /** @var Quote $quote */
                 $quote = $this->quoteRepository->get($this->heidelpayResponse->getIdentification()->getTransactionId());
-                $quote->collectTotals();
 
+                $quote->getStore()->setCurrentCurrencyCode($quote->getQuoteCurrencyCode());
+                $quote->collectTotals();
                 // in case of guest checkout, set some customer related data.
                 if ($this->getRequest()->getPost('CRITERION_GUEST') === 'true') {
                     $quote->setCustomerId(null)

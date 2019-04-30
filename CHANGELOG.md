@@ -7,6 +7,7 @@ This project does not follow a versioning standard. Versions are crafted after t
 ## 19.xx.xx
 ### Fixed
 - An issue that prevented an invoice to be (partly) refunded twice.
+- An issue where different curencies can cause that order is created in base currency.
 
 ### Changed
 - Improved response handling if Post data is empty: Customer gets redirected to cart with an error message. Wording of
