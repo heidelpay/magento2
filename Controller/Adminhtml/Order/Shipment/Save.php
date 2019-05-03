@@ -143,7 +143,7 @@ class Save extends \Magento\Shipping\Controller\Adminhtml\Order\Shipment\Save
                     $this->_redirect('*/*/new', ['order_id' => $this->getRequest()->getParam('order_id')]);
                 }
 
-                // set order status to "pending payment"
+                // set order state to "pending payment"
                 $state = Order::STATE_PENDING_PAYMENT;
                 $order->setState($state)
                     ->addStatusHistoryComment('heidelpay - Finalizing Order', true);
