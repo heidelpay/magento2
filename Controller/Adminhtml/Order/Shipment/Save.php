@@ -144,9 +144,11 @@ class Save extends \Magento\Shipping\Controller\Adminhtml\Order\Shipment\Save
                 }
 
                 // set order status to "pending payment"
-                $order->setStatus(Order::STATE_PENDING_PAYMENT)
-                    ->addStatusHistoryComment('heidelpay - Finalizing Order', Order::STATE_PENDING_PAYMENT)
-                    ->save();
+                $state = Order::STATE_PENDING_PAYMENT;
+                $order->setState($state)
+                    ->addStatusHistoryComment('heidelpay - Finalizing Order', true);
+
+                $this->orderResository->save($order);
 
                 $this->messageManager->addSuccessMessage(__('Shipping Notification has been sent to Heidelpay.'));
             }
