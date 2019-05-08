@@ -4,6 +4,18 @@
 
 This project does not follow a versioning standard. Versions are crafted after the dates; for example, the version 17.7.25 was released on July, 25th in 2017
 
+## 19.5.08
+### Change
+- improved status handling to ensure compatibility with magento 2.2.8
+### Fixed
+- An issue that prevented an invoice to be (partly) refunded twice.
+- An issue where different currencies can cause that order is created in base currency.
+
+### Changed
+- Improved response handling if Post data is empty: Customer gets redirected to cart with an error message. Wording of
+log entry was changed for a better understanding.
+- Removed static version from composer command in installation manual.  
+
 ## 19.1.30
 
 ### Fixed
