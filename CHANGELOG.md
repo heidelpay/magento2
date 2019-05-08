@@ -8,6 +8,8 @@ This project does not follow a versioning standard. Versions are crafted after t
 ### Fixed
 - An issue that prevented an invoice to be (partly) refunded twice.
 - An issue where different curencies can cause that order is created in base currency.
+- A problem where a transaction was processed a second time vie push when using "sofort". That caused the paid amount to be displayed
+incorrectly. 
 
 ### Changed
 - Improved response handling if Post data is empty: Customer gets redirected to cart with an error message. Wording of

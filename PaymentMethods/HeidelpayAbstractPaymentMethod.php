@@ -546,6 +546,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
      */
     public function saveHeidelpayTransaction(Response $response, $paymentMethod, $paymentType, $source, array $data)
     {
+
         $transaction = $this->transactionFactory->create();
         $transaction->setPaymentMethod($paymentMethod)
             ->setPaymentType($paymentType)
@@ -820,5 +821,19 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
             $frontend['LANGUAGE'],                 // Language code for the Frame
             $frontend['RESPONSE_URL']              // Response url from your application
         );
+    }
+
+    /**
+     * @param $transactionID string
+     * @return bool
+     */
+    public function heidelpayTransactionExists($transactionID)
+    {
+        $collection = $this->transactionCollectionFactory->create();
+
+        /** @var \Heidelpay\Gateway\Model\Transaction $transactionInfo */
+        $heidelpayTransaction = $collection->loadByTransactionId($transactionID);
+
+        return empty($heidelpayTransaction);
     }
 }

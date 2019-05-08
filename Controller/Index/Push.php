@@ -11,6 +11,7 @@ use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\OrderRepository;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\ResourceModel\Order\Collection;
+use Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod;
 
 /**
  * heidelpay Push Controller
@@ -132,78 +133,88 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
             );
         }
 
-        $this->_logger->debug('Push Response: ' . print_r($this->heidelpayPush->getResponse(), true));
+        $pushResponse = $this->heidelpayPush->getResponse();
+        $this->_logger->debug('Push Response: ' . print_r($pushResponse, true));
 
         list($paymentMethod, $paymentType) = $this->_paymentHelper->splitPaymentCode(
-            $this->heidelpayPush->getResponse()->getPayment()->getCode()
+            $pushResponse->getPayment()->getCode()
         );
 
         // in case of receipts, we process the push message for receipts.
-        if ($this->_paymentHelper->isReceiptAble($paymentMethod, $paymentType)) {
-            // only when the Response is ACK.
-            if ($this->heidelpayPush->getResponse()->isSuccess()) {
-                // load the referenced order to receive the order information.
-                $criteria = $this->searchCriteriaBuilder
-                    ->addFilter(
-                        'quote_id',
-                        $this->heidelpayPush->getResponse()->getIdentification()->getTransactionId()
-                    )->create();
+        if ($this->_paymentHelper->isReceiptAble($paymentMethod, $paymentType) && $pushResponse->isSuccess()) {
+            // load the referenced order to receive the order information.
+            $criteria = $this->searchCriteriaBuilder
+                ->addFilter(
+                    'quote_id',
+                    $pushResponse->getIdentification()->getTransactionId()
+                )->create();
 
-                /** @var Collection $orderList */
-                $orderList = $this->orderRepository->getList($criteria);
+            /** @var Collection $orderList */
+            $orderList = $this->orderRepository->getList($criteria);
 
-                /** @var Order $order */
-                $order = $orderList->getFirstItem();
+            /** @var Order $order */
+            $order = $orderList->getFirstItem();
+            $payment = $order->getPayment();
 
-                $paidAmount = (float)$this->heidelpayPush->getResponse()->getPresentation()->getAmount();
-                $dueLeft = $order->getTotalDue() - $paidAmount;
+            /** @var HeidelpayAbstractPaymentMethod $methodInstance */
+            $methodInstance = $payment->getMethodInstance();
+            $transactionID = $pushResponse->getPaymentReferenceId();
 
-                $state = Order::STATE_PROCESSING;
-                $comment = 'heidelpay - Purchase Complete';
+            /** @var bool $isNewTransaction Flag to identify new Transaction*/
+            $isNewTransaction = $methodInstance->heidelpayTransactionExists($transactionID);
 
-                // if payment is not complete
-                if ($dueLeft > 0.00) {
-                    $state = Order::STATE_PAYMENT_REVIEW;
-                    $comment = 'heidelpay - Partly Paid ('
-                        . $this->_paymentHelper->format(
-                            $this->heidelpayPush->getResponse()->getPresentation()->getAmount()
-                        )
-                        . ' ' . $this->heidelpayPush->getResponse()->getPresentation()->getCurrency() . ')';
-                }
-
-                // set the invoice states to 'paid', if no due is left.
-                if ($dueLeft <= 0.00) {
-                    /** @var \Magento\Sales\Model\Order\Invoice $invoice */
-                    foreach ($order->getInvoiceCollection() as $invoice) {
-                        $invoice->setState(Invoice::STATE_PAID)->save();
-                    }
-                }
-
-                $order->setTotalPaid($order->getTotalPaid() + $paidAmount)
-                    ->setBaseTotalPaid($order->getBaseTotalPaid() + $paidAmount)
-                    ->setState($state)
-                    ->addStatusHistoryComment($comment, $state);
-
-                // create a heidelpay Transaction.
-                $order->getPayment()->getMethodInstance()->saveHeidelpayTransaction(
-                    $this->heidelpayPush->getResponse(),
-                    $paymentMethod,
-                    $paymentType,
-                    'PUSH',
-                    []
-                );
-
-                // create a child transaction.
-                $order->getPayment()->setTransactionId($this->heidelpayPush->getResponse()->getPaymentReferenceId());
-                $order->getPayment()->setParentTransactionId(
-                    $this->heidelpayPush->getResponse()->getIdentification()->getReferenceId()
-                );
-                $order->getPayment()->setIsTransactionClosed(true);
-
-                $order->getPayment()->addTransaction(Transaction::TYPE_CAPTURE, null, true);
-
-                $order->save();
+            // If Transaction already exists, push wont be processed.
+            if (!$isNewTransaction) {
+                $this->_logger->debug('heidelpay - Push Response: ' . $transactionID . ' already exists');
+                return;
             }
+
+            $paidAmount = (float)$pushResponse->getPresentation()->getAmount();
+            $dueLeft = $order->getTotalDue() - $paidAmount;
+
+            $state = Order::STATE_PROCESSING;
+            $comment = 'heidelpay - Purchase Complete';
+
+            // if payment is not complete
+            if ($dueLeft > 0.00) {
+                $state = Order::STATE_PAYMENT_REVIEW;
+                $comment = 'heidelpay - Partly Paid ('
+                    . $this->_paymentHelper->format(
+                        $pushResponse->getPresentation()->getAmount()
+                    )
+                    . ' ' . $pushResponse->getPresentation()->getCurrency() . ')';
+            }
+
+            // set the invoice states to 'paid', if no due is left.
+            if ($dueLeft <= 0.00) {
+                /** @var \Magento\Sales\Model\Order\Invoice $invoice */
+                foreach ($order->getInvoiceCollection() as $invoice) {
+                    $invoice->setState(Invoice::STATE_PAID)->save();
+                }
+            }
+
+            $order->setTotalPaid($order->getTotalPaid() + $paidAmount)
+                ->setBaseTotalPaid($order->getBaseTotalPaid() + $paidAmount)
+                ->setState($state)
+                ->addStatusHistoryComment($comment, $state);
+
+            // create a heidelpay Transaction.
+            $methodInstance->saveHeidelpayTransaction(
+                $pushResponse,
+                $paymentMethod,
+                $paymentType,
+                'PUSH',
+                []
+            );
+
+            // create a child transaction.
+            $payment->setAmountPaid($paidAmount);
+            $payment->setTransactionId($transactionID)
+                ->setParentTransactionId($pushResponse->getIdentification()->getReferenceId())
+                ->setIsTransactionClosed(true)
+                ->addTransaction(Transaction::TYPE_CAPTURE, null, true);
+
+            $this->orderRepository->save($order);
         }
     }
 }
