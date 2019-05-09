@@ -831,9 +831,9 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
     {
         $collection = $this->transactionCollectionFactory->create();
 
-        /** @var \Heidelpay\Gateway\Model\Transaction $transactionInfo */
+        /** @var \Heidelpay\Gateway\Model\Transaction $heidelpayTransaction */
         $heidelpayTransaction = $collection->loadByTransactionId($transactionID);
 
-        return empty($heidelpayTransaction);
+        return $heidelpayTransaction === null || $heidelpayTransaction->isEmpty();
     }
 }
