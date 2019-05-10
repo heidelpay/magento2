@@ -69,12 +69,15 @@ class BasketHelper extends AbstractHelper
         // initialize the basket request
         $basketRequest = new Request();
         $basketReferenceId = $basketTotals->getBasketReferenceId();
-        $basketRequest->getBasket()
-            ->setCurrencyCode($basketTotals->getCurrencyCode())
+        $basket = $basketRequest->getBasket();
+        $basket->setCurrencyCode($basketTotals->getCurrencyCode())
             ->setAmountTotalNet($basketTotals->getSubtotalWithDiscountAndShipping())
             ->setAmountTotalVat($basketTotals->getActualTaxAmount())
-            ->setAmountTotalDiscount($basketTotals->getTotalDiscountAmount())
             ->setBasketReferenceId($basketReferenceId);
+
+        $totalDiscountTax = 0;
+        /** @var string $discountTaxActive */
+        $discountTaxActive = $quote->getStore()->getConfig('tax/calculation/discount_tax');
 
         /** @var \Magento\Quote\Model\Quote\Item $item */
         foreach ($quote->getAllVisibleItems() as $item) {
@@ -82,12 +85,21 @@ class BasketHelper extends AbstractHelper
 
             /** @var ItemWrapper $itemTotals */
             $itemTotals = ObjectManager::getInstance()->create(ItemWrapper::class, ['item' => $item]);
+            $itemDiscountTaxCompensation = $itemTotals->getDiscountTaxCompensationAmount();
+
+            if ($discountTaxActive == 0) {
+                /** In case discount amount contains no tax it is added/calculated here */
+                $itemDiscountTaxCompensation = $itemTotals->calculateDiscountTaxAmount();
+                $totalDiscountTax += $itemDiscountTaxCompensation;
+            } else {
+                $basket->addAmountTotalNet($itemDiscountTaxCompensation);
+            }
 
             $basketItem->setQuantity($item->getQty())
                 ->setVat($itemTotals->getTaxPercent())
                 ->setAmountPerUnit($itemTotals->getPrice())
                 ->setAmountNet($itemTotals->getRowTotal())
-                ->setAmountVat($itemTotals->getTaxAmount())
+                ->setAmountVat($itemTotals->getTaxAmount()+$itemDiscountTaxCompensation)
                 ->setAmountGross($itemTotals->getRowTotalInclTax())
 
                 ->setTitle($item->getName())
@@ -95,7 +107,7 @@ class BasketHelper extends AbstractHelper
                 ->setArticleId($item->getSku())
                 ->setBasketItemReferenceId($itemTotals->getReferenceId($basketReferenceId));
 
-            $basketRequest->getBasket()->addBasketItem($basketItem);
+            $basket->addBasketItem($basketItem);
         }
 
         /** @var BasketItem $shippingPos */
@@ -110,7 +122,7 @@ class BasketHelper extends AbstractHelper
             ->setAmountNet($basketTotals->getShippingAmount())
             ->setAmountGross($basketTotals->getShippingInclTax())
             ->setBasketItemReferenceId($itemCount);
-        $basketRequest->getBasket()->addBasketItem($shippingPos);
+        $basket->addBasketItem($shippingPos);
 
         if ($basketTotals->getTotalDiscountAmount() > 0) {
             /** @var BasketItem $discountPosition */
@@ -120,10 +132,12 @@ class BasketHelper extends AbstractHelper
                 ->setType('discount')
                 ->setAmountPerUnit(0)
                 ->setAmountNet(0)
-                ->setAmountDiscount($basketTotals->getTotalDiscountAmount())
+                ->setAmountDiscount($basketTotals->getTotalDiscountAmount()+$totalDiscountTax)
                 ->setBasketItemReferenceId($itemCount);
-            $basketRequest->getBasket()->addBasketItem($discountPosition);
+            $basket->addBasketItem($discountPosition);
         }
+
+        $basket->setAmountTotalDiscount($basketTotals->getTotalDiscountAmount()+$totalDiscountTax);
 
         return $basketRequest;
     }

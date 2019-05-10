@@ -85,6 +85,11 @@ class ItemWrapper extends BaseWrapper
         return (int)floor(bcmul($this->item->getRowTotal(), 100, 10));
     }
 
+    public function getDiscountTaxCompensationAmount ()
+    {
+        return (int)floor(bcmul($this->item->getDiscountTaxCompensationAmount(), 100, 10));
+    }
+
     /**
      * @param string $prefix
      * @return string
@@ -92,5 +97,10 @@ class ItemWrapper extends BaseWrapper
     public function getReferenceId($prefix = '')
     {
         return $prefix . sprintf('%x%d', $this->item->getSku(), $this->item->getQty());
+    }
+
+    public function calculateDiscountTaxAmount()
+    {
+        return bcmul($this->item->getDiscountAmount(), $this->item->getTaxPercent());
     }
 }
