@@ -160,11 +160,11 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
             $methodInstance = $payment->getMethodInstance();
             $transactionID = $pushResponse->getPaymentReferenceId();
 
-            /** @var bool $isNewTransaction Flag to identify new Transaction*/
-            $isNewTransaction = $methodInstance->heidelpayTransactionExists($transactionID);
+            /** @var bool $transactionExists Flag to identify new Transaction*/
+            $transactionExists = $methodInstance->heidelpayTransactionExists($transactionID);
 
             // If Transaction already exists, push wont be processed.
-            if (!$isNewTransaction) {
+            if ($transactionExists) {
                 $this->_logger->debug('heidelpay - Push Response: ' . $transactionID . ' already exists');
                 return;
             }
