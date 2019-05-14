@@ -13,6 +13,7 @@ namespace Heidelpay\Gateway\Wrapper;
 
 use Heidelpay\Gateway\Traits\DumpGetterReturnsTrait;
 
+
 class BaseWrapper
 {
     use DumpGetterReturnsTrait;
@@ -24,6 +25,6 @@ class BaseWrapper
      */
     public function normalizeValue($value)
     {
-        return (int)round(bcmul($value, 100));
+        return (int)round(bcmul($value, 100, 10));
     }
 }

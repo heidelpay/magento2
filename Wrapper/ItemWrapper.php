@@ -66,7 +66,8 @@ class ItemWrapper extends BaseWrapper
      */
     public function getTaxAmount()
     {
-        return (int)floor(bcmul($this->item->getTaxAmount(), 100, 10));
+        return $this->normalizeValue($this->item->getTaxAmount())
+            + $this->getDiscountTaxCompensationAmount();
     }
 
     /**
