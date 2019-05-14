@@ -208,7 +208,6 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
             );
 
             // create a child transaction.
-            $payment->setAmountPaid($paidAmount);
             $payment->setTransactionId($transactionID)
                 ->setParentTransactionId($pushResponse->getIdentification()->getReferenceId())
                 ->setIsTransactionClosed(true)
