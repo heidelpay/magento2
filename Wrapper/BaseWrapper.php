@@ -13,7 +13,18 @@ namespace Heidelpay\Gateway\Wrapper;
 
 use Heidelpay\Gateway\Traits\DumpGetterReturnsTrait;
 
+
 class BaseWrapper
 {
     use DumpGetterReturnsTrait;
+
+    /**
+     * Convert an euro amount to cent.
+     * @param $value
+     * @return int
+     */
+    public function normalizeValue($value)
+    {
+        return (int)round(bcmul($value, 100, 10));
+    }
 }

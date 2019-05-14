@@ -69,8 +69,8 @@ class BasketHelper extends AbstractHelper
         // initialize the basket request
         $basketRequest = new Request();
         $basketReferenceId = $basketTotals->getBasketReferenceId();
-        $basketRequest->getBasket()
-            ->setCurrencyCode($basketTotals->getCurrencyCode())
+        $basket = $basketRequest->getBasket();
+        $basket->setCurrencyCode($basketTotals->getCurrencyCode())
             ->setAmountTotalNet($basketTotals->getSubtotalWithDiscountAndShipping())
             ->setAmountTotalVat($basketTotals->getActualTaxAmount())
             ->setAmountTotalDiscount($basketTotals->getTotalDiscountAmount())
@@ -95,7 +95,7 @@ class BasketHelper extends AbstractHelper
                 ->setArticleId($item->getSku())
                 ->setBasketItemReferenceId($itemTotals->getReferenceId($basketReferenceId));
 
-            $basketRequest->getBasket()->addBasketItem($basketItem);
+            $basket->addBasketItem($basketItem);
         }
 
         /** @var BasketItem $shippingPos */
@@ -110,7 +110,7 @@ class BasketHelper extends AbstractHelper
             ->setAmountNet($basketTotals->getShippingAmount())
             ->setAmountGross($basketTotals->getShippingInclTax())
             ->setBasketItemReferenceId($itemCount);
-        $basketRequest->getBasket()->addBasketItem($shippingPos);
+        $basket->addBasketItem($shippingPos);
 
         if ($basketTotals->getTotalDiscountAmount() > 0) {
             /** @var BasketItem $discountPosition */
@@ -122,9 +122,8 @@ class BasketHelper extends AbstractHelper
                 ->setAmountNet(0)
                 ->setAmountDiscount($basketTotals->getTotalDiscountAmount())
                 ->setBasketItemReferenceId($itemCount);
-            $basketRequest->getBasket()->addBasketItem($discountPosition);
+            $basket->addBasketItem($discountPosition);
         }
-
         return $basketRequest;
     }
 

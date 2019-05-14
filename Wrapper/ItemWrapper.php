@@ -66,7 +66,8 @@ class ItemWrapper extends BaseWrapper
      */
     public function getTaxAmount()
     {
-        return (int)floor(bcmul($this->item->getTaxAmount(), 100, 10));
+        return $this->normalizeValue($this->item->getTaxAmount())
+            + $this->getDiscountTaxCompensationAmount();
     }
 
     /**
@@ -83,6 +84,16 @@ class ItemWrapper extends BaseWrapper
     public function getRowTotal()
     {
         return (int)floor(bcmul($this->item->getRowTotal(), 100, 10));
+    }
+
+    public function getDiscountTaxCompensationAmount ()
+    {
+        $discountContainsTax = $this->item->getStore()->getConfig('tax/calculation/discount_tax');
+
+        if ($discountContainsTax === '0') {
+            return bcmul($this->item->getDiscountAmount(), $this->item->getTaxPercent());
+        }
+        return $this->normalizeValue($this->item->getDiscountTaxCompensationAmount());
     }
 
     /**
