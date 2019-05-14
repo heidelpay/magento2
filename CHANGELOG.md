@@ -3,10 +3,12 @@
 ## Versioning
 
 This project does not follow a versioning standard. Versions are crafted after the dates; for example, the version 17.7.25 was released on July, 25th in 2017
+## X.X.X
+### Fixed
+- A problem where a transaction was processed a second time via push when using "sofort". That caused the paid amount to be displayed
+incorrectly. 
 
-## 19.5.08
-### Change
-- improved status handling to ensure compatibility with magento 2.2.8
+## 19.5.8
 ### Fixed
 - An issue that prevented an invoice to be (partly) refunded twice.
 - An issue where different currencies can cause that order is created in base currency.
@@ -14,7 +16,8 @@ This project does not follow a versioning standard. Versions are crafted after t
 ### Changed
 - Improved response handling if Post data is empty: Customer gets redirected to cart with an error message. Wording of
 log entry was changed for a better understanding.
-- Removed static version from composer command in installation manual.  
+- Removed static version from composer command in installation manual.
+- improved status handling to ensure compatibility with magento 2.2.8 
 
 ## 19.1.30
 
