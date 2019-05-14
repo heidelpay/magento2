@@ -90,7 +90,7 @@ class ItemWrapper extends BaseWrapper
     {
         $discountContainsTax = $this->item->getStore()->getConfig('tax/calculation/discount_tax');
 
-        if ($discountContainsTax == '0') {
+        if ($discountContainsTax === '0') {
             return bcmul($this->item->getDiscountAmount(), $this->item->getTaxPercent());
         }
         return $this->normalizeValue($this->item->getDiscountTaxCompensationAmount());
