@@ -114,7 +114,7 @@ class QuoteWrapper extends BaseWrapper
             foreach ($this->quote->getAllVisibleItems() as $item) {
                 /** @var ItemWrapper $itemTotals */
                 $itemTotals = ObjectManager::getInstance()->create(ItemWrapper::class, ['item' => $item]);
-                $totalDiscountTaxCompensation = $itemTotals->getDiscountTaxCompensationAmount();
+                $totalDiscountTaxCompensation += $itemTotals->getDiscountTaxCompensationAmount();
             }
         }
 
