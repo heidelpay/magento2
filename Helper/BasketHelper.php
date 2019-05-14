@@ -73,6 +73,7 @@ class BasketHelper extends AbstractHelper
         $basket->setCurrencyCode($basketTotals->getCurrencyCode())
             ->setAmountTotalNet($basketTotals->getSubtotalWithDiscountAndShipping())
             ->setAmountTotalVat($basketTotals->getActualTaxAmount())
+            ->setAmountTotalDiscount($basketTotals->getTotalDiscountAmount())
             ->setBasketReferenceId($basketReferenceId);
 
         /** @var \Magento\Quote\Model\Quote\Item $item */
@@ -123,9 +124,6 @@ class BasketHelper extends AbstractHelper
                 ->setBasketItemReferenceId($itemCount);
             $basket->addBasketItem($discountPosition);
         }
-
-        $basket->setAmountTotalDiscount($basketTotals->getTotalDiscountAmount());
-
         return $basketRequest;
     }
 
