@@ -87,7 +87,12 @@ class ItemWrapper extends BaseWrapper
 
     public function getDiscountTaxCompensationAmount ()
     {
-        return (int)floor(bcmul($this->item->getDiscountTaxCompensationAmount(), 100, 10));
+        $discountContainsTax = $this->item->getStore()->getConfig('tax/calculation/discount_tax');
+
+        if ($discountContainsTax == '0') {
+            return bcmul($this->item->getDiscountAmount(), $this->item->getTaxPercent());
+        }
+        return $this->normalizeValue($this->item->getDiscountTaxCompensationAmount());
     }
 
     /**
@@ -97,10 +102,5 @@ class ItemWrapper extends BaseWrapper
     public function getReferenceId($prefix = '')
     {
         return $prefix . sprintf('%x%d', $this->item->getSku(), $this->item->getQty());
-    }
-
-    public function calculateDiscountTaxAmount()
-    {
-        return bcmul($this->item->getDiscountAmount(), $this->item->getTaxPercent());
     }
 }

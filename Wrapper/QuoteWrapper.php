@@ -85,7 +85,9 @@ class QuoteWrapper extends BaseWrapper
     public function getSubtotalWithDiscountAndShipping()
     {
         // SubtotalWithDiscount already contains the ShippingDiscount but not the shipping itself.
-        return $this->getSubtotalWithDiscount() + $this->getShippingAmount();
+        return $this->getSubtotalWithDiscount()
+            + $this->getShippingAmount()
+            + $this->getDiscountTaxCompensationAmount();
     }
 
     /**
@@ -268,6 +270,14 @@ class QuoteWrapper extends BaseWrapper
         return $this->fetchNormalizeValue(self::FIELD_TAX_AMOUNT, true);
     }
 
+    /**
+     * @return int
+     */
+    public function getDiscountTaxCompensationAmount()
+    {
+        return $this->normalizeValue($this->quote->getShippingAddress()->getDiscountTaxCompensationAmount());
+    }
+
     //<editor-fold desc="Helpers">
 
     /**
@@ -280,7 +290,7 @@ class QuoteWrapper extends BaseWrapper
         $value = $this->totals[$field];
 
         if (!$raw) {
-            $value = (int)round(bcmul($value, 100));
+            $value = $this->normalizeValue($value);
         }
 
         return $value;

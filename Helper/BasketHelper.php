@@ -75,9 +75,9 @@ class BasketHelper extends AbstractHelper
             ->setAmountTotalVat($basketTotals->getActualTaxAmount())
             ->setBasketReferenceId($basketReferenceId);
 
-        $totalDiscountTax = 0;
-        /** @var string $discountTaxActive */
-        $discountTaxActive = $quote->getStore()->getConfig('tax/calculation/discount_tax');
+        /** @var string $discountContainsTax */
+        $discountContainsTax = $quote->getStore()->getConfig('tax/calculation/discount_tax');
+        $totalDiscountTaxCompensation = 0;
 
         /** @var \Magento\Quote\Model\Quote\Item $item */
         foreach ($quote->getAllVisibleItems() as $item) {
@@ -87,12 +87,9 @@ class BasketHelper extends AbstractHelper
             $itemTotals = ObjectManager::getInstance()->create(ItemWrapper::class, ['item' => $item]);
             $itemDiscountTaxCompensation = $itemTotals->getDiscountTaxCompensationAmount();
 
-            if ($discountTaxActive == 0) {
-                /** In case discount amount contains no tax it is added/calculated here */
-                $itemDiscountTaxCompensation = $itemTotals->calculateDiscountTaxAmount();
-                $totalDiscountTax += $itemDiscountTaxCompensation;
-            } else {
-                $basket->addAmountTotalNet($itemDiscountTaxCompensation);
+            if ($discountContainsTax == '0') {
+                /** In case discount amount contains no tax it will be added */
+                $totalDiscountTaxCompensation += $itemDiscountTaxCompensation;
             }
 
             $basketItem->setQuantity($item->getQty())
@@ -132,12 +129,12 @@ class BasketHelper extends AbstractHelper
                 ->setType('discount')
                 ->setAmountPerUnit(0)
                 ->setAmountNet(0)
-                ->setAmountDiscount($basketTotals->getTotalDiscountAmount()+$totalDiscountTax)
+                ->setAmountDiscount($basketTotals->getTotalDiscountAmount()+$totalDiscountTaxCompensation)
                 ->setBasketItemReferenceId($itemCount);
             $basket->addBasketItem($discountPosition);
         }
 
-        $basket->setAmountTotalDiscount($basketTotals->getTotalDiscountAmount()+$totalDiscountTax);
+        $basket->setAmountTotalDiscount($basketTotals->getTotalDiscountAmount()+$totalDiscountTaxCompensation);
 
         return $basketRequest;
     }
