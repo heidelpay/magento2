@@ -13,6 +13,13 @@
         <plugin name="HeidelpayGatewayShipmentSaveController" type="Heidelpay\Gateway\Controller\Adminhtml\Order\Shipment\Save" sortOrder="1"/>
     </type>
 
+    <!-- Payment method config -->
+    <type name="Heidelpay\Gateway\PaymentMethods\HeidelpayPISPaymentMethod">
+        <arguments>
+            <argument name ="paymentConfig" xsi:type="object">HgwPISConfig</argument>
+        </arguments>
+    </type>
+
     <!-- Config readers -->
     <virtualType name="HgwInvoiceSecuredConfig" type="Heidelpay\Gateway\Gateway\Config\HgwInvoiceSecuredPaymentConfig">
         <arguments>
@@ -67,6 +74,11 @@
     <virtualType name="HgwIDealConfig" type="Heidelpay\Gateway\Gateway\Config\HgwIDealPaymentConfig">
         <arguments>
             <argument name="methodCode" xsi:type="const">Heidelpay\Gateway\PaymentMethods\HeidelpayIDealPaymentMethod::CODE</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="HgwPISConfig" type="Heidelpay\Gateway\Gateway\Config\HgwBasePaymentConfig">
+        <arguments>
+            <argument name="methodCode" xsi:type="const">Heidelpay\Gateway\PaymentMethods\HeidelpayPISPaymentMethod::CODE</argument>
         </arguments>
     </virtualType>
 

@@ -132,6 +132,17 @@
                 <max_order_total>0</max_order_total>
                 <model>Heidelpay\Gateway\PaymentMethods\HeidelpayIDealPaymentMethod</model>
             </hgwidl>
+            <hgwpis>
+                <active>0</active>
+                <payment_action>authorize</payment_action>
+                <title><![CDATA[Flexipay]]></title>
+                <channel>31HA07BC8176B8333AC423CC4EC0C2D4</channel>
+                <allowspecific>1</allowspecific>
+                <specificcountry>BE,DE,IT,NL,AT,SI,ES</specificcountry>
+                <min_order_total>0</min_order_total>
+                <max_order_total>0</max_order_total>
+                <model>Heidelpay\Gateway\PaymentMethods\HeidelpayPISPaymentMethod</model>
+            </hgwpis>
         </payment>
     </default>
 </config>

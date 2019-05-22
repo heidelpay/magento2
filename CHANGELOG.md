@@ -6,7 +6,9 @@ This project does not follow a versioning standard. Versions are crafted after t
 ## X.X.X
 ### Fixed
 - A problem where a transaction was processed a second time via push when using "sofort". That caused the paid amount to be displayed
-incorrectly. 
+incorrectly.
+### Added
+- Payment method "Flexipay".
 
 ## 19.5.8
 ### Fixed
@@ -32,7 +34,7 @@ log entry was changed for a better understanding.
 ## 18.10.1
 
 ### Added
-- payment method iDeal
+- Payment method iDeal.
 
 ## 18.9.20
 

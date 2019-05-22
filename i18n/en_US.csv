@@ -11,6 +11,7 @@
 "HGWIV","<img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAMxJREFUeNpiZBXzZSAFMDGQCFhwSXBysAX6WPl7WhgbqMhKi3789E1MLRK7BiYmxvQEr5qSCFFh/rMX7qzbcuzOveePnrzCboOgAM+KuRWONnor1h1s6V1x685TfE4Cqt63sR3oAP/opu17zhDwA9AlQLOBqh18y69cf0jY00B3A10CNBuPakSwAsME6MuV6w/hcgm6BmAIAsOktXclsREHDO/zl+7euP2YWA3A2Dl0/AoJSQMYOPcfviBBAzDm7z98SYwGRpqnVoAAAwCge0cwGsIpTQAAAABJRU5ErkJggg==' style='margin-right: 5px'/>Invoice"
 "HGWIVS","<img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAMxJREFUeNpiZBXzZSAFMDGQCFhwSXBysAX6WPl7WhgbqMhKi3789E1MLRK7BiYmxvQEr5qSCFFh/rMX7qzbcuzOveePnrzCboOgAM+KuRWONnor1h1s6V1x685TfE4Cqt63sR3oAP/opu17zhDwA9AlQLOBqh18y69cf0jY00B3A10CNBuPakSwAsME6MuV6w/hcgm6BmAIAsOktXclsREHDO/zl+7euP2YWA3A2Dl0/AoJSQMYOPcfviBBAzDm7z98SYwGRpqnVoAAAwCge0cwGsIpTQAAAABJRU5ErkJggg==' style='margin-right: 5px'/>Invoice Secured (B2C)"
 "HGWIDL","<img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAMxJREFUeNpiZBXzZSAFMDGQCFhwSXBysAX6WPl7WhgbqMhKi3789E1MLRK7BiYmxvQEr5qSCFFh/rMX7qzbcuzOveePnrzCboOgAM+KuRWONnor1h1s6V1x685TfE4Cqt63sR3oAP/opu17zhDwA9AlQLOBqh18y69cf0jY00B3A10CNBuPakSwAsME6MuV6w/hcgm6BmAIAsOktXclsREHDO/zl+7euP2YWA3A2Dl0/AoJSQMYOPcfviBBAzDm7z98SYwGRpqnVoAAAwCge0cwGsIpTQAAAABJRU5ErkJggg==' style='margin-right: 5px'/>iDeal"
+"HGWPIS","<img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAMxJREFUeNpiZBXzZSAFMDGQCFhwSXBysAX6WPl7WhgbqMhKi3789E1MLRK7BiYmxvQEr5qSCFFh/rMX7qzbcuzOveePnrzCboOgAM+KuRWONnor1h1s6V1x685TfE4Cqt63sR3oAP/opu17zhDwA9AlQLOBqh18y69cf0jY00B3A10CNBuPakSwAsME6MuV6w/hcgm6BmAIAsOktXclsREHDO/zl+7euP2YWA3A2Dl0/AoJSQMYOPcfviBBAzDm7z98SYwGRpqnVoAAAwCge0cwGsIpTQAAAABJRU5ErkJggg==' style='margin-right: 5px'/>Flexipay"
 
 "HGW_ABOUT_US","heidelpay GmbH, shortly: heidelpay, is a leading payment institution for online payment methods authorized and regulated by BaFin, which offers the full range of services for an electronic payment processing from one single source: from processing of transactions and providing of acceptance contracts to monitoring and risk management.<br/><br/>For more information please visit <a href='https://www.heidelpay.de/inc/magento?lead=Magento2' target='_blank'>www.heidelpay.de</a>"
 
@@ -33,6 +34,7 @@
 "Mangirkart","MangirKart"
 "MasterPass","MasterPass"
 "Sofort.","Sofort."
+"Flexipay","Flexipay"
 
 "IBAN","IBAN"
 "BIC","BIC"

@@ -122,18 +122,22 @@
                         <comment>Insert 0 to disable limit.</comment>
                     </field>
                     </group>
-                    <group id="hgwsue" translate="label" type="text" sortOrder="140" showInDefault="1" showInWebsite="1" showInStore="1">
-                <label>HGWSUE</label>
-                    <field id="active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                <group id="hgwsue" translate="label" type="text" sortOrder="140" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>HGWSUE</label>
+                    <field id="active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1"
+                           showInStore="1">
                         <label>Enabled</label>
                         <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                         <config_path>payment/hgwsue/active</config_path>
                     </field>
-                <field id="title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Title</label>
-                    <config_path>payment/hgwsue/title</config_path>
+                    <field id="title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1"
+                           showInStore="1">
+                        <label>Title</label>
+                        <config_path>payment/hgwsue/title</config_path>
                     </field>
-                    <field id="channel" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <field id="channel" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1"
+                           showInStore="1">
                         <label>Channel</label>
                         <config_path>payment/hgwsue/channel</config_path>
                     </field>
@@ -160,7 +164,7 @@
                         <config_path>payment/hgwsue/max_order_total</config_path>
                         <comment>Insert 0 to disable limit.</comment>
                     </field>
-                    </group>
+                </group>
                 <group id="hgwpal" translate="label" type="text" sortOrder="150" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>HGWPAL</label>
                     <field id="active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -494,6 +498,49 @@
                     <field id="max_order_total" translate="label" type="text" sortOrder="99" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Maximum Order Total</label>
                         <config_path>payment/hgwidl/max_order_total</config_path>
+                        <comment>Insert 0 to disable limit.</comment>
+                    </field>
+                </group>
+                <group id="hgwpis" translate="label" type="text" sortOrder="140" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>HGWPIS</label>
+                    <field id="active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1"
+                           showInStore="1">
+                        <label>Enabled</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        <config_path>payment/hgwpis/active</config_path>
+                    </field>
+                    <field id="title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1"
+                           showInStore="1">
+                        <label>Title</label>
+                        <config_path>payment/hgwpis/title</config_path>
+                    </field>
+                    <field id="channel" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1"
+                           showInStore="1">
+                        <label>Channel</label>
+                        <config_path>payment/hgwpis/channel</config_path>
+                    </field>
+                    <field id="sort_order" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Sort Order</label>
+                        <config_path>payment/hgwpis/sort_order</config_path>
+                    </field>
+                    <field id="allowspecific" translate="label" type="allowspecific" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Payment from Applicable Countries</label>
+                        <source_model>Magento\Payment\Model\Config\Source\Allspecificcountries</source_model>
+                        <config_path>payment/hgwpis/allowspecific</config_path>
+                    </field>
+                    <field id="specificcountry" translate="label" type="multiselect" sortOrder="51" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Payment from Specific Countries</label>
+                        <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
+                        <config_path>payment/hgwpis/specificcountry</config_path>
+                    </field>
+                    <field id="min_order_total" translate="label" type="text" sortOrder="98" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Minimum Order Total</label>
+                        <config_path>payment/hgwpis/min_order_total</config_path>
+                    </field>
+                    <field id="max_order_total" translate="label" type="text" sortOrder="99" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Maximum Order Total</label>
+                        <config_path>payment/hgwpis/max_order_total</config_path>
                         <comment>Insert 0 to disable limit.</comment>
                     </field>
                 </group>

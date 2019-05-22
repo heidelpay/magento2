@@ -52,6 +52,10 @@ define(
             {
                 type: 'hgwidl',
                 component: 'Heidelpay_Gateway/js/view/payment/method-renderer/hgw-ideal'
+            },
+            {
+                type: 'hgwpis',
+                component: 'Heidelpay_Gateway/js/view/payment/method-renderer/hgw-abstract'
             }
         );
         return Component.extend({});
