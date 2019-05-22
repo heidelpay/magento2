@@ -26,7 +26,7 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
 {
     /**
      * Payment Code
-     * @var string PayentCode
+     * @var string PaymentCode
      */
     const CODE = 'hgwdd';
 
