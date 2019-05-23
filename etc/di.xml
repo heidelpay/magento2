@@ -69,6 +69,11 @@
             <argument name="methodCode" xsi:type="const">Heidelpay\Gateway\PaymentMethods\HeidelpayIDealPaymentMethod::CODE</argument>
         </arguments>
     </virtualType>
+    <virtualType name="HgwSantanderHirePurchaseConfig" type="Heidelpay\Gateway\Gateway\Config\HgwSantanderHirePurchaseConfig">
+        <arguments>
+            <argument name="methodCode" xsi:type="const">Heidelpay\Gateway\PaymentMethods\HeidelpaySantanderHirePurchasePaymentMethod::CODE</argument>
+        </arguments>
+    </virtualType>
 
     <!-- Preferences -->
     <preference for="Heidelpay\Gateway\Api\PaymentInterface" type="Heidelpay\Gateway\Api\Payment" />
@@ -86,4 +91,5 @@
     <preference for="Heidelpay\Gateway\Gateway\Config\HgwInvoicePaymentConfigInterface" type="HgwInvoiceConfig" />
     <preference for="Heidelpay\Gateway\Gateway\Config\HgwPayPalPaymentConfigInterface" type="HgwPayPalConfig" />
     <preference for="Heidelpay\Gateway\Gateway\Config\HgwIDealPaymentConfigInterface" type="HgwIDealConfig" />
+    <preference for="Heidelpay\Gateway\Gateway\Config\HgwSantanderHirePurchasePaymentConfigInterface" type="HgwSantanderHirePurchaseConfig" />
 </config>
