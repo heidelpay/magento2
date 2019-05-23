@@ -1,5 +1,18 @@
 <?php
-
+/**
+ * This is the payment class for heidelpay santander hire purchase payment method.
+ *
+ * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
+ * @copyright Copyright © 2019-present heidelpay GmbH. All rights reserved.
+ *
+ * @link http://dev.heidelpay.com/magento2
+ *
+ * @author Simon Gabriel
+ *
+ * @package heidelpay
+ * @subpackage magento2
+ * @category magento2
+ */
 namespace Heidelpay\Gateway\PaymentMethods;
 
 use Heidelpay\Gateway\Gateway\Config\HgwMainConfigInterface;
@@ -25,20 +38,6 @@ use Magento\Framework\UrlInterface;
 use Magento\Payment\Helper\Data;
 use Magento\Payment\Model\Method\Logger;
 
-/**
- * This is the payment class for heidelpay santander hire purchase payment method.
- *
- * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
- * @copyright Copyright © 2019-present heidelpay GmbH. All rights reserved.
- *
- * @link http://dev.heidelpay.com/magento2
- *
- * @author Simon Gabriel
- *
- * @package heidelpay
- * @subpackage magento2
- * @category magento2
- */
 class HeidelpaySantanderHirePurchasePaymentMethod extends HeidelpayAbstractPaymentMethod
 {
     /** @var string PaymentCode */
