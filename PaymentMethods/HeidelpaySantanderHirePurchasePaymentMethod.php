@@ -15,8 +15,8 @@
  */
 namespace Heidelpay\Gateway\PaymentMethods;
 
+use Heidelpay\Gateway\Gateway\Config\HgwBasePaymentConfigInterface;
 use Heidelpay\Gateway\Gateway\Config\HgwMainConfigInterface;
-use Heidelpay\Gateway\Gateway\Config\HgwSantanderHirePurchasePaymentConfigInterface;
 use Heidelpay\Gateway\Helper\BasketHelper;
 use Heidelpay\Gateway\Helper\Payment;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
@@ -72,7 +72,7 @@ class HeidelpaySantanderHirePurchasePaymentMethod extends HeidelpayAbstractPayme
      * @param ResolverInterface                              $localeResolver
      * @param ProductMetadataInterface                       $productMetadata
      * @param ResourceInterface                              $moduleResource
-     * @param HgwSantanderHirePurchasePaymentConfigInterface $paymentConfig
+     * @param HgwBasePaymentConfigInterface                  $paymentConfig
      * @param Payment                                        $paymentHelper
      * @param BasketHelper                                   $basketHelper
      * @param \Magento\Sales\Helper\Data                     $salesHelper
@@ -98,7 +98,7 @@ class HeidelpaySantanderHirePurchasePaymentMethod extends HeidelpayAbstractPayme
         ResolverInterface $localeResolver,
         ProductMetadataInterface $productMetadata,
         ResourceInterface $moduleResource,
-        HgwSantanderHirePurchasePaymentConfigInterface $paymentConfig,
+        HgwBasePaymentConfigInterface $paymentConfig,
         Payment $paymentHelper,
         BasketHelper $basketHelper,
         \Magento\Sales\Helper\Data $salesHelper,
