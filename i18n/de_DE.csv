@@ -11,6 +11,7 @@
 "HGWIV","<img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAMxJREFUeNpiZBXzZSAFMDGQCFhwSXBysAX6WPl7WhgbqMhKi3789E1MLRK7BiYmxvQEr5qSCFFh/rMX7qzbcuzOveePnrzCboOgAM+KuRWONnor1h1s6V1x685TfE4Cqt63sR3oAP/opu17zhDwA9AlQLOBqh18y69cf0jY00B3A10CNBuPakSwAsME6MuV6w/hcgm6BmAIAsOktXclsREHDO/zl+7euP2YWA3A2Dl0/AoJSQMYOPcfviBBAzDm7z98SYwGRpqnVoAAAwCge0cwGsIpTQAAAABJRU5ErkJggg==' style='margin-right: 5px'/>Rechnungskauf"
 "HGWIVS","<img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAMxJREFUeNpiZBXzZSAFMDGQCFhwSXBysAX6WPl7WhgbqMhKi3789E1MLRK7BiYmxvQEr5qSCFFh/rMX7qzbcuzOveePnrzCboOgAM+KuRWONnor1h1s6V1x685TfE4Cqt63sR3oAP/opu17zhDwA9AlQLOBqh18y69cf0jY00B3A10CNBuPakSwAsME6MuV6w/hcgm6BmAIAsOktXclsREHDO/zl+7euP2YWA3A2Dl0/AoJSQMYOPcfviBBAzDm7z98SYwGRpqnVoAAAwCge0cwGsIpTQAAAABJRU5ErkJggg==' style='margin-right: 5px'/>Gesicherter Rechnungskauf (B2C)"
 "HGWIDL","<img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAMxJREFUeNpiZBXzZSAFMDGQCFhwSXBysAX6WPl7WhgbqMhKi3789E1MLRK7BiYmxvQEr5qSCFFh/rMX7qzbcuzOveePnrzCboOgAM+KuRWONnor1h1s6V1x685TfE4Cqt63sR3oAP/opu17zhDwA9AlQLOBqh18y69cf0jY00B3A10CNBuPakSwAsME6MuV6w/hcgm6BmAIAsOktXclsREHDO/zl+7euP2YWA3A2Dl0/AoJSQMYOPcfviBBAzDm7z98SYwGRpqnVoAAAwCge0cwGsIpTQAAAABJRU5ErkJggg==' style='margin-right: 5px'/>iDeal"
+"HGWSANHP","<img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAMxJREFUeNpiZBXzZSAFMDGQCFhwSXBysAX6WPl7WhgbqMhKi3789E1MLRK7BiYmxvQEr5qSCFFh/rMX7qzbcuzOveePnrzCboOgAM+KuRWONnor1h1s6V1x685TfE4Cqt63sR3oAP/opu17zhDwA9AlQLOBqh18y69cf0jY00B3A10CNBuPakSwAsME6MuV6w/hcgm6BmAIAsOktXclsREHDO/zl+7euP2YWA3A2Dl0/AoJSQMYOPcfviBBAzDm7z98SYwGRpqnVoAAAwCge0cwGsIpTQAAAABJRU5ErkJggg==' style='margin-right: 5px'/>Ratenkauf von Santander"
 
 "HGW_ABOUT_US","Die heidelpay GmbH, kurz: heidelpay, ist ein führendes, von der BaFin zugelassenes und beaufsichtigtes Zahlungsinstitut für Online-Paymentverfahren, welches das komplette Leistungsspektrum in Sachen elektronische Zahlungsabwicklung abdeckt: vom Processing der Transaktionen über die Vergabe der Akzeptanzstellenverträge bis hin zum Monitoring und Risk Management.<br/><br/>Mehr Informationen finden Sie auf <a href='https://www.heidelpay.de/inc/magento?lead=Magento2' target='_blank'>www.heidelpay.de</a>"
 
@@ -44,6 +45,7 @@
 "Mangirkart","MangirKart"
 "MasterPass","MasterPass"
 "Sofort.","Sofort."
+"Santander Hire Purchase","Ratenkauf von Santander"
 
 "IBAN", "IBAN"
 "BIC","BIC"
