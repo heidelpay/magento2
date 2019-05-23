@@ -69,7 +69,7 @@
             <argument name="methodCode" xsi:type="const">Heidelpay\Gateway\PaymentMethods\HeidelpayIDealPaymentMethod::CODE</argument>
         </arguments>
     </virtualType>
-    <virtualType name="HgwSantanderHirePurchaseConfig" type="Heidelpay\Gateway\Gateway\Config\HgwSantanderHirePurchaseConfig">
+    <virtualType name="HgwSantanderHirePurchaseConfig" type="Heidelpay\Gateway\Gateway\Config\HgwSantanderHirePurchasePaymentConfig">
         <arguments>
             <argument name="methodCode" xsi:type="const">Heidelpay\Gateway\PaymentMethods\HeidelpaySantanderHirePurchasePaymentMethod::CODE</argument>
         </arguments>

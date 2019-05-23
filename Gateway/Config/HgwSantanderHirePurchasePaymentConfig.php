@@ -13,6 +13,6 @@
  */
 namespace Heidelpay\Gateway\Gateway\Config;
 
-class HgwSantanderHirePurchasePaymentConfig extends HgwBasePaymentConfig implements HgwSofortPaymentConfigInterface
+class HgwSantanderHirePurchasePaymentConfig extends HgwBasePaymentConfig implements HgwSantanderHirePurchasePaymentConfigInterface
 {
 }
