@@ -13,7 +13,7 @@
         <plugin name="HeidelpayGatewayShipmentSaveController" type="Heidelpay\Gateway\Controller\Adminhtml\Order\Shipment\Save" sortOrder="1"/>
     </type>
 
-    <!-- Payment method config -->
+    <!-- Inject virtual payment configs -->
     <type name="Heidelpay\Gateway\PaymentMethods\HeidelpayPISPaymentMethod">
         <arguments>
             <argument name ="paymentConfig" xsi:type="object">HgwPISConfig</argument>

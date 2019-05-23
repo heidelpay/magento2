@@ -35,7 +35,7 @@ use Magento\Sales\Helper\Data as SalesData;
  * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
  * @copyright Copyright © 2016-present heidelpay GmbH. All rights reserved.
  * @link http://dev.heidelpay.com/magento2
- * @author Jens Richter
+ * @author David Owusu
  *
  * @package heidelpay
  * @subpackage magento2
