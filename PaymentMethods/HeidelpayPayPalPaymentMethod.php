@@ -2,8 +2,8 @@
 
 namespace Heidelpay\Gateway\PaymentMethods;
 
+use Heidelpay\Gateway\Gateway\Config\HgwBasePaymentConfigInterface;
 use Heidelpay\Gateway\Gateway\Config\HgwMainConfigInterface;
-use Heidelpay\Gateway\Gateway\Config\HgwPayPalPaymentConfigInterface;
 use Heidelpay\Gateway\Model\Config\Source\BookingMode;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
 use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
@@ -84,7 +84,7 @@ class HeidelpayPayPalPaymentMethod extends HeidelpayAbstractPaymentMethod
      * @param \Magento\Framework\Locale\ResolverInterface $localeResolver
      * @param \Magento\Framework\App\ProductMetadataInterface $productMetadata
      * @param \Magento\Framework\Module\ResourceInterface $moduleResource
-     * @param HgwPayPalPaymentConfigInterface $paymentConfig
+     * @param HgwBasePaymentConfigInterface $paymentConfig
      * @param \Heidelpay\Gateway\Helper\Payment $paymentHelper
      * @param \Heidelpay\Gateway\Helper\BasketHelper $basketHelper
      * @param \Magento\Sales\Helper\Data $salesHelper
@@ -110,7 +110,7 @@ class HeidelpayPayPalPaymentMethod extends HeidelpayAbstractPaymentMethod
         \Magento\Framework\Locale\ResolverInterface $localeResolver,
         \Magento\Framework\App\ProductMetadataInterface $productMetadata,
         \Magento\Framework\Module\ResourceInterface $moduleResource,
-        HgwPayPalPaymentConfigInterface $paymentConfig,
+        HgwBasePaymentConfigInterface $paymentConfig,
         \Heidelpay\Gateway\Helper\Payment $paymentHelper,
         \Heidelpay\Gateway\Helper\BasketHelper $basketHelper,
         \Magento\Sales\Helper\Data $salesHelper,

@@ -2,7 +2,7 @@
 
 namespace Heidelpay\Gateway\PaymentMethods;
 
-use Heidelpay\Gateway\Gateway\Config\HgwIDealPaymentConfigInterface;
+use Heidelpay\Gateway\Gateway\Config\HgwBasePaymentConfigInterface;
 use Heidelpay\Gateway\Gateway\Config\HgwMainConfigInterface;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
 use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
@@ -47,7 +47,7 @@ class HeidelpayIDealPaymentMethod extends HeidelpayAbstractPaymentMethod
         \Magento\Framework\Locale\ResolverInterface $localeResolver,
         \Magento\Framework\App\ProductMetadataInterface $productMetadata,
         \Magento\Framework\Module\ResourceInterface $moduleResource,
-        HgwIDealPaymentConfigInterface $paymentConfig,
+        HgwBasePaymentConfigInterface $paymentConfig,
         \Heidelpay\Gateway\Helper\Payment $paymentHelper,
         \Heidelpay\Gateway\Helper\BasketHelper $basketHelper,
         \Magento\Sales\Helper\Data $salesHelper,

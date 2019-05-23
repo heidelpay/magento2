@@ -2,7 +2,7 @@
 
 namespace Heidelpay\Gateway\PaymentMethods;
 
-use Heidelpay\Gateway\Gateway\Config\HgwInvoiceSecuredPaymentConfigInterface;
+use Heidelpay\Gateway\Gateway\Config\HgwBasePaymentConfigInterface;
 use Heidelpay\Gateway\Gateway\Config\HgwMainConfigInterface;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
 use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
@@ -79,7 +79,7 @@ class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMetho
      * @param \Magento\Framework\Locale\ResolverInterface $localeResolver
      * @param \Magento\Framework\App\ProductMetadataInterface $productMetadata
      * @param \Magento\Framework\Module\ResourceInterface $moduleResource
-     * @param HgwInvoiceSecuredPaymentConfigInterface $paymentConfig
+     * @param HgwBasePaymentConfigInterface $paymentConfig
      * @param \Heidelpay\Gateway\Helper\Payment $paymentHelper
      * @param \Heidelpay\Gateway\Helper\BasketHelper $basketHelper
      * @param \Magento\Sales\Helper\Data $salesHelper
@@ -105,7 +105,7 @@ class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMetho
         \Magento\Framework\Locale\ResolverInterface $localeResolver,
         \Magento\Framework\App\ProductMetadataInterface $productMetadata,
         \Magento\Framework\Module\ResourceInterface $moduleResource,
-        HgwInvoiceSecuredPaymentConfigInterface $paymentConfig,
+        HgwBasePaymentConfigInterface $paymentConfig,
         \Heidelpay\Gateway\Helper\Payment $paymentHelper,
         \Heidelpay\Gateway\Helper\BasketHelper $basketHelper,
         \Magento\Sales\Helper\Data $salesHelper,

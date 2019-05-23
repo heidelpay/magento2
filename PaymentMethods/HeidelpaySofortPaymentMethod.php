@@ -3,7 +3,7 @@
 namespace Heidelpay\Gateway\PaymentMethods;
 
 use Heidelpay\Gateway\Gateway\Config\HgwMainConfigInterface;
-use Heidelpay\Gateway\Gateway\Config\HgwSofortPaymentConfigInterface;
+use Heidelpay\Gateway\Gateway\Config\HgwBasePaymentConfigInterface;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
 use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
 
@@ -73,7 +73,7 @@ class HeidelpaySofortPaymentMethod extends HeidelpayAbstractPaymentMethod
      * @param \Magento\Framework\Locale\ResolverInterface $localeResolver
      * @param \Magento\Framework\App\ProductMetadataInterface $productMetadata
      * @param \Magento\Framework\Module\ResourceInterface $moduleResource
-     * @param HgwSofortPaymentConfigInterface $paymentConfig
+     * @param HgwBasePaymentConfigInterface $paymentConfig
      * @param \Heidelpay\Gateway\Helper\Payment $paymentHelper
      * @param \Heidelpay\Gateway\Helper\BasketHelper $basketHelper
      * @param \Magento\Sales\Helper\Data $salesHelper
@@ -99,7 +99,7 @@ class HeidelpaySofortPaymentMethod extends HeidelpayAbstractPaymentMethod
         \Magento\Framework\Locale\ResolverInterface $localeResolver,
         \Magento\Framework\App\ProductMetadataInterface $productMetadata,
         \Magento\Framework\Module\ResourceInterface $moduleResource,
-        HgwSofortPaymentConfigInterface $paymentConfig,
+        HgwBasePaymentConfigInterface $paymentConfig,
         \Heidelpay\Gateway\Helper\Payment $paymentHelper,
         \Heidelpay\Gateway\Helper\BasketHelper $basketHelper,
         \Magento\Sales\Helper\Data $salesHelper,
