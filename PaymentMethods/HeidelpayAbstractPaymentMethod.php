@@ -38,7 +38,6 @@ use Magento\Sales\Api\Data\TransactionInterface;
 use Magento\Sales\Helper\Data;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Invoice;
-use Magento\Sales\Model\Order\Payment\Interceptor;
 use Magento\Store\Model\ScopeInterface as StoreScopeInterface;
 use Heidelpay\Gateway\Block\Payment\HgwAbstract;
 use Heidelpay\PhpPaymentApi\PaymentMethods\PaymentMethodInterface;
@@ -412,7 +411,6 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
      */
     public function refund(InfoInterface $payment, $amount)
     {
-        /** @var Interceptor $payment */
         if (!$this->canRefund()) {
             throw new LocalizedException(__('The refund action is not available.'));
         }
@@ -572,7 +570,6 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
      */
     public function saveHeidelpayTransaction(Response $response, $paymentMethod, $paymentType, $source, array $data)
     {
-
         $transaction = $this->transactionFactory->create();
         $transaction->setPaymentMethod($paymentMethod)
             ->setPaymentType($paymentType)
@@ -637,7 +634,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
             $billingStreet .= $street . ' ';
         }
 
-        $user['CRITERION.GUEST'] = $order->getCustomer()->getId() == 0 ? 'true' : 'false';
+        $user['CRITERION.GUEST'] = $order->getCustomer()->getId() === 0;
 
         $user['NAME.COMPANY'] = ($billing->getCompany() === false) ? null : trim($billing->getCompany());
         $user['NAME.GIVEN'] = trim($billing->getFirstname());
@@ -661,7 +658,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
         if ($order->canCancel()) {
             $order->cancel()
                 ->setState(Order::STATE_CANCELED)
-                ->addStatusHistoryComment('heidelpay - ' . $message, Order::STATE_CANCELED)
+                ->addCommentToStatusHistory('heidelpay - ' . $message, Order::STATE_CANCELED)
                 ->setIsCustomerNotified(false);
         }
     }
@@ -679,7 +676,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
         $order->getPayment()->addTransaction(TransactionInterface::TYPE_AUTH, null, true);
 
         $order->setState(Order::STATE_PENDING_PAYMENT)
-            ->addStatusHistoryComment('heidelpay - ' . $message, Order::STATE_PENDING_PAYMENT)
+            ->addCommentToStatusHistory('heidelpay - ' . $message, Order::STATE_PENDING_PAYMENT)
             ->setIsCustomerNotified(true);
     }
 
@@ -702,7 +699,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
             && $this->_paymentHelper->isMatchingCurrency($order, $data)
         ) {
             $order->setState(Order::STATE_PROCESSING)
-                ->addStatusHistoryComment('heidelpay - ' . $message, Order::STATE_PROCESSING)
+                ->addCommentToStatusHistory('heidelpay - ' . $message, Order::STATE_PROCESSING)
                 ->setIsCustomerNotified(true);
         } else {
             // In case receipt is successful (ACK) and amount is to low/high or currency mismatch.
@@ -712,7 +709,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
             );
 
             $order->setState(Order::STATE_PAYMENT_REVIEW)
-                ->addStatusHistoryComment('heidelpay - ' . $message, Order::STATE_PAYMENT_REVIEW)
+                ->addCommentToStatusHistory('heidelpay - ' . $message, Order::STATE_PAYMENT_REVIEW)
                 ->setIsCustomerNotified(true);
         }
 
