@@ -6,6 +6,7 @@ use Exception;
 use Heidelpay\Gateway\Gateway\Config\HgwBasePaymentConfigInterface;
 use Heidelpay\Gateway\Gateway\Config\HgwMainConfigInterface;
 use Heidelpay\Gateway\Helper\BasketHelper;
+use Heidelpay\Gateway\Helper\Payment as PaymentHelper;
 use Heidelpay\Gateway\Model\Config\Source\BookingMode;
 use Heidelpay\Gateway\Model\ResourceModel\Transaction\Collection as TransactionCollection;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
@@ -29,17 +30,22 @@ use Magento\Framework\Module\ResourceInterface;
 use Magento\Framework\Phrase;
 use Magento\Framework\Registry;
 use Magento\Framework\UrlInterface;
+use Magento\Payment\Helper\Data as DataHelper;
 use Magento\Payment\Model\InfoInterface;
 use Magento\Payment\Model\Method\AbstractMethod;
 use Magento\Payment\Model\Method\Logger;
+use Magento\Quote\Api\Data\AddressInterface;
 use Magento\Quote\Api\Data\CartInterface;
 use Magento\Quote\Model\Quote;
+use Magento\Sales\Api\Data\OrderPaymentInterface;
 use Magento\Sales\Api\Data\TransactionInterface;
 use Magento\Sales\Helper\Data;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Invoice;
-use Magento\Store\Model\ScopeInterface as StoreScopeInterface;
 use Magento\Sales\Model\Order\Payment;
+use Magento\Sales\Model\Spi\OrderPaymentResourceInterface;
+use Magento\Sales\Model\Spi\TransactionResourceInterface;
+use Magento\Store\Model\ScopeInterface as StoreScopeInterface;
 use Heidelpay\Gateway\Block\Payment\HgwAbstract;
 use Heidelpay\PhpPaymentApi\PaymentMethods\PaymentMethodInterface;
 use Magento\Store\Model\ScopeInterface;
@@ -109,7 +115,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
     /**
      * Factory for heidelpay payment information
      *
-     * @var PaymentInformationCollectionFactory
+     * @var PaymentInformationCollectionFactory $paymentInformationCollectionFactory
      */
     protected $paymentInformationCollectionFactory;
 
@@ -124,6 +130,14 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
 
     /** @var HgwBasePaymentConfigInterface */
     private $paymentConfig;
+    /**
+     * @var OrderPaymentResourceInterface
+     */
+    private $paymentResource;
+    /**
+     * @var TransactionResourceInterface
+     */
+    private $transactionResource;
 
     /**
      * @param Context $context
@@ -145,6 +159,8 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
      * @param PaymentInformationCollectionFactory $paymentInformationCollectionFactory
      * @param TransactionFactory $transactionFactory
      * @param HeidelpayTransactionCollectionFactory $transactionCollectionFactory
+     * @param OrderPaymentResourceInterface $paymentResource
+     * @param TransactionResourceInterface $transactionResource
      * @param AbstractResource $resource
      * @param AbstractDb $resourceCollection
      * @param HgwBasePaymentConfigInterface $paymentConfig
@@ -171,6 +187,8 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
         PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
         TransactionFactory $transactionFactory,
         HeidelpayTransactionCollectionFactory $transactionCollectionFactory,
+        OrderPaymentResourceInterface $paymentResource,
+        TransactionResourceInterface $transactionResource,
         AbstractResource $resource = null,
         AbstractDb $resourceCollection = null,
         HgwBasePaymentConfigInterface $paymentConfig = null,
@@ -200,6 +218,8 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
         $this->_localResolver = $localeResolver;
         $this->productMetadata = $productMetadata;
         $this->moduleResource = $moduleResource;
+        $this->paymentResource = $paymentResource;
+        $this->transactionResource = $transactionResource;
 
         $this->paymentInformationCollectionFactory = $paymentInformationCollectionFactory;
         $this->transactionFactory = $transactionFactory;
@@ -345,7 +365,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
 
         // set the last transaction id to the Pre-Authorization.
         $payment->setLastTransId($this->_heidelpayPaymentMethod->getResponse()->getPaymentReferenceId());
-        $payment->save();
+        $this->paymentResource->save($payment);
 
         return $this;
     }
@@ -425,7 +445,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
 
         // set the last transaction id to the Pre-Authorization.
         $payment->setLastTransId($this->_heidelpayPaymentMethod->getResponse()->getPaymentReferenceId());
-        $payment->save();
+        $this->paymentResource->save($payment);
 
         return $this;
     }
@@ -530,7 +550,8 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
             ->setJsonResponse(json_encode($data))
             ->setSource($source);
 
-        $transaction->save();
+        $this->transactionResource->save($transaction);
+
     }
 
     /**
