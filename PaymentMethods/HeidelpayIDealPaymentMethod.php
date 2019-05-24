@@ -1,13 +1,5 @@
-<?php /** @noinspection ClassOverridesFieldOfSuperClassInspection */
-
-namespace Heidelpay\Gateway\PaymentMethods;
-
-use Heidelpay\PhpPaymentApi\PaymentMethods\IDealPaymentMethod;
-use Heidelpay\PhpPaymentApi\Response;
-
+<?php
 /**
- * Heidelpay iDeal payment method
- *
  * This is the payment class for heidelpay iDeal
  *
  * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
@@ -19,6 +11,13 @@ use Heidelpay\PhpPaymentApi\Response;
  * @subpackage magento2
  * @category magento2
  */
+namespace Heidelpay\Gateway\PaymentMethods;
+
+use Heidelpay\Gateway\Model\PaymentInformation;
+use Heidelpay\PhpPaymentApi\Exceptions\UndefinedTransactionModeException;
+use Heidelpay\PhpPaymentApi\PaymentMethods\IDealPaymentMethod;
+use Heidelpay\PhpPaymentApi\Response;
+
 class HeidelpayIDealPaymentMethod extends HeidelpayAbstractPaymentMethod
 {
     const CODE = 'hgwidl';
@@ -29,7 +28,7 @@ class HeidelpayIDealPaymentMethod extends HeidelpayAbstractPaymentMethod
 
     protected $_isGateway = true;
 
-    /** @var IDealPaymentMethod */
+    /** @var IDealPaymentMethod $_heidelpayPaymentMethod*/
     protected $_heidelpayPaymentMethod;
 
     /**
@@ -65,7 +64,7 @@ class HeidelpayIDealPaymentMethod extends HeidelpayAbstractPaymentMethod
         $paymentInfoCollection = $this->paymentInformationCollectionFactory->create();
 
         // load the payment information by store id, customer email address and payment method
-        /** @var \Heidelpay\Gateway\Model\PaymentInformation $paymentInfo */
+        /** @var PaymentInformation $paymentInfo */
         $paymentInfo = $paymentInfoCollection->loadByCustomerInformation(
             $quote->getStoreId(),
             $quote->getBillingAddress()->getEmail(),
@@ -96,13 +95,12 @@ class HeidelpayIDealPaymentMethod extends HeidelpayAbstractPaymentMethod
         return $this->_heidelpayPaymentMethod->getResponse();
     }
 
-    public function activeRedirect()
-    {
-        return true;
-    }
-
-    /*
+    /**
      * Send an authorize request to get a response which contains list of available banks.
+     *
+     * @return Response
+     *
+     * @throws UndefinedTransactionModeException
      */
     public function initMethod()
     {

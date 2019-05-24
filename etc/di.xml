@@ -80,6 +80,12 @@
             <argument name ="paymentMethod" xsi:type="object">Heidelpay\PhpPaymentApi\PaymentMethods\SofortPaymentMethod</argument>
         </arguments>
     </type>
+    <type name="Heidelpay\Gateway\PaymentMethods\HeidelpaySantanderHirePurchasePaymentMethod">
+        <arguments>
+            <argument name ="paymentConfig" xsi:type="object">HgwSantanderHirePurchaseConfig</argument>
+            <argument name ="paymentMethod" xsi:type="object">Heidelpay\PhpPaymentApi\PaymentMethods\SantanderHirePurchasePaymentMethod</argument>
+        </arguments>
+    </type>
 
     <!-- Config readers -->
     <virtualType name="HgwInvoiceSecuredConfig" type="Heidelpay\Gateway\Gateway\Config\HgwBasePaymentConfig">

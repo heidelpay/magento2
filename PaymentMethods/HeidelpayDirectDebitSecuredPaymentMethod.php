@@ -1,12 +1,5 @@
 <?php
-
-namespace Heidelpay\Gateway\PaymentMethods;
-
-use Heidelpay\PhpPaymentApi\PaymentMethods\DirectDebitB2CSecuredPaymentMethod;
-
 /**
- * Heidelpay Direct Debit
- *
  * The heidelpay Direct Debit payment method.
  *
  * @license Use of this software requires acceptance of the License Agreement. See LICENSE file.
@@ -19,12 +12,15 @@ use Heidelpay\PhpPaymentApi\PaymentMethods\DirectDebitB2CSecuredPaymentMethod;
  * @subpackage magento2
  * @category magento2
  */
+namespace Heidelpay\Gateway\PaymentMethods;
+
+use Heidelpay\Gateway\Model\PaymentInformation;
+use Heidelpay\PhpPaymentApi\PaymentMethods\DirectDebitB2CSecuredPaymentMethod;
+use Magento\Quote\Api\Data\CartInterface;
+
 class HeidelpayDirectDebitSecuredPaymentMethod extends HeidelpayAbstractPaymentMethod
 {
-    /**
-     * Payment Code
-     * @var string PaymentCode
-     */
+    /** @var string PaymentCode */
     const CODE = 'hgwdds';
 
     /** @var string heidelpay gateway payment code */
@@ -47,11 +43,10 @@ class HeidelpayDirectDebitSecuredPaymentMethod extends HeidelpayAbstractPaymentM
      */
     public function getHeidelpayUrl($quote)
     {
-        // create the collection factory
         $paymentInfoCollection = $this->paymentInformationCollectionFactory->create();
 
         // load the payment information by store id, customer email address and payment method
-        /** @var \Heidelpay\Gateway\Model\PaymentInformation $paymentInfo */
+        /** @var PaymentInformation $paymentInfo */
         $paymentInfo = $paymentInfoCollection->loadByCustomerInformation(
             $quote->getStoreId(),
             $quote->getBillingAddress()->getEmail(),
@@ -72,7 +67,7 @@ class HeidelpayDirectDebitSecuredPaymentMethod extends HeidelpayAbstractPaymentM
                 ->set('holder', $paymentInfo->getAdditionalData()->hgw_holder);
         }
 
-        // add salutation and birthdate to the request
+        // add salutation and date of birth to the request
         if (isset($paymentInfo->getAdditionalData()->hgw_salutation)) {
             $this->_heidelpayPaymentMethod->getRequest()->getName()
                 ->set('salutation', $paymentInfo->getAdditionalData()->hgw_salutation);
@@ -115,7 +110,7 @@ class HeidelpayDirectDebitSecuredPaymentMethod extends HeidelpayAbstractPaymentM
      *
      * @inheritdoc
      */
-    public function isAvailable(\Magento\Quote\Api\Data\CartInterface $quote = null)
+    public function isAvailable(CartInterface $quote = null)
     {
         // in B2C payment methods, we don't want companies to be involved.
         // so, if the address contains a company, return false.

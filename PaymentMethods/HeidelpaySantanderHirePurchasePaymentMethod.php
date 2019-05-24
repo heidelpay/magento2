@@ -15,28 +15,8 @@
  */
 namespace Heidelpay\Gateway\PaymentMethods;
 
-use Heidelpay\Gateway\Gateway\Config\HgwBasePaymentConfigInterface;
-use Heidelpay\Gateway\Gateway\Config\HgwMainConfigInterface;
-use Heidelpay\Gateway\Helper\BasketHelper;
-use Heidelpay\Gateway\Helper\Payment;
-use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
-use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
-use Heidelpay\Gateway\Model\TransactionFactory;
 use Heidelpay\PhpPaymentApi\PaymentMethods\SantanderHirePurchasePaymentMethod;
-use Magento\Framework\Api\AttributeValueFactory;
-use Magento\Framework\Api\ExtensionAttributesFactory;
-use Magento\Framework\App\ProductMetadataInterface;
-use Magento\Framework\App\RequestInterface;
-use Magento\Framework\Data\Collection\AbstractDb;
-use Magento\Framework\Encryption\Encryptor;
-use Magento\Framework\Locale\ResolverInterface;
-use Magento\Framework\Model\Context;
-use Magento\Framework\Model\ResourceModel\AbstractResource;
-use Magento\Framework\Module\ResourceInterface;
-use Magento\Framework\Registry;
-use Magento\Framework\UrlInterface;
-use Magento\Payment\Helper\Data;
-use Magento\Payment\Model\Method\Logger;
+use Magento\Quote\Api\Data\CartInterface;
 
 class HeidelpaySantanderHirePurchasePaymentMethod extends HeidelpayAbstractPaymentMethod
 {
@@ -58,85 +38,27 @@ class HeidelpaySantanderHirePurchasePaymentMethod extends HeidelpayAbstractPayme
     /** @var boolean $_canRefundInvoicePartial */
     protected $_canRefundInvoicePartial = true;
 
-    /**
-     * @param Context                                        $context
-     * @param Registry                                       $registry
-     * @param ExtensionAttributesFactory                     $extensionFactory
-     * @param AttributeValueFactory                          $customAttributeFactory
-     * @param Data                                           $paymentData
-     * @param HgwMainConfigInterface                         $mainConfig
-     * @param RequestInterface                               $request
-     * @param UrlInterface                                   $urlinterface
-     * @param Encryptor                                      $encryptor
-     * @param Logger                                         $logger
-     * @param ResolverInterface                              $localeResolver
-     * @param ProductMetadataInterface                       $productMetadata
-     * @param ResourceInterface                              $moduleResource
-     * @param HgwBasePaymentConfigInterface                  $paymentConfig
-     * @param Payment                                        $paymentHelper
-     * @param BasketHelper                                   $basketHelper
-     * @param \Magento\Sales\Helper\Data                     $salesHelper
-     * @param PaymentInformationCollectionFactory            $paymentInformationCollectionFactory
-     * @param TransactionFactory                             $transactionFactory
-     * @param HeidelpayTransactionCollectionFactory          $transactionCollectionFactory
-     * @param SantanderHirePurchasePaymentMethod             $paymentMethod
-     * @param AbstractResource|null                          $resource
-     * @param AbstractDb|null                                $resourceCollection
-     * @param array                                          $data
-     */
-    public function __construct(
-        Context $context,
-        Registry $registry,
-        ExtensionAttributesFactory $extensionFactory,
-        AttributeValueFactory $customAttributeFactory,
-        Data $paymentData,
-        HgwMainConfigInterface $mainConfig,
-        RequestInterface $request,
-        UrlInterface $urlinterface,
-        Encryptor $encryptor,
-        Logger $logger,
-        ResolverInterface $localeResolver,
-        ProductMetadataInterface $productMetadata,
-        ResourceInterface $moduleResource,
-        HgwBasePaymentConfigInterface $paymentConfig,
-        Payment $paymentHelper,
-        BasketHelper $basketHelper,
-        \Magento\Sales\Helper\Data $salesHelper,
-        PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
-        TransactionFactory $transactionFactory,
-        HeidelpayTransactionCollectionFactory $transactionCollectionFactory,
-        SantanderHirePurchasePaymentMethod $paymentMethod,
-        AbstractResource $resource = null,
-        AbstractDb $resourceCollection = null,
-        array $data = []
-    ) {
-        parent::__construct(
-            $context,
-            $registry,
-            $extensionFactory,
-            $customAttributeFactory,
-            $paymentData,
-            $mainConfig,
-            $request,
-            $urlinterface,
-            $encryptor,
-            $logger,
-            $localeResolver,
-            $productMetadata,
-            $moduleResource,
-            $paymentHelper,
-            $basketHelper,
-            $salesHelper,
-            $paymentInformationCollectionFactory,
-            $transactionFactory,
-            $transactionCollectionFactory,
-            $resource,
-            $resourceCollection,
-            $paymentConfig,
-            $data
-        );
+    /** @var SantanderHirePurchasePaymentMethod */
+    protected $_heidelpayPaymentMethod;
 
-        $this->_heidelpayPaymentMethod = $paymentMethod;
+    /**
+     * Determines if the payment method will be displayed at the checkout.
+     * For B2C methods, the payment method should not be displayed.
+     *
+     * Else, refer to the parent isActive method.
+     *
+     * @inheritdoc
+     */
+    public function isAvailable(CartInterface $quote = null)
+    {
+        // in B2C payment methods, we don't want companies to be involved.
+        // so, if the address contains a company, return false.
+        if ($quote !== null && !empty($quote->getBillingAddress()->getCompany())) {
+            return false;
+        }
+
+        // process the parent isAvailable method
+        return parent::isAvailable($quote);
     }
 
     /**

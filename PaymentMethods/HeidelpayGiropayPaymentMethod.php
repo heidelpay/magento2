@@ -1,12 +1,5 @@
 <?php
-
-namespace Heidelpay\Gateway\PaymentMethods;
-
-use Heidelpay\PhpPaymentApi\PaymentMethods\GiropayPaymentMethod;
-
 /**
- * heidelpay giropay Payment Method
- *
  * heidelpay Payment Method for giropay.
  *
  * @license Use of this software requires acceptance of the License Agreement. See LICENSE file.
@@ -18,17 +11,16 @@ use Heidelpay\PhpPaymentApi\PaymentMethods\GiropayPaymentMethod;
  * @subpackage magento2
  * @category magento2
  */
+namespace Heidelpay\Gateway\PaymentMethods;
+
+use Heidelpay\PhpPaymentApi\PaymentMethods\GiropayPaymentMethod;
+
 class HeidelpayGiropayPaymentMethod extends HeidelpayAbstractPaymentMethod
 {
-    /**
-     * Payment Code
-     * @var string PaymentCode
-     */
+    /** @var string PaymentCode */
     const CODE = 'hgwgp';
 
-    /**
-     * @var string heidelpay gateway payment code
-     */
+    /** @var string heidelpay gateway payment code */
     protected $_code = self::CODE;
 
     /** @var bool */

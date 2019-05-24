@@ -1,11 +1,5 @@
 <?php
-
-namespace Heidelpay\Gateway\PaymentMethods;
-
-use Heidelpay\PhpPaymentApi\PaymentMethods\SofortPaymentMethod;
 /**
- * heidelpay sofort payment method
- *
  * This is the payment class for heidelpay sofort
  *
  * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
@@ -17,34 +11,25 @@ use Heidelpay\PhpPaymentApi\PaymentMethods\SofortPaymentMethod;
  * @subpackage magento2
  * @category magento2
  */
+namespace Heidelpay\Gateway\PaymentMethods;
+
+use Heidelpay\PhpPaymentApi\PaymentMethods\SofortPaymentMethod;
+
 class HeidelpaySofortPaymentMethod extends HeidelpayAbstractPaymentMethod
 {
-    /**
-     * Payment Code
-     * @var string PaymentCode
-     */
+    /** @var string PaymentCode */
     const CODE = 'hgwsue';
 
-    /**
-     * Payment Code
-     * @var string PaymentCode
-     */
+    /** @var string PaymentCode */
     protected $_code = self::CODE;
 
-    /**
-     * isGateway
-     * @var boolean
-     */
+    /** @var boolean */
     protected $_isGateway = true;
 
-    /**
-     * canAuthorize
-     * @var boolean
-     */
+    /** @var boolean */
     protected $_canAuthorize = true;
 
-    /**
-     * @var boolean */
+    /** @var boolean */
     protected $_canRefund = true;
 
     /** @var boolean */

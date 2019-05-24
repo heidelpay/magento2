@@ -1,12 +1,5 @@
 <?php
-
-namespace Heidelpay\Gateway\PaymentMethods;
-
-use Heidelpay\PhpPaymentApi\PaymentMethods\DirectDebitPaymentMethod;
-
 /**
- * Heidelpay Direct Debit
- *
  * The heidelpay Direct Debit payment method.
  *
  * @license Use of this software requires acceptance of the License Agreement. See LICENSE file.
@@ -19,12 +12,20 @@ use Heidelpay\PhpPaymentApi\PaymentMethods\DirectDebitPaymentMethod;
  * @subpackage magento2
  * @category magento2
  */
+namespace Heidelpay\Gateway\PaymentMethods;
+
+use Exception;
+use Heidelpay\Gateway\Model\PaymentInformation;
+use Heidelpay\PhpBasketApi\Exception\InvalidBasketitemPositionException;
+use Heidelpay\PhpPaymentApi\Exceptions\UndefinedTransactionModeException;
+use Heidelpay\PhpPaymentApi\PaymentMethods\DirectDebitPaymentMethod;
+use Heidelpay\PhpPaymentApi\Response;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Quote\Model\Quote;
+
 class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
 {
-    /**
-     * Payment Code
-     * @var string PaymentCode
-     */
+    /** @var string PaymentCode */
     const CODE = 'hgwdd';
 
     /** @var string heidelpay gateway payment code */
@@ -45,20 +46,20 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
     /**
      * Fires the initial request to the heidelpay payment provider.
      *
-     * @param \Magento\Quote\Model\Quote $quote
-     * @return \Heidelpay\PhpPaymentApi\Response
-     * @throws \Exception
-     * @throws \Heidelpay\PhpBasketApi\Exception\InvalidBasketitemPositionException
-     * @throws \Heidelpay\PhpPaymentApi\Exceptions\UndefinedTransactionModeException
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @param Quote $quote
+     *
+     * @return Response
+     * @throws Exception
+     * @throws InvalidBasketitemPositionException
+     * @throws UndefinedTransactionModeException
+     * @throws LocalizedException
      */
     public function getHeidelpayUrl($quote)
     {
-        // create the collection factory
         $paymentInfoCollection = $this->paymentInformationCollectionFactory->create();
 
         // load the payment information by store id, customer email address and payment method
-        /** @var \Heidelpay\Gateway\Model\PaymentInformation $paymentInfo */
+        /** @var PaymentInformation $paymentInfo */
         $paymentInfo = $paymentInfoCollection->loadByCustomerInformation(
             $quote->getStoreId(),
             $quote->getBillingAddress()->getEmail(),

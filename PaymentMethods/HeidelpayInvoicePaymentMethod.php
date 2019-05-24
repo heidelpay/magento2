@@ -1,11 +1,5 @@
 <?php
-
-namespace Heidelpay\Gateway\PaymentMethods;
-
-use Heidelpay\PhpPaymentApi\PaymentMethods\InvoicePaymentMethod;
 /**
- * Heidelpay prepayment payment method
- *
  * This is the payment class for heidelpay prepayment
  *
  * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
@@ -17,36 +11,32 @@ use Heidelpay\PhpPaymentApi\PaymentMethods\InvoicePaymentMethod;
  * @subpackage magento2
  * @category magento2
  */
+namespace Heidelpay\Gateway\PaymentMethods;
+
+use Heidelpay\PhpPaymentApi\PaymentMethods\InvoicePaymentMethod;
+use Heidelpay\Gateway\Block\Info\Invoice as InvoiceBlock;
+use Magento\Sales\Model\Order;
+use Magento\Sales\Model\Order\Invoice;
+use Magento\Sales\Model\Order\Payment\Transaction;
+
 class HeidelpayInvoicePaymentMethod extends HeidelpayAbstractPaymentMethod
 {
-    /**
-     * Payment Code
-     * @var string
-     */
+    /** @var string Payment Code */
     const CODE = 'hgwiv';
 
-    /**
-     * Payment Code
-     * @var string
-     */
+    /** @var string Payment Code */
     protected $_code = self::CODE;
 
     /**
      * Info Block Class (used for Order/Invoice details)
      * @var string
      */
-    protected $_infoBlockType = 'Heidelpay\Gateway\Block\Info\Invoice';
+    protected $_infoBlockType = InvoiceBlock::class;
 
-    /**
-     * isGateway
-     * @var boolean
-     */
+    /** @var boolean */
     protected $_isGateway = true;
 
-    /**
-     * canAuthorize
-     * @var boolean
-     */
+    /** @var boolean */
     protected $_canAuthorize = true;
 
     /** @var boolean */
@@ -98,12 +88,13 @@ class HeidelpayInvoicePaymentMethod extends HeidelpayAbstractPaymentMethod
      */
     public function pendingTransactionProcessing($data, &$order, $message = null)
     {
-        $order->getPayment()->setTransactionId($data['IDENTIFICATION_UNIQUEID']);
-        $order->getPayment()->setIsTransactionClosed(false);
-        $order->getPayment()->addTransaction(\Magento\Sales\Model\Order\Payment\Transaction::TYPE_AUTH, null, true);
+        $payment = $order->getPayment();
+        $payment->setTransactionId($data['IDENTIFICATION_UNIQUEID']);
+        $payment->setIsTransactionClosed(false);
+        $payment->addTransaction(Transaction::TYPE_AUTH, null, true);
 
-        $order->setState(\Magento\Sales\Model\Order::STATE_PROCESSING)
-            ->addStatusHistoryComment($message, \Magento\Sales\Model\Order::STATE_PROCESSING)
+        $order->setState(Order::STATE_PROCESSING)
+            ->addCommentToStatusHistory($message, Order::STATE_PROCESSING)
             ->setIsCustomerNotified(true);
 
         // payment is pending at the beginning, so we set the total paid sum to 0.
@@ -112,7 +103,7 @@ class HeidelpayInvoicePaymentMethod extends HeidelpayAbstractPaymentMethod
         // if the order can be invoiced, create one and save it into a transaction.
         if ($order->canInvoice()) {
             $invoice = $order->prepareInvoice();
-            $invoice->setRequestedCaptureCase(\Magento\Sales\Model\Order\Invoice::CAPTURE_ONLINE)
+            $invoice->setRequestedCaptureCase(Invoice::CAPTURE_ONLINE)
                 ->setTransactionId($data['IDENTIFICATION_UNIQUEID'])
                 ->setIsPaid(false)
                 ->register();

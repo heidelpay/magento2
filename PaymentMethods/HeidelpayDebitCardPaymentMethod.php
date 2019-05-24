@@ -1,13 +1,5 @@
 <?php
-
-namespace Heidelpay\Gateway\PaymentMethods;
-
-use Heidelpay\PhpPaymentApi\PaymentMethods\DebitCardPaymentMethod;
-use Heidelpay\Gateway\Model\Config\Source\BookingMode;
-
 /**
- * Heidelpay debit card payment method
- *
  * This is the payment class for heidelpay debit card
  *
  * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
@@ -19,30 +11,23 @@ use Heidelpay\Gateway\Model\Config\Source\BookingMode;
  * @subpackage magento2
  * @category magento2
  */
+namespace Heidelpay\Gateway\PaymentMethods;
+
+use Heidelpay\PhpPaymentApi\PaymentMethods\DebitCardPaymentMethod;
+use Heidelpay\Gateway\Model\Config\Source\BookingMode;
+
 class HeidelpayDebitCardPaymentMethod extends HeidelpayAbstractPaymentMethod
 {
-    /**
-     * Payment Code
-     * @var string PaymentCode
-     */
+    /** @var string PaymentCode */
     const CODE = 'hgwdc';
 
-    /**
-     * Payment Code
-     * @var string PaymentCode
-     */
+    /** @var string PaymentCode */
     protected $_code = self::CODE;
 
-    /**
-     * isGateway
-     * @var boolean
-     */
+    /** @var boolean */
     protected $_isGateway = true;
 
-    /**
-     * canAuthorize
-     * @var boolean
-     */
+    /** @var boolean */
     protected $_canAuthorize = true;
 
     /** @var boolean */
@@ -88,14 +73,15 @@ class HeidelpayDebitCardPaymentMethod extends HeidelpayAbstractPaymentMethod
         $paymentFrameOrigin = $url[0] . '//' . $url[2];
         $preventAsyncRedirect = 'FALSE';
         $cssPath = $this->mainConfig->getDefaultCss();
+        $bookingMode = $this->getBookingMode();
 
         // make an authorize request, if set...
-        if ($this->getBookingMode() === BookingMode::AUTHORIZATION) {
+        if ($bookingMode === BookingMode::AUTHORIZATION) {
             $this->_heidelpayPaymentMethod->authorize($paymentFrameOrigin, $preventAsyncRedirect, $cssPath);
         }
 
         // ... else if no booking mode is set or bookingmode is set to 'debit', make a debit request.
-        if ($this->getBookingMode() === null || $this->getBookingMode() === BookingMode::DEBIT) {
+        if ($bookingMode === null || $bookingMode === BookingMode::DEBIT) {
             $this->_heidelpayPaymentMethod->debit($paymentFrameOrigin, $preventAsyncRedirect, $cssPath);
         }
 

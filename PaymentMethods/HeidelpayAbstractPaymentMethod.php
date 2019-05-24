@@ -6,9 +6,10 @@ use Exception;
 use Heidelpay\Gateway\Gateway\Config\HgwBasePaymentConfigInterface;
 use Heidelpay\Gateway\Gateway\Config\HgwMainConfigInterface;
 use Heidelpay\Gateway\Helper\BasketHelper;
-use Heidelpay\Gateway\Helper\Payment;
+use Heidelpay\Gateway\Helper\Payment as PaymentHelper;
 use Heidelpay\Gateway\Model\Config\Source\BookingMode;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
+use Heidelpay\Gateway\Model\ResourceModel\Transaction\Collection as TransactionCollection;
 use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
 use Heidelpay\Gateway\Model\Transaction;
 use Heidelpay\Gateway\Model\TransactionFactory;
@@ -29,19 +30,26 @@ use Magento\Framework\Module\ResourceInterface;
 use Magento\Framework\Phrase;
 use Magento\Framework\Registry;
 use Magento\Framework\UrlInterface;
+use Magento\Payment\Helper\Data as DataHelper;
 use Magento\Payment\Model\InfoInterface;
 use Magento\Payment\Model\Method\AbstractMethod;
 use Magento\Payment\Model\Method\Logger;
+use Magento\Quote\Api\Data\AddressInterface;
 use Magento\Quote\Api\Data\CartInterface;
 use Magento\Quote\Model\Quote;
+use Magento\Sales\Api\Data\OrderPaymentInterface;
 use Magento\Sales\Api\Data\TransactionInterface;
 use Magento\Sales\Helper\Data;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Invoice;
+use Magento\Sales\Model\Order\Payment;
+use Magento\Sales\Model\Spi\OrderPaymentResourceInterface;
+use Magento\Sales\Model\Spi\TransactionResourceInterface;
 use Magento\Store\Model\ScopeInterface as StoreScopeInterface;
 use Heidelpay\Gateway\Block\Payment\HgwAbstract;
 use Heidelpay\PhpPaymentApi\PaymentMethods\PaymentMethodInterface;
 use Magento\Store\Model\ScopeInterface;
+use RuntimeException;
 
 /**
  * Heidelpay  abstract payment method
@@ -59,147 +67,95 @@ use Magento\Store\Model\ScopeInterface;
  */
 class HeidelpayAbstractPaymentMethod extends AbstractMethod
 {
-    /**
-     * PaymentCode
-     *
-     * @var string
-     */
+    /** @var string PaymentCode */
     const CODE = 'hgwabstract';
 
-    /**
-     * PaymentCode
-     *
-     * @var string
-     */
+    /** @var string PaymentCode */
     protected $_code = self::CODE;
 
-    /**
-     * @var boolean
-     */
+    /** @var boolean */
     protected $_isGateway = true;
 
-    /**
-     * @var boolean
-     */
+    /** @var boolean */
     protected $_canCapture = false;
 
-    /**
-     * @var boolean
-     */
+    /** @var boolean */
     protected $_canCapturePartial = false;
 
-    /**
-     * @var boolean
-     */
+    /** @var boolean */
     protected $_canRefund = false;
 
-    /**
-     * @var boolean
-     */
+    /** @var boolean */
     protected $_canRefundInvoicePartial = false;
 
-    /**
-     * @var boolean
-     */
+    /** @var boolean */
     protected $_canUseInternal = false;
 
-    /**
-     * @var boolean
-     */
+    /** @var boolean */
     private $usingBasketApi = false;
 
-    /**
-     * @var string
-     */
+    /** @var string */
     protected $_formBlockType = HgwAbstract::class;
 
-    /**
-     * @var UrlInterface
-     */
+    /** @var UrlInterface */
     protected $urlBuilder;
 
-    /**
-     * @var RequestInterface
-     */
+    /** @var RequestInterface */
     protected $_requestHttp;
 
-    /**
-     * @var Payment
-     */
+    /** @var PaymentHelper */
     protected $_paymentHelper;
 
-    /**
-     * @var BasketHelper
-     */
+    /** @var BasketHelper */
     protected $basketHelper;
 
-    /**
-     * @var ResolverInterface
-     */
+    /** @var ResolverInterface */
     protected $_localResolver;
 
-    /**
-     * The used heidelpay payment method
-     *
-     * @var PaymentMethodInterface $_heidelpayPaymentMethod
-     */
+    /** @var PaymentMethodInterface $_heidelpayPaymentMethod The used heidelpay payment method */
     protected $_heidelpayPaymentMethod;
 
-    /**
-     * @var Logger
-     */
+    /** @var Logger */
     protected $logger;
 
-    /**
-     * Encryption & Hashing
-     *
-     * @var Encryptor
-     */
+    /** @var Encryptor $_encryptor Encryption & Hashing */
     protected $_encryptor;
 
-    /**
-     * Product Metadata to receive Magento information
-     *
-     * @var ProductMetadataInterface
-     */
+    /** @var ProductMetadataInterface $productMetadata Product Metadata to receive Magento information */
     protected $productMetadata;
 
     /** @var Data */
     protected $salesHelper;
 
-    /**
-     * Resource information about modules
-     *
-     * @var ResourceInterface
-     */
+    /** @var ResourceInterface $moduleResource Resource information about modules */
     protected $moduleResource;
 
     /**
      * Factory for heidelpay payment information
      *
-     * @var PaymentInformationCollectionFactory
+     * @var PaymentInformationCollectionFactory $paymentInformationCollectionFactory
      */
     protected $paymentInformationCollectionFactory;
 
-    /**
-     * @var TransactionFactory
-     */
+    /** @var TransactionFactory */
     protected $transactionFactory;
 
-    /**
-     * @var HeidelpayTransactionCollectionFactory
-     */
+    /** @var HeidelpayTransactionCollectionFactory */
     protected $transactionCollectionFactory;
 
-    /**
-     * @var HgwMainConfigInterface
-     */
+    /** @var HgwMainConfigInterface */
     protected $mainConfig;
 
-    /**
-     * @var HgwBasePaymentConfigInterface
-     */
+    /** @var HgwBasePaymentConfigInterface */
     private $paymentConfig;
+    /**
+     * @var OrderPaymentResourceInterface
+     */
+    private $paymentResource;
+    /**
+     * @var TransactionResourceInterface
+     */
+    private $transactionResource;
 
     /**
      * heidelpay Abstract Payment method constructor
@@ -208,7 +164,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
      * @param Registry $registry
      * @param ExtensionAttributesFactory $extensionFactory
      * @param AttributeValueFactory $customAttributeFactory
-     * @param \Magento\Payment\Helper\Data $paymentData
+     * @param DataHelper $paymentData
      * @param HgwMainConfigInterface $mainConfig
      * @param RequestInterface $request
      * @param UrlInterface $urlinterface
@@ -217,12 +173,14 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
      * @param ResolverInterface $localeResolver
      * @param ProductMetadataInterface $productMetadata
      * @param ResourceInterface $moduleResource
-     * @param Payment $paymentHelper
+     * @param PaymentHelper $paymentHelper
      * @param BasketHelper $basketHelper
      * @param Data $salesHelper
      * @param PaymentInformationCollectionFactory $paymentInformationCollectionFactory
      * @param TransactionFactory $transactionFactory
      * @param HeidelpayTransactionCollectionFactory $transactionCollectionFactory
+     * @param OrderPaymentResourceInterface $paymentResource
+     * @param TransactionResourceInterface $transactionResource
      * @param AbstractResource $resource
      * @param AbstractDb $resourceCollection
      * @param HgwBasePaymentConfigInterface $paymentConfig
@@ -234,7 +192,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
         Registry $registry,
         ExtensionAttributesFactory $extensionFactory,
         AttributeValueFactory $customAttributeFactory,
-        \Magento\Payment\Helper\Data $paymentData,
+        DataHelper $paymentData,
         HgwMainConfigInterface $mainConfig,
         RequestInterface $request,
         UrlInterface $urlinterface,
@@ -243,14 +201,16 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
         ResolverInterface $localeResolver,
         ProductMetadataInterface $productMetadata,
         ResourceInterface $moduleResource,
-        Payment $paymentHelper,
+        PaymentHelper $paymentHelper,
         BasketHelper $basketHelper,
         Data $salesHelper,
         PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
         TransactionFactory $transactionFactory,
         HeidelpayTransactionCollectionFactory $transactionCollectionFactory,
-        \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
-        \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
+        OrderPaymentResourceInterface $paymentResource,
+        TransactionResourceInterface $transactionResource,
+        AbstractResource $resource = null,
+        AbstractDb $resourceCollection = null,
         HgwBasePaymentConfigInterface $paymentConfig = null,
         PaymentMethodInterface $paymentMethod = null,
         array $data = []
@@ -279,6 +239,8 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
         $this->_localResolver = $localeResolver;
         $this->productMetadata = $productMetadata;
         $this->moduleResource = $moduleResource;
+        $this->paymentResource = $paymentResource;
+        $this->transactionResource = $transactionResource;
 
         $this->paymentInformationCollectionFactory = $paymentInformationCollectionFactory;
         $this->transactionFactory = $transactionFactory;
@@ -332,7 +294,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
      */
     public function capture(InfoInterface $payment, $amount)
     {
-        /** @var \Magento\Sales\Model\Order\Payment $payment */
+        /** @var Payment $payment */
         if (!$this->canCapture()) {
             throw new LocalizedException(__('The capture action is not available.'));
         }
@@ -406,7 +368,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
 
         // set the last transaction id to the Pre-Authorization.
         $payment->setLastTransId($this->_heidelpayPaymentMethod->getResponse()->getPaymentReferenceId());
-        $payment->save();
+        $this->paymentResource->save($payment);
 
         return $this;
     }
@@ -416,6 +378,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
      */
     public function refund(InfoInterface $payment, $amount)
     {
+        /** @var Payment $payment */
         if (!$this->canRefund()) {
             throw new LocalizedException(__('The refund action is not available.'));
         }
@@ -485,7 +448,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
 
         // set the last transaction id to the Pre-Authorization.
         $payment->setLastTransId($this->_heidelpayPaymentMethod->getResponse()->getPaymentReferenceId());
-        $payment->save();
+        $this->paymentResource->save($payment);
 
         return $this;
     }
@@ -572,9 +535,11 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
      * @param $paymentType
      * @param string $source
      * @param array $data
+     * @throws Exception
      */
     public function saveHeidelpayTransaction(Response $response, $paymentMethod, $paymentType, $source, array $data)
     {
+        /** @var Transaction $transaction */
         $transaction = $this->transactionFactory->create();
         $transaction->setPaymentMethod($paymentMethod)
             ->setPaymentType($paymentType)
@@ -586,8 +551,9 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
             ->setReturnMessage($response->getProcessing()->getReturn())
             ->setReturnCode($response->getProcessing()->getReturnCode())
             ->setJsonResponse(json_encode($data))
-            ->setSource($source)
-            ->save();
+            ->setSource($source);
+
+        $this->transactionResource->save($transaction);
     }
 
     /**
@@ -631,30 +597,30 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
     {
         $user = [];
         $billing = $order->getBillingAddress();
-        $email = $order->getBillingAddress()->getEmail();
+        if (!$billing instanceof AddressInterface) {
+            throw new RuntimeException('heidelpay - Error billing address is not set!');
+        }
 
         $billingStreet = '';
-
         foreach ($billing->getStreet() as $street) {
             $billingStreet .= $street . ' ';
         }
 
         $user['CRITERION.GUEST'] = $order->getCustomer()->getId() === 0;
 
-        $user['NAME.COMPANY'] = ($billing->getCompany() === false) ? null : trim($billing->getCompany());
-        $user['NAME.GIVEN'] = trim($billing->getFirstname());
-        $user['NAME.FAMILY'] = trim($billing->getLastname());
-        $user['ADDRESS.STREET'] = trim($billingStreet);
-        $user['ADDRESS.ZIP'] = trim($billing->getPostcode());
-        $user['ADDRESS.CITY'] = trim($billing->getCity());
+        $user['NAME.COMPANY']    = ($billing->getCompany() === false) ? null : trim($billing->getCompany());
+        $user['NAME.GIVEN']      = trim($billing->getFirstname());
+        $user['NAME.FAMILY']     = trim($billing->getLastname());
+        $user['ADDRESS.STREET']  = trim($billingStreet);
+        $user['ADDRESS.ZIP']     = trim($billing->getPostcode());
+        $user['ADDRESS.CITY']    = trim($billing->getCity());
         $user['ADDRESS.COUNTRY'] = trim($billing->getCountryId());
-        $user['CONTACT.EMAIL'] = trim($email);
+        $user['CONTACT.EMAIL']   = trim($billing->getEmail());
 
         return $user;
     }
 
     /**
-     *
      * @param Order $order
      * @param string|null                $message
      */
@@ -670,15 +636,20 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
 
     /**
      *
-     * @param array                      $data
-     * @param Order $order
-     * @param string|null                $message
+     * @param array       $data
+     * @param Order       $order
+     * @param string|null $message
      */
     public function pendingTransactionProcessing($data, &$order, $message = null)
     {
-        $order->getPayment()->setTransactionId($data['IDENTIFICATION_UNIQUEID']);
-        $order->getPayment()->setIsTransactionClosed(false);
-        $order->getPayment()->addTransaction(TransactionInterface::TYPE_AUTH, null, true);
+        $orderPayment = $order->getPayment();
+        if (!$orderPayment instanceof OrderPaymentInterface) {
+            throw new RuntimeException('heidelpay - Error: Payment is not set.');
+        }
+
+        $orderPayment->setTransactionId($data['IDENTIFICATION_UNIQUEID']);
+        $orderPayment->setIsTransactionClosed(false);
+        $orderPayment->addTransaction(TransactionInterface::TYPE_AUTH, null, true);
 
         $order->setState(Order::STATE_PENDING_PAYMENT)
             ->addCommentToStatusHistory('heidelpay - ' . $message, Order::STATE_PENDING_PAYMENT)
@@ -694,10 +665,10 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
     {
         $message = __('ShortId : %1', $data['IDENTIFICATION_SHORTID']);
 
-        $order->getPayment()
-            ->setTransactionId($data['IDENTIFICATION_UNIQUEID'])
-            ->setParentTransactionId($order->getPayment()->getLastTransId())
-            ->setIsTransactionClosed(true);
+        $payment = $order->getPayment();
+        $payment->setTransactionId($data['IDENTIFICATION_UNIQUEID'])
+                ->setParentTransactionId($payment->getLastTransId())
+                ->setIsTransactionClosed(true);
 
         // if the total sum of the order matches the presentation amount of the heidelpay response...
         if ($this->_paymentHelper->isMatchingAmount($order, $data)
@@ -730,7 +701,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
             $this->_paymentHelper->saveTransaction($invoice);
         }
 
-        $order->getPayment()->addTransaction(TransactionInterface::TYPE_CAPTURE, null, true);
+        $payment->addTransaction(TransactionInterface::TYPE_CAPTURE, null, true);
     }
 
     /**
@@ -754,8 +725,6 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
     }
 
     /**
-     * Additional payment information
-     *
      * This function will return a text message used to show payment information
      * to your customer on the checkout success page
      *
@@ -857,6 +826,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
      */
     public function heidelpayTransactionExists($transactionID)
     {
+        /** @var TransactionCollection $collection */
         $collection = $this->transactionCollectionFactory->create();
 
         /** @var Transaction $heidelpayTransaction */
