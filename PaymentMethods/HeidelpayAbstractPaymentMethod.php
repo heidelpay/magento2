@@ -38,7 +38,6 @@ use Magento\Sales\Api\Data\TransactionInterface;
 use Magento\Sales\Helper\Data;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Invoice;
-use Magento\Sales\Model\Order\Payment\Interceptor;
 use Magento\Store\Model\ScopeInterface as StoreScopeInterface;
 use Magento\Sales\Model\Order\Payment;
 use Heidelpay\Gateway\Block\Payment\HgwAbstract;
