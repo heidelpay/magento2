@@ -201,6 +201,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
      * @param \Magento\Framework\Model\ResourceModel\AbstractResource $resource
      * @param \Magento\Framework\Data\Collection\AbstractDb $resourceCollection
      * @param HgwBasePaymentConfigInterface $paymentConfig
+     * @param PaymentMethodInterface $paymentMethod
      * @param array $data
      */
     public function __construct(
@@ -225,7 +226,8 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         HeidelpayTransactionCollectionFactory $transactionCollectionFactory,
         \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
-        $paymentConfig = null /* do not add Type or this wont work */,
+        HgwBasePaymentConfigInterface $paymentConfig = null,
+        PaymentMethodInterface $paymentMethod = null,
         array $data = []
     ) {
         parent::__construct(
@@ -258,6 +260,9 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
         $this->transactionCollectionFactory = $transactionCollectionFactory;
         $this->mainConfig = $mainConfig;
         $this->paymentConfig = $paymentConfig;
+
+        $this->_heidelpayPaymentMethod = $paymentMethod;
+        $this->setup();
     }
 
     /**
@@ -836,4 +841,8 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
 
         return !$heidelpayTransaction === null && !$heidelpayTransaction->isEmpty();
     }
+
+    /** Override to perform additional tasks in constructor. */
+    protected function setup()
+    {}
 }

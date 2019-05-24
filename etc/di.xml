@@ -17,56 +17,67 @@
     <type name="Heidelpay\Gateway\PaymentMethods\HeidelpayCreditCardPaymentMethod">
         <arguments>
             <argument name ="paymentConfig" xsi:type="object">HgwCreditCardConfig</argument>
+            <argument name ="paymentMethod" xsi:type="object">Heidelpay\PhpPaymentApi\PaymentMethods\CreditCardPaymentMethod</argument>
         </arguments>
     </type>
     <type name="Heidelpay\Gateway\PaymentMethods\HeidelpayDebitCardPaymentMethod">
         <arguments>
             <argument name ="paymentConfig" xsi:type="object">HgwDebitCardConfig</argument>
+            <argument name ="paymentMethod" xsi:type="object">Heidelpay\PhpPaymentApi\PaymentMethods\DebitCardPaymentMethod</argument>
         </arguments>
     </type>
     <type name="Heidelpay\Gateway\PaymentMethods\HeidelpayDirectDebitPaymentMethod">
         <arguments>
             <argument name ="paymentConfig" xsi:type="object">HgwDirectDebitConfig</argument>
+            <argument name ="paymentMethod" xsi:type="object">Heidelpay\PhpPaymentApi\PaymentMethods\DirectDebitPaymentMethod</argument>
         </arguments>
     </type>
     <type name="Heidelpay\Gateway\PaymentMethods\HeidelpayDirectDebitSecuredPaymentMethod">
         <arguments>
             <argument name ="paymentConfig" xsi:type="object">HgwDirectDebitSecuredConfig</argument>
+            <argument name ="paymentMethod" xsi:type="object">Heidelpay\PhpPaymentApi\PaymentMethods\DirectDebitB2CSecuredPaymentMethod</argument>
         </arguments>
     </type>
     <type name="Heidelpay\Gateway\PaymentMethods\HeidelpayGiropayPaymentMethod">
         <arguments>
             <argument name ="paymentConfig" xsi:type="object">HgwGiropayConfig</argument>
+            <argument name ="paymentMethod" xsi:type="object">Heidelpay\PhpPaymentApi\PaymentMethods\GiropayPaymentMethod</argument>
         </arguments>
     </type>
     <type name="Heidelpay\Gateway\PaymentMethods\HeidelpayIDealPaymentMethod">
         <arguments>
             <argument name ="paymentConfig" xsi:type="object">HgwIDealConfig</argument>
+            <argument name ="paymentMethod" xsi:type="object">Heidelpay\PhpPaymentApi\PaymentMethods\IDealPaymentMethod</argument>
         </arguments>
     </type>
     <type name="Heidelpay\Gateway\PaymentMethods\HeidelpayInvoicePaymentMethod">
         <arguments>
             <argument name ="paymentConfig" xsi:type="object">HgwInvoiceConfig</argument>
+            <argument name ="paymentMethod" xsi:type="object">Heidelpay\PhpPaymentApi\PaymentMethods\InvoicePaymentMethod</argument>
         </arguments>
     </type>
     <type name="Heidelpay\Gateway\PaymentMethods\HeidelpayInvoiceSecuredPaymentMethod">
         <arguments>
             <argument name ="paymentConfig" xsi:type="object">HgwInvoiceSecuredConfig</argument>
+            <argument name ="paymentMethod" xsi:type="object">Heidelpay\PhpPaymentApi\PaymentMethods\InvoiceB2CSecuredPaymentMethod</argument>
         </arguments>
     </type>
     <type name="Heidelpay\Gateway\PaymentMethods\HeidelpayPayPalPaymentMethod">
         <arguments>
             <argument name ="paymentConfig" xsi:type="object">HgwPayPalConfig</argument>
+            <argument name ="paymentMethod" xsi:type="object">Heidelpay\PhpPaymentApi\PaymentMethods\PayPalPaymentMethod</argument>
         </arguments>
     </type>
     <type name="Heidelpay\Gateway\PaymentMethods\HeidelpayPrepaymentPaymentMethod">
         <arguments>
             <argument name ="paymentConfig" xsi:type="object">HgwPrepaymentConfig</argument>
+            <argument name ="paymentMethod" xsi:type="object">Heidelpay\PhpPaymentApi\PaymentMethods\PrepaymentPaymentMethod</argument>
         </arguments>
     </type>
     <type name="Heidelpay\Gateway\PaymentMethods\HeidelpaySofortPaymentMethod">
         <arguments>
             <argument name ="paymentConfig" xsi:type="object">HgwSofortConfig</argument>
+            <argument name ="paymentMethod" xsi:type="object">Heidelpay\PhpPaymentApi\PaymentMethods\SofortPaymentMethod</argument>
         </arguments>
     </type>
 
