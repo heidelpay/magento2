@@ -21,29 +21,21 @@ class HeidelpayPayPalPaymentMethod extends HeidelpayAbstractPaymentMethod
     /** @var string PaymentCode */
     const CODE = 'hgwpal';
 
-    /** @var string PaymentCode */
-    protected $_code = self::CODE;
-
-    /** @var boolean */
-    protected $_isGateway = true;
-
-    /** @var boolean */
-    protected $_canAuthorize = true;
-
-    /** @var boolean */
-    protected $_canCapture = true;
-
-    /** @var boolean */
-    protected $_canCapturePartial = true;
-
-    /** @var boolean */
-    protected $_canRefund = true;
-
-    /** @var boolean */
-    protected $_canRefundInvoicePartial = true;
-
     /** @var PayPalPaymentMethod */
     protected $_heidelpayPaymentMethod;
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function setup()
+    {
+        parent::setup();
+        $this->_canCapture = true;
+        $this->_canAuthorize = true;
+        $this->_canCapturePartial = true;
+        $this->_canRefund = true;
+        $this->_canRefundInvoicePartial = true;
+    }
 
     /**
      * Initial Request to heidelpay payment server to get the form / iframe url

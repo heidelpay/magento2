@@ -24,29 +24,20 @@ class HeidelpayInvoicePaymentMethod extends HeidelpayAbstractPaymentMethod
     /** @var string Payment Code */
     const CODE = 'hgwiv';
 
-    /** @var string Payment Code */
-    protected $_code = self::CODE;
-
-    /**
-     * Info Block Class (used for Order/Invoice details)
-     * @var string
-     */
-    protected $_infoBlockType = InvoiceBlock::class;
-
-    /** @var boolean */
-    protected $_isGateway = true;
-
-    /** @var boolean */
-    protected $_canAuthorize = true;
-
-    /** @var boolean */
-    protected $_canRefund = true;
-
-    /** @var boolean */
-    protected $_canRefundInvoicePartial = true;
-
     /** @var InvoicePaymentMethod */
     protected $_heidelpayPaymentMethod;
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function setup()
+    {
+        parent::setup();
+        $this->_canAuthorize = true;
+        $this->_canRefund = true;
+        $this->_canRefundInvoicePartial = true;
+        $this->_formBlockType = InvoiceBlock::class;
+    }
 
     /**
      * Initial Request to heidelpay payment server to get the form / iframe url

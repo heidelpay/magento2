@@ -50,8 +50,6 @@ use Magento\Store\Model\ScopeInterface;
 use RuntimeException;
 
 /**
- * Heidelpay  abstract payment method
- *
  * All Heidelpay payment methods will extend this abstract payment method
  *
  * @license    Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
@@ -68,32 +66,11 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
     /** @var string PaymentCode */
     const CODE = 'hgwabstract';
 
-    /** @var string PaymentCode */
-    protected $_code = self::CODE;
+    /** @var boolean */
+    protected $_usingBasket;
 
     /** @var boolean */
-    protected $_isGateway = true;
-
-    /** @var boolean */
-    protected $_canCapture = false;
-
-    /** @var boolean */
-    protected $_canCapturePartial = false;
-
-    /** @var boolean */
-    protected $_canRefund = false;
-
-    /** @var boolean */
-    protected $_canRefundInvoicePartial = false;
-
-    /** @var boolean */
-    protected $_canUseInternal = false;
-
-    /** @var boolean */
-    private $usingBasketApi = false;
-
-    /** @var string */
-    protected $_formBlockType = HgwAbstract::class;
+    protected $_usingActiveRedirect;
 
     /** @var UrlInterface */
     protected $urlBuilder;
@@ -112,9 +89,6 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
 
     /** @var PaymentMethodInterface $_heidelpayPaymentMethod The used heidelpay payment method */
     protected $_heidelpayPaymentMethod;
-
-    /** @var Logger */
-    protected $logger;
 
     /** @var Encryptor $_encryptor Encryption & Hashing */
     protected $_encryptor;
@@ -209,7 +183,6 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
         );
 
         $this->urlBuilder = $urlinterface;
-        $this->logger = $logger;
         $this->_requestHttp = $request;
         $this->_paymentHelper = $paymentHelper;
         $this->salesHelper = $salesHelper;
@@ -231,16 +204,34 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
     }
 
     /**
+     * Performs setup steps to initialize the payment method.
+     * Override to perform additional tasks in constructor.
+     */
+    protected function setup()
+    {
+        $this->_code                    = static::CODE; // set the payment code
+        $this->_isGateway               = true;
+        $this->_canCapture              = false;
+        $this->_canAuthorize            = false;
+        $this->_canCapturePartial       = false;
+        $this->_canRefund               = false;
+        $this->_canRefundInvoicePartial = false;
+        $this->_canUseInternal          = false;
+        $this->_usingBasket             = false;
+        $this->_usingActiveRedirect     = true;
+        $this->_formBlockType           = HgwAbstract::class;
+    }
+
+    /**
      * Active redirect
      *
      * This function will return false, if the used payment method needs additional
      * customer payment data to pursue.
      * @return boolean
      */
-
     public function activeRedirect()
     {
-        return true;
+        return $this->_usingActiveRedirect;
     }
 
     /**
@@ -492,7 +483,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
         );
 
         // submit the Quote to the Basket API if the payment method needs one.
-        if ($this->isUsingBasketApi()) {
+        if ($this->_usingBasket) {
             $basketId = $this->basketHelper->submitQuoteToBasketApi($quote);
 
             if ($basketId === null) {
@@ -716,22 +707,6 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
     }
 
     /**
-     * @return bool
-     */
-    public function isUsingBasketApi()
-    {
-        return $this->usingBasketApi;
-    }
-
-    /**
-     * @param bool $usingBasketApi
-     */
-    public function setUsingBasketApi($usingBasketApi)
-    {
-        $this->usingBasketApi = $usingBasketApi;
-    }
-
-    /**
      * Set request authentication
      */
     private function performAuthentication()
@@ -812,8 +787,4 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
 
         return !$heidelpayTransaction === null && !$heidelpayTransaction->isEmpty();
     }
-
-    /** Override to perform additional tasks in constructor. */
-    protected function setup()
-    {}
 }

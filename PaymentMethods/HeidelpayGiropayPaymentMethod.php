@@ -20,20 +20,19 @@ class HeidelpayGiropayPaymentMethod extends HeidelpayAbstractPaymentMethod
     /** @var string PaymentCode */
     const CODE = 'hgwgp';
 
-    /** @var string heidelpay gateway payment code */
-    protected $_code = self::CODE;
-
-    /** @var bool */
-    protected $_canAuthorize = true;
-
-    /** @var boolean */
-    protected $_canRefund = true;
-
-    /** @var boolean */
-    protected $_canRefundInvoicePartial = true;
-
     /** @var GiropayPaymentMethod */
     protected $_heidelpayPaymentMethod;
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function setup()
+    {
+        parent::setup();
+        $this->_canAuthorize = true;
+        $this->_canRefund = true;
+        $this->_canRefundInvoicePartial = true;
+    }
 
     /**
      * @inheritdoc

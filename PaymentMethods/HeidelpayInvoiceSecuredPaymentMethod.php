@@ -26,29 +26,21 @@ class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMetho
     /** @var string Payment Code */
     const CODE = 'hgwivs';
 
-    /** @var string Payment Code */
-    protected $_code = self::CODE;
-
-    /**
-     * Info Block Class (used for Order/Invoice details)
-     * @var string
-     */
-    protected $_infoBlockType = InvoiceSecured::class;
-
-    /** @var boolean */
-    protected $_isGateway = true;
-
-    /** @var boolean */
-    protected $_canAuthorize = true;
-
-    /** @var boolean */
-    protected $_canRefund = true;
-
-    /** @var boolean */
-    protected $_canRefundInvoicePartial = true;
-
     /** @var InvoiceB2CSecuredPaymentMethod */
     protected $_heidelpayPaymentMethod;
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function setup()
+    {
+        parent::setup();
+        $this->_canAuthorize            = true;
+        $this->_canRefund               = true;
+        $this->_canRefundInvoicePartial = true;
+        $this->_usingBasket             = true;
+        $this->_formBlockType           = InvoiceSecured::class;
+    }
 
     /**
      * @inheritDoc
@@ -154,13 +146,4 @@ class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMetho
             $this->_paymentHelper->saveTransaction($invoice);
         }
     }
-
-    /** @inheritdoc */
-    protected function setup()
-    {
-        parent::setup();
-        $this->setUsingBasketApi(true);
-    }
-
-
 }

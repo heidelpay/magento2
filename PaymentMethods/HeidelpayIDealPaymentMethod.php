@@ -22,14 +22,17 @@ class HeidelpayIDealPaymentMethod extends HeidelpayAbstractPaymentMethod
 {
     const CODE = 'hgwidl';
 
-    protected $_code = self::CODE;
-
-    protected $_canAuthorize = true;
-
-    protected $_isGateway = true;
-
     /** @var IDealPaymentMethod $_heidelpayPaymentMethod*/
     protected $_heidelpayPaymentMethod;
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function setup()
+    {
+        parent::setup();
+        $this->_canAuthorize = true;
+    }
 
     /**
      * @inheritdoc

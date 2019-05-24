@@ -21,41 +21,21 @@ class HeidelpayDebitCardPaymentMethod extends HeidelpayAbstractPaymentMethod
     /** @var string PaymentCode */
     const CODE = 'hgwdc';
 
-    /** @var string PaymentCode */
-    protected $_code = self::CODE;
-
-    /** @var boolean */
-    protected $_isGateway = true;
-
-    /** @var boolean */
-    protected $_canAuthorize = true;
-
-    /** @var boolean */
-    protected $_canCapture = true;
-
-    /** @var boolean */
-    protected $_canCapturePartial = true;
-
-    /** @var boolean */
-    protected $_canRefund = true;
-
-    /** @var boolean */
-    protected $_canRefundInvoicePartial = true;
-
     /** @var DebitCardPaymentMethod */
     protected $_heidelpayPaymentMethod;
 
     /**
-     * Active redirect
-     *
-     * This function will return false, if the used payment method needs additional
-     * customer payment data to pursue.
-     *
-     * @return boolean
+     * {@inheritDoc}
      */
-    public function activeRedirect()
+    protected function setup()
     {
-        return false;
+        parent::setup();
+        $this->_canCapture = true;
+        $this->_canAuthorize = true;
+        $this->_canCapturePartial = true;
+        $this->_canRefund = true;
+        $this->_canRefundInvoicePartial = true;
+        $this->_usingActiveRedirect = false;
     }
 
     /**

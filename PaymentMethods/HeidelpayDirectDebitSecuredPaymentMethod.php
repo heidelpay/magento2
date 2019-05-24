@@ -23,20 +23,19 @@ class HeidelpayDirectDebitSecuredPaymentMethod extends HeidelpayAbstractPaymentM
     /** @var string PaymentCode */
     const CODE = 'hgwdds';
 
-    /** @var string heidelpay gateway payment code */
-    protected $_code = self::CODE;
-
-    /** @var bool */
-    protected $_canAuthorize = true;
-
-    /** @var boolean */
-    protected $_canRefund = true;
-
-    /** @var boolean */
-    protected $_canRefundInvoicePartial = true;
-
     /** @var DirectDebitB2CSecuredPaymentMethod */
     protected $_heidelpayPaymentMethod;
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function setup()
+    {
+        parent::setup();
+        $this->_canAuthorize = true;
+        $this->_canRefund = true;
+        $this->_canRefundInvoicePartial = true;
+    }
 
     /**
      * @inheritdoc

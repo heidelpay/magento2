@@ -23,23 +23,20 @@ class HeidelpaySantanderHirePurchasePaymentMethod extends HeidelpayAbstractPayme
     /** @var string PaymentCode */
     const CODE = 'hgwsanhp';
 
-    /** @var string PaymentCode */
-    protected $_code = self::CODE;
-
-    /** @var boolean $_isGateway */
-    protected $_isGateway = true;
-
-    /** @var boolean $_canAuthorize */
-    protected $_canAuthorize = true;
-
-    /** @var boolean $_canRefund */
-    protected $_canRefund = true;
-
-    /** @var boolean $_canRefundInvoicePartial */
-    protected $_canRefundInvoicePartial = true;
-
     /** @var SantanderHirePurchasePaymentMethod */
     protected $_heidelpayPaymentMethod;
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function setup()
+    {
+        parent::setup();
+        $this->_canAuthorize            = true;
+        $this->_canRefund               = true;
+        $this->_canRefundInvoicePartial = true;
+        $this->_usingBasket             = true;
+    }
 
     /**
      * Determines if the payment method will be displayed at the checkout.
