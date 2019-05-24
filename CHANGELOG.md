@@ -10,6 +10,9 @@ incorrectly.
 ### Added
 - Payment method "Flexipay".
 
+### Changed 
+- Refactored paymentMethods. Simplify configuration and reduce duplicate code in payment methods.
+
 ## 19.5.8
 ### Fixed
 - An issue that prevented an invoice to be (partly) refunded twice.
