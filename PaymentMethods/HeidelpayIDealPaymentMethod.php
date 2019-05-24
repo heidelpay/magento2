@@ -1,11 +1,8 @@
-<?php
+<?php /** @noinspection ClassOverridesFieldOfSuperClassInspection */
 
 namespace Heidelpay\Gateway\PaymentMethods;
 
-use Heidelpay\Gateway\Gateway\Config\HgwIDealPaymentConfigInterface;
-use Heidelpay\Gateway\Gateway\Config\HgwMainConfigInterface;
-use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
-use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
+use Heidelpay\PhpPaymentApi\PaymentMethods\IDealPaymentMethod;
 use Heidelpay\PhpPaymentApi\Response;
 
 /**
@@ -32,62 +29,8 @@ class HeidelpayIDealPaymentMethod extends HeidelpayAbstractPaymentMethod
 
     protected $_isGateway = true;
 
-
-    public function __construct(
-        \Magento\Framework\Model\Context $context,
-        \Magento\Framework\Registry $registry,
-        \Magento\Framework\Api\ExtensionAttributesFactory $extensionFactory,
-        \Magento\Framework\Api\AttributeValueFactory $customAttributeFactory,
-        \Magento\Payment\Helper\Data $paymentData,
-        HgwMainConfigInterface $mainConfig,
-        \Magento\Framework\App\RequestInterface $request,
-        \Magento\Framework\UrlInterface $urlinterface,
-        \Magento\Framework\Encryption\Encryptor $encryptor,
-        \Magento\Payment\Model\Method\Logger $logger,
-        \Magento\Framework\Locale\ResolverInterface $localeResolver,
-        \Magento\Framework\App\ProductMetadataInterface $productMetadata,
-        \Magento\Framework\Module\ResourceInterface $moduleResource,
-        HgwIDealPaymentConfigInterface $paymentConfig,
-        \Heidelpay\Gateway\Helper\Payment $paymentHelper,
-        \Heidelpay\Gateway\Helper\BasketHelper $basketHelper,
-        \Magento\Sales\Helper\Data $salesHelper,
-        PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
-        \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory,
-        HeidelpayTransactionCollectionFactory $transactionCollectionFactory,
-        \Heidelpay\PhpPaymentApi\PaymentMethods\IDealPaymentMethod $iDealPaymentMethod,
-        \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
-        \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
-        array $data = []
-    )
-    {
-        parent::__construct(
-            $context,
-            $registry,
-            $extensionFactory,
-            $customAttributeFactory,
-            $paymentData,
-            $mainConfig,
-            $request,
-            $urlinterface,
-            $encryptor,
-            $logger,
-            $localeResolver,
-            $productMetadata,
-            $moduleResource,
-            $paymentHelper,
-            $basketHelper,
-            $salesHelper,
-            $paymentInformationCollectionFactory,
-            $transactionFactory,
-            $transactionCollectionFactory,
-            $resource,
-            $resourceCollection,
-            $paymentConfig,
-            $data
-        );
-
-        $this->_heidelpayPaymentMethod = $iDealPaymentMethod;
-    }
+    /** @var IDealPaymentMethod */
+    protected $_heidelpayPaymentMethod;
 
     /**
      * @inheritdoc
