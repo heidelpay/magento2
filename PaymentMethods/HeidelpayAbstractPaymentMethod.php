@@ -6,13 +6,12 @@ use Exception;
 use Heidelpay\Gateway\Gateway\Config\HgwBasePaymentConfigInterface;
 use Heidelpay\Gateway\Gateway\Config\HgwMainConfigInterface;
 use Heidelpay\Gateway\Helper\BasketHelper;
-use Heidelpay\Gateway\Helper\Payment as PaymentHelper;
 use Heidelpay\Gateway\Model\Config\Source\BookingMode;
 use Heidelpay\Gateway\Model\ResourceModel\Transaction\Collection as TransactionCollection;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
 use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
-use Heidelpay\Gateway\Model\TransactionFactory;
 use Heidelpay\Gateway\Model\Transaction;
+use Heidelpay\Gateway\Model\TransactionFactory;
 use Heidelpay\PhpBasketApi\Exception\InvalidBasketitemPositionException;
 use Heidelpay\PhpPaymentApi\ParameterGroups\BasketParameterGroup;
 use Heidelpay\PhpPaymentApi\Response;
@@ -30,18 +29,17 @@ use Magento\Framework\Module\ResourceInterface;
 use Magento\Framework\Phrase;
 use Magento\Framework\Registry;
 use Magento\Framework\UrlInterface;
-use Magento\Payment\Helper\Data as DataHelper;
 use Magento\Payment\Model\InfoInterface;
 use Magento\Payment\Model\Method\AbstractMethod;
 use Magento\Payment\Model\Method\Logger;
-use Magento\Quote\Api\Data\AddressInterface;
 use Magento\Quote\Api\Data\CartInterface;
 use Magento\Quote\Model\Quote;
-use Magento\Sales\Api\Data\OrderPaymentInterface;
 use Magento\Sales\Api\Data\TransactionInterface;
 use Magento\Sales\Helper\Data;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Invoice;
+use Magento\Sales\Model\Order\Payment\Interceptor;
+use Magento\Store\Model\ScopeInterface as StoreScopeInterface;
 use Magento\Sales\Model\Order\Payment;
 use Heidelpay\Gateway\Block\Payment\HgwAbstract;
 use Heidelpay\PhpPaymentApi\PaymentMethods\PaymentMethodInterface;
@@ -86,7 +84,11 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
     /** @var ResolverInterface */
     protected $_localResolver;
 
-    /** @var PaymentMethodInterface $_heidelpayPaymentMethod The used heidelpay payment method */
+    /**
+     * The used heidelpay payment method
+     *
+     * @var PaymentMethodInterface $_heidelpayPaymentMethod
+     */
     protected $_heidelpayPaymentMethod;
 
     /** @var Encryptor $_encryptor Encryption & Hashing */
@@ -98,10 +100,18 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
     /** @var Data */
     protected $salesHelper;
 
-    /** @var ResourceInterface $moduleResource Resource information about modules */
+    /**
+     * Resource information about modules
+     *
+     * @var ResourceInterface
+     */
     protected $moduleResource;
 
-    /** @var PaymentInformationCollectionFactory $paymentInformationCollectionFactory */
+    /**
+     * Factory for heidelpay payment information
+     *
+     * @var PaymentInformationCollectionFactory
+     */
     protected $paymentInformationCollectionFactory;
 
     /** @var TransactionFactory */
@@ -574,7 +584,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
             $billingStreet .= $street . ' ';
         }
 
-        $user['CRITERION.GUEST'] = $order->getCustomer()->getId() === 0;
+        $user['CRITERION.GUEST'] = $order->getCustomer()->getId() === null;
 
         $user['NAME.COMPANY']    = ($billing->getCompany() === false) ? null : trim($billing->getCompany());
         $user['NAME.GIVEN']      = trim($billing->getFirstname());
