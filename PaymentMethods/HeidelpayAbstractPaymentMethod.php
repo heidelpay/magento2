@@ -43,7 +43,6 @@ use Magento\Sales\Helper\Data;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Order\Payment;
-use Magento\Store\Model\ScopeInterface as StoreScopeInterface;
 use Heidelpay\Gateway\Block\Payment\HgwAbstract;
 use Heidelpay\PhpPaymentApi\PaymentMethods\PaymentMethodInterface;
 use Magento\Store\Model\ScopeInterface;
@@ -253,7 +252,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
 
         $path = 'payment/' . $this->getCode() . '/' . $field;
 
-        return $this->_scopeConfig->getValue($path, StoreScopeInterface::SCOPE_STORE, $storeId);
+        return $this->_scopeConfig->getValue($path, ScopeInterface::SCOPE_STORE, $storeId);
     }
 
     /**
