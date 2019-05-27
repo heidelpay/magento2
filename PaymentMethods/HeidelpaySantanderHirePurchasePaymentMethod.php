@@ -15,6 +15,7 @@
  */
 namespace Heidelpay\Gateway\PaymentMethods;
 
+use Heidelpay\Gateway\Model\PaymentInformation;
 use Heidelpay\PhpPaymentApi\PaymentMethods\SantanderHirePurchasePaymentMethod;
 use Magento\Quote\Api\Data\CartInterface;
 
@@ -66,8 +67,30 @@ class HeidelpaySantanderHirePurchasePaymentMethod extends HeidelpayAbstractPayme
      */
     public function getHeidelpayUrl($quote)
     {
+        // create the collection factory
+        $paymentInfoCollection = $this->paymentInformationCollectionFactory->create();
+
+        // load the payment information by store id, customer email address and payment method
+        /** @var PaymentInformation $paymentInfo */
+        $paymentInfo = $paymentInfoCollection->loadByCustomerInformation(
+            $quote->getStoreId(),
+            $quote->getBillingAddress()->getEmail(),
+            $quote->getPayment()->getMethod()
+        );
+
         // set initial data for the request
         parent::getHeidelpayUrl($quote);
+
+        // add salutation and birthdate to the request
+        if (isset($paymentInfo->getAdditionalData()->hgw_salutation)) {
+            $this->_heidelpayPaymentMethod->getRequest()->getName()
+                ->set('salutation', $paymentInfo->getAdditionalData()->hgw_salutation);
+        }
+
+        if (isset($paymentInfo->getAdditionalData()->hgw_birthdate)) {
+            $this->_heidelpayPaymentMethod->getRequest()->getName()
+                ->set('birthdate', $paymentInfo->getAdditionalData()->hgw_birthdate);
+        }
 
         // send the authorize request
         $this->_heidelpayPaymentMethod->initialize();
