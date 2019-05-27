@@ -166,13 +166,11 @@
                 <button class="action primary checkout"
                         type="submit"
                         data-bind="
-                        click: placeOrder,
-                        attr: {title: $t('Place Order')},
-                        enable: (getCode() == isChecked()),
-                        css: {disabled: !isPlaceOrderActionAllowed()}
-                        "
+                        click: chooseInstallmentPlan,
+                        attr: {title: $t('Choose installment plan')},
+                        enable: (getCode() == isChecked())"
                         data-role="review-save">
-                    <span data-bind="i18n: 'Place Order'"></span>
+                    <span data-bind="i18n: 'Choose installment plan'"></span>
                 </button>
             </div>
         </div>
