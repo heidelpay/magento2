@@ -145,7 +145,7 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
         // set Parameters for success page
         if ($this->heidelpayResponse->isSuccess()) {
             // lock the quote
-            $session->getQuote()->setIsActive(false)->save();
+            //$session->getQuote()->setIsActive(false)->save();
 
             /** @var Order $order */
             $order = null;
@@ -156,7 +156,6 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
                     'Heidelpay - Redirect: Cannot receive order.' . $e->getMessage()
                 );
             }
-
             $session->clearHelperData();
 
             // set QuoteIds
@@ -178,29 +177,6 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
 
             // set response
             $response = $this->_redirect('checkout/onepage/success', ['_secure' => true]);
-
-            try {
-                // send order confirmation to the customer
-                if ($order && $order->getId()) {
-                    $this->_orderSender->send($order);
-                }
-            } catch (\Exception $e) {
-                $this->_logger->error(
-                    'Heidelpay - Redirect: Cannot send order confirmation E-Mail. ' . $e->getMessage()
-                );
-            }
-
-            // Check send Invoice Mail enabled
-            if ($this->salesHelper->canSendNewInvoiceEmail($session->getQuote()->getStore()->getId())) {
-                // send invoice(s) to the customer
-                if (!$order->canInvoice()) {
-                    $invoices = $order->getInvoiceCollection();
-
-                    foreach ($invoices as $invoice) {
-                        $this->_invoiceSender->send($invoice);
-                    }
-                }
-            }
 
             // return response
             return $response;

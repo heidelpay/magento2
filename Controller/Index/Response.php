@@ -10,7 +10,9 @@ use Heidelpay\PhpPaymentApi\Exceptions\HashVerificationException;
 use Heidelpay\PhpPaymentApi\Response as HeidelpayResponse;
 use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\QuoteRepository;
+use Magento\Sales\Helper\Data as SalesHelper;
 use Magento\Sales\Model\Order;
+use Magento\Sales\Model\OrderRepository;
 use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderCommentSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
@@ -48,6 +50,14 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
 
     /** @var CollectionFactory */
     private $paymentInformationCollectionFactory;
+    /**
+     * @var SalesHelper
+     */
+    private $salesHelper;
+    /**
+     * @var OrderRepository
+     */
+    private $orderRepository;
 
     /**
      * heidelpay Response constructor.
@@ -69,8 +79,10 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
      * @param \Magento\Customer\Model\Url $customerUrl
      * @param \Magento\Framework\Controller\Result\RawFactory $rawResultFactory
      * @param QuoteRepository $quoteRepository
-     * @param PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
+     * @param PaymentInformationCollectionFactory $paymentInformationCollectionFactory ,
      * @param TransactionFactory $transactionFactory
+     * @param SalesHelper $salesHelper
+     * @param OrderRepository $orderRepository
      */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
@@ -91,7 +103,9 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
         \Magento\Framework\Controller\Result\RawFactory $rawResultFactory,
         QuoteRepository $quoteRepository,
         PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
-        TransactionFactory $transactionFactory
+        TransactionFactory $transactionFactory,
+        SalesHelper $salesHelper,
+        OrderRepository $orderRepository
     ) {
         parent::__construct(
             $context,
@@ -115,6 +129,8 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
         $this->quoteRepository = $quoteRepository;
         $this->paymentInformationCollectionFactory = $paymentInformationCollectionFactory;
         $this->transactionFactory = $transactionFactory;
+        $this->salesHelper = $salesHelper;
+        $this->orderRepository = $orderRepository;
     }
 
     /**
@@ -243,7 +259,6 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
             $this->_logger->debug($message);
 
             // return the heidelpay response url as raw response instead of echoing it out.
-            $result->setContents($redirectUrl);
             return $result;
         }
 
@@ -252,19 +267,7 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
                 // get the quote by transactionid from the heidelpay response
                 /** @var Quote $quote */
                 $quote = $this->quoteRepository->get($this->heidelpayResponse->getIdentification()->getTransactionId());
-
-                $quote->getStore()->setCurrentCurrencyCode($quote->getQuoteCurrencyCode());
-                $quote->collectTotals();
-                // in case of guest checkout, set some customer related data.
-                if ($this->getRequest()->getPost('CRITERION_GUEST') === 'true') {
-                    $quote->setCustomerId(null)
-                        ->setCustomerEmail($quote->getBillingAddress()->getEmail())
-                        ->setCustomerIsGuest(true)
-                        ->setCustomerGroupId(\Magento\Customer\Model\Group::NOT_LOGGED_IN_ID);
-                }
-
-                // create an order by submitting the quote.
-                $order = $this->_cartManagement->submit($quote);
+                $order = $this->createOrderFromQuote($quote);
             } catch (\Exception $e) {
                 $this->_logger->error('Heidelpay - Response: Cannot submit the Quote. ' . $e->getMessage());
 
@@ -278,11 +281,80 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
                 $order
             );
 
-            $order->save();
+            $this->handleOrderMail($order);
+            $this->handleInvoiceMails($order);
+            $this->orderRepository->save($order);
         }
 
         // if the customer is a guest, we'll delete the additional payment information, which
         // is only used for customer recognition.
+        $this->handleAdittionalPaymentInformation($quote);
+        $this->_logger->debug('Heidelpay - Response: redirectUrl is ' . $redirectUrl);
+
+        // return the heidelpay response url as raw response instead of echoing it out.
+        return $result;
+    }
+
+    /**
+     * @param $order
+     */
+    protected function handleOrderMail($order)
+    {
+        try {
+            // send order confirmation to the customer
+            if ($order && $order->getId()) {
+                $this->_orderSender->send($order);
+            }
+        } catch (\Exception $e) {
+            $this->_logger->error(
+                'Heidelpay - Redirect: Cannot send order confirmation E-Mail. ' . $e->getMessage()
+            );
+        }
+    }
+
+    /**
+     * @param $order
+     */
+    protected function handleInvoiceMails($order)
+    {
+        if (!$order->canInvoice() && $this->salesHelper->canSendNewInvoiceEmail($order->getStore()->getId())) {
+            $invoices = $order->getInvoiceCollection();
+
+            foreach ($invoices as $invoice) {
+                $this->_invoiceSender->send($invoice);
+            }
+        }
+    }
+
+    /**
+     * @param $quote
+     * @return \Magento\Framework\Model\AbstractExtensibleModel|\Magento\Sales\Api\Data\OrderInterface|null|object
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    protected function createOrderFromQuote($quote)
+    {
+        $quote->getStore()->setCurrentCurrencyCode($quote->getQuoteCurrencyCode());
+        $quote->collectTotals();
+        // in case of guest checkout, set some customer related data.
+        if ($this->getRequest()->getPost('CRITERION_GUEST') === 'true') {
+            $quote->setCustomerId(null)
+                ->setCustomerEmail($quote->getBillingAddress()->getEmail())
+                ->setCustomerIsGuest(true)
+                ->setCustomerGroupId(\Magento\Customer\Model\Group::NOT_LOGGED_IN_ID);
+        }
+
+        // create an order by submitting the quote.
+        $order = $this->_cartManagement->submit($quote);
+
+        return $order;
+    }
+
+    /**
+     * @param $quote
+     * @throws \Exception
+     */
+    protected function handleAdittionalPaymentInformation($quote)
+    {
         if (isset($quote) && $quote->getCustomerIsGuest()) {
             // create a new instance for the payment information collection.
             $paymentInfoCollection = $this->paymentInformationCollectionFactory->create();
@@ -299,11 +371,5 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
                 $paymentInfo->delete();
             }
         }
-
-        $this->_logger->debug('Heidelpay - Response: redirectUrl is ' . $redirectUrl);
-
-        // return the heidelpay response url as raw response instead of echoing it out.
-        $result->setContents($redirectUrl);
-        return $result;
     }
 }
