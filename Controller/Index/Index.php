@@ -2,13 +2,27 @@
 
 namespace Heidelpay\Gateway\Controller\Index;
 
+use Exception;
+use Heidelpay\Gateway\Controller\HgwAbstract;
 use Heidelpay\Gateway\Helper\Payment as HeidelpayHelper;
 use Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod;
+use Heidelpay\PhpBasketApi\Exception\InvalidBasketitemPositionException;
+use Magento\Checkout\Model\Session as CheckoutSession;
+use Magento\Customer\Model\Session;
+use Magento\Customer\Model\Url;
 use Magento\Framework\App\Action\Context;
+use Magento\Framework\Encryption\Encryptor;
 use Magento\Framework\Escaper;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Url\Helper\Data;
+use Magento\Framework\View\Result\PageFactory;
+use Magento\Quote\Api\CartManagementInterface;
+use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderCommentSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
+use Magento\Sales\Model\OrderFactory;
+use Psr\Log\LoggerInterface;
 
 /**
  * Customer redirect to heidelpay payment or used to display the payment frontend to the customer
@@ -20,27 +34,27 @@ use Magento\Sales\Model\Order\Email\Sender\OrderSender;
  *
  * @package heidelpay\magento2\controllers
  */
-class Index extends \Heidelpay\Gateway\Controller\HgwAbstract
+class Index extends HgwAbstract
 {
     /** @var Escaper */
     private $escaper;
 
     public function __construct(
         Context $context,
-        \Magento\Customer\Model\Session $customerSession,
-        \Magento\Checkout\Model\Session $checkoutSession,
-        \Magento\Sales\Model\OrderFactory $orderFactory,
-        \Magento\Framework\Url\Helper\Data $urlHelper,
-        \Psr\Log\LoggerInterface $logger,
-        \Magento\Quote\Api\CartManagementInterface $cartManagement,
-        \Magento\Quote\Api\CartRepositoryInterface $quoteObject,
-        \Magento\Framework\View\Result\PageFactory $resultPageFactory,
+        Session $customerSession,
+        CheckoutSession $checkoutSession,
+        OrderFactory $orderFactory,
+        Data $urlHelper,
+        LoggerInterface $logger,
+        CartManagementInterface $cartManagement,
+        CartRepositoryInterface $quoteObject,
+        PageFactory $resultPageFactory,
         HeidelpayHelper $paymentHelper,
         OrderSender $orderSender,
         InvoiceSender $invoiceSender,
         OrderCommentSender $orderCommentSender,
-        \Magento\Framework\Encryption\Encryptor $encryptor,
-        \Magento\Customer\Model\Url $customerUrl,
+        Encryptor $encryptor,
+        Url $customerUrl,
         Escaper $escaper
     ) {
         parent::__construct(
@@ -66,9 +80,9 @@ class Index extends \Heidelpay\Gateway\Controller\HgwAbstract
 
     /**
      * {@inheritDoc}
-     * @throws \Heidelpay\PhpBasketApi\Exception\InvalidBasketitemPositionException
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Exception
+     * @throws InvalidBasketitemPositionException
+     * @throws LocalizedException
+     * @throws Exception
      */
     public function execute()
     {

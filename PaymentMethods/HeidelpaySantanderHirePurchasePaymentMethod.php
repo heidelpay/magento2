@@ -19,13 +19,13 @@ use Heidelpay\Gateway\Model\PaymentInformation;
 use Heidelpay\PhpPaymentApi\PaymentMethods\SantanderHirePurchasePaymentMethod;
 use Magento\Quote\Api\Data\CartInterface;
 
+/**
+ * @property SantanderHirePurchasePaymentMethod $_heidelpayPaymentMethod
+ */
 class HeidelpaySantanderHirePurchasePaymentMethod extends HeidelpayAbstractPaymentMethod
 {
     /** @var string PaymentCode */
     const CODE = 'hgwsanhp';
-
-    /** @var SantanderHirePurchasePaymentMethod */
-    protected $_heidelpayPaymentMethod;
 
     /**
      * {@inheritDoc}
@@ -82,14 +82,13 @@ class HeidelpaySantanderHirePurchasePaymentMethod extends HeidelpayAbstractPayme
         parent::getHeidelpayUrl($quote);
 
         // add salutation and birthdate to the request
+        $request = $this->_heidelpayPaymentMethod->getRequest();
         if (isset($paymentInfo->getAdditionalData()->hgw_salutation)) {
-            $this->_heidelpayPaymentMethod->getRequest()->getName()
-                ->set('salutation', $paymentInfo->getAdditionalData()->hgw_salutation);
+            $request->getName()->set('salutation', $paymentInfo->getAdditionalData()->hgw_salutation);
         }
 
         if (isset($paymentInfo->getAdditionalData()->hgw_birthdate)) {
-            $this->_heidelpayPaymentMethod->getRequest()->getName()
-                ->set('birthdate', $paymentInfo->getAdditionalData()->hgw_birthdate);
+            $request->getName()->set('birthdate', $paymentInfo->getAdditionalData()->hgw_birthdate);
         }
 
         // send the authorize request

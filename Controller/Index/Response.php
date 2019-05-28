@@ -6,11 +6,11 @@ use Exception;
 use Heidelpay\Gateway\Controller\HgwAbstract;
 use Heidelpay\Gateway\Helper\Payment as HeidelpayHelper;
 use Heidelpay\Gateway\Model\PaymentInformation;
-use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory;
 use Heidelpay\Gateway\Model\TransactionFactory;
 use Magento\Framework\Controller\Result\RawFactory;
 use Magento\Sales\Model\OrderFactory;
+use Magento\Customer\Model\Group;
 use Heidelpay\PhpPaymentApi\Exceptions\HashVerificationException;
 use Heidelpay\PhpPaymentApi\Response as HeidelpayResponse;
 use Magento\Checkout\Model\Session as CheckoutSession;
@@ -84,7 +84,7 @@ class Response extends HgwAbstract
      * @param Url $customerUrl
      * @param RawFactory $rawResultFactory
      * @param QuoteRepository $quoteRepository
-     * @param PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
+     * @param CollectionFactory $paymentInformationCollectionFactory,
      * @param TransactionFactory $transactionFactory
      */
     public function __construct(
@@ -105,7 +105,7 @@ class Response extends HgwAbstract
         Url $customerUrl,
         RawFactory $rawResultFactory,
         QuoteRepository $quoteRepository,
-        PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
+        CollectionFactory $paymentInformationCollectionFactory,
         TransactionFactory $transactionFactory
     ) {
         parent::__construct(
@@ -275,7 +275,7 @@ class Response extends HgwAbstract
                     $quote->setCustomerId(null)
                         ->setCustomerEmail($quote->getBillingAddress()->getEmail())
                         ->setCustomerIsGuest(true)
-                        ->setCustomerGroupId(\Magento\Customer\Model\Group::NOT_LOGGED_IN_ID);
+                        ->setCustomerGroupId(Group::NOT_LOGGED_IN_ID);
                 }
 
                 // create an order by submitting the quote.
