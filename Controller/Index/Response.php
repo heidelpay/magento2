@@ -5,9 +5,11 @@ namespace Heidelpay\Gateway\Controller\Index;
 use Heidelpay\Gateway\Helper\Payment as HeidelpayHelper;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory;
+use Heidelpay\Gateway\Model\Transaction;
 use Heidelpay\Gateway\Model\TransactionFactory;
 use Heidelpay\PhpPaymentApi\Exceptions\HashVerificationException;
 use Heidelpay\PhpPaymentApi\Response as HeidelpayResponse;
+use Magento\Framework\Controller\Result\RawFactory;
 use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\QuoteRepository;
 use Magento\Sales\Helper\Data as SalesHelper;
@@ -77,7 +79,7 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
      * @param OrderCommentSender $orderCommentSender
      * @param \Magento\Framework\Encryption\Encryptor $encryptor
      * @param \Magento\Customer\Model\Url $customerUrl
-     * @param \Magento\Framework\Controller\Result\RawFactory $rawResultFactory
+     * @param RawFactory $rawResultFactory
      * @param QuoteRepository $quoteRepository
      * @param PaymentInformationCollectionFactory $paymentInformationCollectionFactory ,
      * @param TransactionFactory $transactionFactory
@@ -100,7 +102,7 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
         OrderCommentSender $orderCommentSender,
         \Magento\Framework\Encryption\Encryptor $encryptor,
         \Magento\Customer\Model\Url $customerUrl,
-        \Magento\Framework\Controller\Result\RawFactory $rawResultFactory,
+        RawFactory $rawResultFactory,
         QuoteRepository $quoteRepository,
         PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
         TransactionFactory $transactionFactory,
@@ -139,12 +141,6 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
      */
     public function execute()
     {
-        // initialize the Raw Response object from the factory.
-        $result = $this->resultFactory->create();
-
-        // we just want the response to return a plain url, so we set the header to text/plain.
-        $result->setHeader('Content-Type', 'text/plain');
-
         // the url where the payment will redirect the customer to.
         $redirectUrl = $this->_url->getUrl('hgw/index/redirect', [
             '_forced_secure' => true,
@@ -152,6 +148,10 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
             '_nosid' => true
         ]);
 
+        // initialize the Raw Response object from the factory.
+        $result = $this->resultFactory->create();
+        // we just want the response to return a plain url, so we set the header to text/plain.
+        $result->setHeader('Content-Type', 'text/plain');
         // the payment just wants a url as result, so we set the content to the redirectUrl.
         $result->setContents($redirectUrl);
 
@@ -186,24 +186,7 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
         $secret = $this->_encryptor->exportKeys();
         $identificationTransactionId = $this->heidelpayResponse->getIdentification()->getTransactionId();
 
-        $this->_logger->debug('Heidelpay secret: ' . $secret);
-        $this->_logger->debug('Heidelpay identificationTransactionId: ' . $identificationTransactionId);
-
-        // validate Hash to prevent manipulation
-        try {
-            $this->heidelpayResponse->verifySecurityHash($secret, $identificationTransactionId);
-        } catch (HashVerificationException $e) {
-            $this->_logger->critical('Heidelpay Response - HashVerification Exception: ' . $e->getMessage());
-            $this->_logger->critical(
-                'Heidelpay Response - Received request form server '
-                . $this->getRequest()->getServer('REMOTE_ADDR')
-                . ' with an invalid hash. This could be some kind of manipulation.'
-            );
-            $this->_logger->critical(
-                'Heidelpay Response - Reference secret hash: '
-                . $this->heidelpayResponse->getCriterion()->getSecretHash()
-            );
-
+        if(!$this->validateSecurityHash($secret, $identificationTransactionId)) {
             return $result;
         }
 
@@ -219,30 +202,7 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
         $quote = null;
 
         $data = $this->getRequest()->getParams();
-
-        // save the heidelpay transaction data
-        list($paymentMethod, $paymentType) = $this->_paymentHelper->splitPaymentCode(
-            $this->heidelpayResponse->getPayment()->getCode()
-        );
-
-        try {
-            // save the response details into the heidelpay Transactions table.
-            $transaction = $this->transactionFactory->create();
-            $transaction->setPaymentMethod($paymentMethod)
-                ->setPaymentType($paymentType)
-                ->setTransactionId($this->heidelpayResponse->getIdentification()->getTransactionId())
-                ->setUniqueId($this->heidelpayResponse->getIdentification()->getUniqueId())
-                ->setShortId($this->heidelpayResponse->getIdentification()->getShortId())
-                ->setStatusCode($this->heidelpayResponse->getProcessing()->getStatusCode())
-                ->setResult($this->heidelpayResponse->getProcessing()->getResult())
-                ->setReturnMessage($this->heidelpayResponse->getProcessing()->getReturn())
-                ->setReturnCode($this->heidelpayResponse->getProcessing()->getReturnCode())
-                ->setJsonResponse(json_encode($data))
-                ->setSource('RESPONSE')
-                ->save();
-        } catch (\Exception $e) {
-            $this->_logger->error('Heidelpay - Response: Save transaction error. ' . $e->getMessage());
-        }
+        $this->saveHeidelpayTransaction($this->heidelpayResponse, $data, 'RESPONSE');
 
         // if something went wrong, return the redirect url without processing the order.
         if ($this->heidelpayResponse->isError()) {
@@ -266,7 +226,7 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
             try {
                 // get the quote by transactionid from the heidelpay response
                 /** @var Quote $quote */
-                $quote = $this->quoteRepository->get($this->heidelpayResponse->getIdentification()->getTransactionId());
+                $quote = $this->quoteRepository->get($identificationTransactionId);
                 $order = $this->createOrderFromQuote($quote);
             } catch (\Exception $e) {
                 $this->_logger->error('Heidelpay - Response: Cannot submit the Quote. ' . $e->getMessage());
@@ -276,19 +236,14 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
 
             $data['ORDER_ID'] = $order->getIncrementId();
 
-            $this->_paymentHelper->mapStatus(
-                $data,
-                $order
-            );
-
+            $this->_paymentHelper->mapStatus($data, $order);
             $this->handleOrderMail($order);
             $this->handleInvoiceMails($order);
+
             $this->orderRepository->save($order);
         }
 
-        // if the customer is a guest, we'll delete the additional payment information, which
-        // is only used for customer recognition.
-        $this->handleAdittionalPaymentInformation($quote);
+        $this->handleAdditionalPaymentInformation($quote);
         $this->_logger->debug('Heidelpay - Response: redirectUrl is ' . $redirectUrl);
 
         // return the heidelpay response url as raw response instead of echoing it out.
@@ -296,12 +251,12 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
     }
 
     /**
+     * Send order confirmation to the customer
      * @param $order
      */
     protected function handleOrderMail($order)
     {
         try {
-            // send order confirmation to the customer
             if ($order && $order->getId()) {
                 $this->_orderSender->send($order);
             }
@@ -313,6 +268,7 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
     }
 
     /**
+     * Send invoice mails to the customer
      * @param $order
      */
     protected function handleInvoiceMails($order)
@@ -327,12 +283,14 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
     }
 
     /**
+     * Create an order by submitting the quote.
      * @param $quote
      * @return \Magento\Framework\Model\AbstractExtensibleModel|\Magento\Sales\Api\Data\OrderInterface|null|object
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     protected function createOrderFromQuote($quote)
     {
+        // Ensure to use the currency of the quote.
         $quote->getStore()->setCurrentCurrencyCode($quote->getQuoteCurrencyCode());
         $quote->collectTotals();
         // in case of guest checkout, set some customer related data.
@@ -343,19 +301,18 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
                 ->setCustomerGroupId(\Magento\Customer\Model\Group::NOT_LOGGED_IN_ID);
         }
 
-        // create an order by submitting the quote.
-        $order = $this->_cartManagement->submit($quote);
-
-        return $order;
+        return $this->_cartManagement->submit($quote);
     }
 
     /**
+     * If the customer is a guest, we'll delete the additional payment information, which
+     * is only used for customer recognition.
      * @param $quote
      * @throws \Exception
      */
-    protected function handleAdittionalPaymentInformation($quote)
+    protected function handleAdditionalPaymentInformation($quote)
     {
-        if (isset($quote) && $quote->getCustomerIsGuest()) {
+        if ($quote !== null && $quote->getCustomerIsGuest()) {
             // create a new instance for the payment information collection.
             $paymentInfoCollection = $this->paymentInformationCollectionFactory->create();
 
@@ -370,6 +327,69 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
             if (!$paymentInfo->isEmpty()) {
                 $paymentInfo->delete();
             }
+        }
+    }
+
+    /**
+     * Validate Hash to prevent manipulation
+     * @param $secret
+     * @param $identificationTransactionId
+     * @return bool
+     */
+    protected function validateSecurityHash($secret, $identificationTransactionId)
+    {
+        $this->_logger->debug('Heidelpay secret: ' . $secret);
+        $this->_logger->debug('Heidelpay identificationTransactionId: ' . $identificationTransactionId);
+
+        try {
+            $this->heidelpayResponse->verifySecurityHash($secret, $identificationTransactionId);
+            return true;
+        } catch (HashVerificationException $e) {
+            $this->_logger->critical('Heidelpay Response - HashVerification Exception: ' . $e->getMessage());
+            $this->_logger->critical(
+                'Heidelpay Response - Received request form server '
+                . $this->getRequest()->getServer('REMOTE_ADDR')
+                . ' with an invalid hash. This could be some kind of manipulation.'
+            );
+            $this->_logger->critical(
+                'Heidelpay Response - Reference secret hash: '
+                . $this->heidelpayResponse->getCriterion()->getSecretHash()
+            );
+            return false;
+        }
+    }
+
+    /**
+     * Save the heidelpay transaction data
+     * @param Response $response
+     * @param $data
+     * @param $source
+     * @return void
+     */
+    protected function saveHeidelpayTransaction($response, $data, $source)
+    {
+        list($paymentMethod, $paymentType) = $this->_paymentHelper->splitPaymentCode(
+            $response->getPayment()->getCode()
+        );
+
+        try {
+            // save the response details into the heidelpay Transactions table.
+            /** @var Transaction $transaction */
+            $transaction = $this->transactionFactory->create();
+            $transaction->setPaymentMethod($paymentMethod)
+                ->setPaymentType($paymentType)
+                ->setTransactionId($response->getIdentification()->getTransactionId())
+                ->setUniqueId($response->getIdentification()->getUniqueId())
+                ->setShortId($response->getIdentification()->getShortId())
+                ->setStatusCode($response->getProcessing()->getStatusCode())
+                ->setResult($response->getProcessing()->getResult())
+                ->setReturnMessage($response->getProcessing()->getReturn())
+                ->setReturnCode($response->getProcessing()->getReturnCode())
+                ->setJsonResponse(json_encode($data))
+                ->setSource($source)
+                ->save();
+        } catch (\Exception $e) {
+            $this->_logger->error('Heidelpay - ' . $source . ': Save transaction error. ' . $e->getMessage());
         }
     }
 }
