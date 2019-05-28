@@ -88,8 +88,8 @@ class Response extends HgwAbstract
      * @param Url $customerUrl
      * @param RawFactory $rawResultFactory
      * @param QuoteRepository $quoteRepository
-     * @param CollectionFactory $paymentInformationCollectionFactory,
-     * @param TransactionFactory $transactionFactory
+     * @param PaymentInformationCollectionFactory $paymentInformationCollectionFactory ,
+     * @param SalesHelper $salesHelper
      */
     public function __construct(
         Context $context,
@@ -110,7 +110,6 @@ class Response extends HgwAbstract
         RawFactory $rawResultFactory,
         QuoteRepository $quoteRepository,
         PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
-        TransactionFactory $transactionFactory,
         SalesHelper $salesHelper
     ) {
         parent::__construct(
@@ -245,6 +244,7 @@ class Response extends HgwAbstract
                 $order = $this->_paymentHelper->createOrderFromQuote($quote);
             } catch (Exception $e) {
                 $this->_logger->error('Heidelpay - Response: Cannot submit the Quote. ' . $e->getMessage());
+
                 return $result;
             }
 
@@ -254,6 +254,7 @@ class Response extends HgwAbstract
             $this->handleOrderMail($order);
             $this->handleInvoiceMails($order);
             $order->save();
+        }
 
         $this->handleAdditionalPaymentInformation($quote);
         $this->_logger->debug('Heidelpay - Response: redirectUrl is ' . $redirectUrl);

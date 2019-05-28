@@ -3,15 +3,15 @@
 namespace Heidelpay\Gateway\Controller\Index;
 
 use Exception;
-use Heidelpay\Gateway\Block\Hgw;
 use Heidelpay\Gateway\Controller\HgwAbstract;
+use Heidelpay\Gateway\Block\Hgw;
 use Heidelpay\Gateway\Helper\Payment as HeidelpayHelper;
 use Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod;
 use Heidelpay\PhpBasketApi\Exception\InvalidBasketitemPositionException;
-use Heidelpay\PhpPaymentApi\Response as HeidelpayResponse;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Customer\Model\Session;
 use Magento\Customer\Model\Url;
+use Heidelpay\PhpPaymentApi\Response as HeidelpayResponse;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\Encryption\Encryptor;
 use Magento\Framework\Escaper;
