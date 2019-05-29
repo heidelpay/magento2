@@ -16,7 +16,9 @@
 namespace Heidelpay\Gateway\PaymentMethods;
 
 use Heidelpay\Gateway\Model\PaymentInformation;
+use Heidelpay\Gateway\Wrapper\CustomerWrapper;
 use Heidelpay\PhpPaymentApi\PaymentMethods\SantanderHirePurchasePaymentMethod;
+use Magento\Framework\App\ObjectManager;
 use Magento\Quote\Api\Data\CartInterface;
 
 /**
@@ -90,6 +92,14 @@ class HeidelpaySantanderHirePurchasePaymentMethod extends HeidelpayAbstractPayme
         if (isset($paymentInfo->getAdditionalData()->hgw_birthdate)) {
             $request->getName()->set('birthdate', $paymentInfo->getAdditionalData()->hgw_birthdate);
         }
+
+        $objectManager = ObjectManager::getInstance();
+        /** @var CustomerWrapper $customer */
+        $customer = $objectManager->create(CustomerWrapper::class)->setCustomer($quote->getCustomer());
+        $request->getRiskInformation()
+                ->setCustomerGuestCheckout($customer->isGuest())
+                ->setCustomerOrderCount($customer->numberOfOrders())
+                ->setCustomerSince($customer->customerSince());
 
         // send the authorize request
         $this->_heidelpayPaymentMethod->initialize();
