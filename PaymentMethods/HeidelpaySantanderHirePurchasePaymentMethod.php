@@ -97,7 +97,7 @@ class HeidelpaySantanderHirePurchasePaymentMethod extends HeidelpayAbstractPayme
         /** @var CustomerWrapper $customer */
         $customer = $objectManager->create(CustomerWrapper::class)->setCustomer($quote->getCustomer());
         $request->getRiskInformation()
-                ->setCustomerGuestCheckout($customer->isGuest())
+                ->setCustomerGuestCheckout($customer->isGuest() ? 'TRUE' : 'FALSE')
                 ->setCustomerOrderCount($customer->numberOfOrders())
                 ->setCustomerSince($customer->customerSince());
 
