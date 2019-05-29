@@ -151,7 +151,7 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
         $result = $this->resultFactory->create();
         // we just want the response to return a plain url, so we set the header to text/plain.
         $result->setHeader('Content-Type', 'text/plain');
-        // the payment just wants a url as result, so we set the content to the redirectUrl.
+        // the payment just wants an url as result, so we set the content to the redirectUrl.
         $result->setContents($redirectUrl);
 
         // if there is no post request, just redirect to the cart instantly and show an error message to the customer.
