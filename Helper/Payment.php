@@ -313,13 +313,13 @@ class Payment extends AbstractHelper
      * @return \Magento\Framework\Model\AbstractExtensibleModel|\Magento\Sales\Api\Data\OrderInterface|null|object
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function createOrderFromQuote($quote, $isGuest = false)
+    public function createOrderFromQuote($quote)
     {
         // Ensure to use the currency of the quote.
         $quote->getStore()->setCurrentCurrencyCode($quote->getQuoteCurrencyCode());
         $quote->collectTotals();
         // in case of guest checkout, set some customer related data.
-        if ($isGuest) {
+        if ($quote->getCustomerId() === null) {
             $quote->setCustomerId(null)
                 ->setCustomerEmail($quote->getBillingAddress()->getEmail())
                 ->setCustomerIsGuest(true)

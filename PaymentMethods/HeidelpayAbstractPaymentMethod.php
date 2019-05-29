@@ -616,7 +616,7 @@ class HeidelpayAbstractPaymentMethod extends \Magento\Payment\Model\Method\Abstr
             $billingStreet .= $street . ' ';
         }
 
-        $user['CRITERION.GUEST'] = $order->getCustomer()->getId() == 0 ? 'true' : 'false';
+        $user['CRITERION.GUEST'] = $order->getCustomer()->getId() === null ? 'true' : 'false';
 
         $user['NAME.COMPANY'] = ($billing->getCompany() === false) ? null : trim($billing->getCompany());
         $user['NAME.GIVEN'] = trim($billing->getFirstname());

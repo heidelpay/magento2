@@ -182,10 +182,7 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
             return $result;
         }
 
-        $secret = $this->_encryptor->exportKeys();
-        $identificationTransactionId = $this->heidelpayResponse->getIdentification()->getTransactionId();
-
-        if(!$this->validateSecurityHash($secret, $identificationTransactionId)) {
+        if(!$this->validateSecurityHash($this->heidelpayResponse)) {
             return $result;
         }
 
@@ -223,11 +220,11 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
 
         if ($this->heidelpayResponse->isSuccess()) {
             try {
+                $identificationTransactionId = $this->heidelpayResponse->getIdentification()->getTransactionId();
                 // get the quote by transactionid from the heidelpay response
                 /** @var Quote $quote */
                 $quote = $this->quoteRepository->get($identificationTransactionId);
-                $isGuest = $this->getRequest()->getPost('CRITERION_GUEST') === 'true';
-                $order = $this->_paymentHelper->createOrderFromQuote($quote, $isGuest);
+                $order = $this->_paymentHelper->createOrderFromQuote($quote);
             } catch (\Exception $e) {
                 $this->_logger->error('Heidelpay - Response: Cannot submit the Quote. ' . $e->getMessage());
 
@@ -310,17 +307,19 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
 
     /**
      * Validate Hash to prevent manipulation
-     * @param $secret
-     * @param $identificationTransactionId
+     * @param HeidelpayResponse $response
      * @return bool
      */
-    protected function validateSecurityHash($secret, $identificationTransactionId)
+    protected function validateSecurityHash($response)
     {
+        $secret = $this->_encryptor->exportKeys();
+        $identificationTransactionId = $response->getIdentification()->getTransactionId();
+
         $this->_logger->debug('Heidelpay secret: ' . $secret);
         $this->_logger->debug('Heidelpay identificationTransactionId: ' . $identificationTransactionId);
 
         try {
-            $this->heidelpayResponse->verifySecurityHash($secret, $identificationTransactionId);
+            $response->verifySecurityHash($secret, $identificationTransactionId);
             return true;
         } catch (HashVerificationException $e) {
             $this->_logger->critical('Heidelpay Response - HashVerification Exception: ' . $e->getMessage());
@@ -331,7 +330,7 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
             );
             $this->_logger->critical(
                 'Heidelpay Response - Reference secret hash: '
-                . $this->heidelpayResponse->getCriterion()->getSecretHash()
+                . $response->getCriterion()->getSecretHash()
             );
             return false;
         }

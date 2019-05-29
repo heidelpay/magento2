@@ -144,9 +144,6 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
 
         // set Parameters for success page
         if ($this->heidelpayResponse->isSuccess()) {
-            // lock the quote
-            //$session->getQuote()->setIsActive(false)->save();
-
             /** @var Order $order */
             $order = null;
             try {
@@ -176,9 +173,6 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
 
             return $this->_redirect('checkout/onepage/success', ['_secure' => true]);
         }
-
-        // unlock the quote in case of error
-        $session->getQuote()->setIsActive(true)->save();
 
         $this->_logger->error(
             'Heidelpay - Redirect: Redirect with error to cart: ' . $this->heidelpayResponse->getError()['message']
