@@ -7,13 +7,22 @@ use Heidelpay\PhpPaymentApi\Constants\PaymentMethod;
 use Heidelpay\PhpPaymentApi\Constants\ProcessingResult;
 use Heidelpay\PhpPaymentApi\Constants\StatusCode;
 use Heidelpay\PhpPaymentApi\Constants\TransactionType;
+use Heidelpay\PhpPaymentApi\Response;
+use Magento\Customer\Model\Group;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\DB\TransactionFactory;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\HTTP\ZendClientFactory;
 use Magento\Framework\Locale\Resolver;
+use Magento\Framework\Model\AbstractExtensibleModel;
+use Magento\Quote\Model\Quote;
+use Magento\Quote\Model\QuoteManagement;
+use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Invoice;
+use Heidelpay\Gateway\Model\Transaction;
+use Heidelpay\Gateway\Model\TransactionFactory as HgwTransactionFactory;
 
 /**
  * Heidelpay payment helper
@@ -45,23 +54,35 @@ class Payment extends AbstractHelper
     /** @var Resolver */
     protected $localeResolver;
 
+    /** @var QuoteManagement */
+    private $_cartManagement;
+
+    /** @var HgwTransactionFactory */
+    private $heidelpayTransactionFactory;
+
     /**
      * @param Context $context
      * @param ZendClientFactory $httpClientFactory
      * @param TransactionFactory $transactionFactory
      * @param Resolver $localeResolver
+     * @param QuoteManagement $cartManagement
+     * @param Transaction $heidelpayTransactionFactory
      */
     public function __construct(
         Context $context,
         ZendClientFactory $httpClientFactory,
         TransactionFactory $transactionFactory,
-        Resolver $localeResolver
+        Resolver $localeResolver,
+        QuoteManagement $cartManagement,
+        Transaction $heidelpayTransactionFactory
     ) {
         $this->httpClientFactory = $httpClientFactory;
         $this->transactionFactory = $transactionFactory;
         $this->localeResolver = $localeResolver;
 
         parent::__construct($context);
+        $this->_cartManagement = $cartManagement;
+        $this->heidelpayTransactionFactory = $heidelpayTransactionFactory;
     }
 
     /**
@@ -256,5 +277,61 @@ class Payment extends AbstractHelper
     {
         $transaction = $this->transactionFactory->create();
         $transaction->addObject($invoice)->addObject($invoice->getOrder())->save();
+    }
+
+    /**
+     * Save the heidelpay transaction data
+     * @param Response $response
+     * @param $data
+     * @param $source
+     * @return void
+     */
+    public function saveHeidelpayTransaction($response, $data, $source)
+    {
+        list($paymentMethod, $paymentType) = $this->splitPaymentCode(
+            $response->getPayment()->getCode()
+        );
+
+        try {
+            // save the response details into the heidelpay Transactions table.
+            /** @var Transaction $transaction */
+            $transaction = $this->heidelpayTransactionFactory->create();
+            $transaction->setPaymentMethod($paymentMethod)
+                ->setPaymentType($paymentType)
+                ->setTransactionId($response->getIdentification()->getTransactionId())
+                ->setUniqueId($response->getIdentification()->getUniqueId())
+                ->setShortId($response->getIdentification()->getShortId())
+                ->setStatusCode($response->getProcessing()->getStatusCode())
+                ->setResult($response->getProcessing()->getResult())
+                ->setReturnMessage($response->getProcessing()->getReturn())
+                ->setReturnCode($response->getProcessing()->getReturnCode())
+                ->setJsonResponse(json_encode($data))
+                ->setSource($source)
+                ->save();
+        } catch (\Exception $e) {
+            $this->_logger->error('Heidelpay - ' . $source . ': Save transaction error. ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Create an order by submitting the quote.
+     * @param Quote $quote
+     * @return AbstractExtensibleModel|OrderInterface|null|object
+     * @throws LocalizedException
+     */
+    public function createOrderFromQuote($quote)
+    {
+        // Ensure to use the currency of the quote.
+        $quote->getStore()->setCurrentCurrencyCode($quote->getQuoteCurrencyCode());
+        $quote->collectTotals();
+        // in case of guest checkout, set some customer related data.
+        if ($quote->getCustomerId() === null) {
+            $quote->setCustomerId(null)
+                ->setCustomerEmail($quote->getBillingAddress()->getEmail())
+                ->setCustomerIsGuest(true)
+                ->setCustomerGroupId(Group::NOT_LOGGED_IN_ID);
+        }
+
+        return $this->_cartManagement->submit($quote);
     }
 }
