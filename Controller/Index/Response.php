@@ -262,7 +262,7 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
             }
         } catch (\Exception $e) {
             $this->_logger->error(
-                'Heidelpay - Redirect: Cannot send order confirmation E-Mail. ' . $e->getMessage()
+                'Heidelpay - Response: Cannot send order confirmation E-Mail. ' . $e->getMessage()
             );
         }
     }
