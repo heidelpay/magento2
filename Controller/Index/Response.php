@@ -13,6 +13,7 @@ use Magento\Sales\Model\OrderFactory;
 use Heidelpay\PhpPaymentApi\Constants\PaymentMethod;
 use Heidelpay\PhpPaymentApi\Exceptions\HashVerificationException;
 use Heidelpay\PhpPaymentApi\Response as HeidelpayResponse;
+use Heidelpay\PhpPaymentApi\Constants\TransactionType;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Customer\Model\Session;
 use Magento\Customer\Model\Url;
@@ -22,7 +23,6 @@ use Magento\Framework\Url\Helper\Data;
 use Magento\Framework\View\Result\PageFactory;
 use Magento\Quote\Api\CartManagementInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
-use Heidelpay\PhpPaymentApi\Constants\TransactionType;
 use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\QuoteRepository;
 use Magento\Sales\Model\Order;
@@ -220,6 +220,7 @@ class Response extends HgwAbstract
             return $result;
         }
 
+        // Create order if transaction is successful and not just an initialization
         if ($paymentType === TransactionType::INITIALIZE && $paymentMethod === PaymentMethod::HIRE_PURCHASE) {
             if ($this->heidelpayResponse->isSuccess()) {
                 $redirectUrl = $this->_url->getUrl('checkout/', [
@@ -244,7 +245,6 @@ class Response extends HgwAbstract
                 $order = $this->_paymentHelper->createOrderFromQuote($quote);
             } catch (Exception $e) {
                 $this->_logger->error('Heidelpay - Response: Cannot submit the Quote. ' . $e->getMessage());
-
                 return $result;
             }
 
