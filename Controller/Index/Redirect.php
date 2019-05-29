@@ -172,14 +172,9 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
                 ->additionalPaymentInformation($data);
 
             $this->_checkoutSession->setHeidelpayInfo($additionalPaymentInformation);
-
             $this->_logger->debug('Heidelpay - Redirect: Redirecting customer to success page.');
 
-            // set response
-            $response = $this->_redirect('checkout/onepage/success', ['_secure' => true]);
-
-            // return response
-            return $response;
+            return $this->_redirect('checkout/onepage/success', ['_secure' => true]);
         }
 
         // unlock the quote in case of error

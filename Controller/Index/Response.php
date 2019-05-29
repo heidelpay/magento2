@@ -5,7 +5,6 @@ namespace Heidelpay\Gateway\Controller\Index;
 use Heidelpay\Gateway\Helper\Payment as HeidelpayHelper;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory;
-use Heidelpay\Gateway\Model\Transaction;
 use Heidelpay\Gateway\Model\TransactionFactory;
 use Heidelpay\PhpPaymentApi\Exceptions\HashVerificationException;
 use Heidelpay\PhpPaymentApi\Response as HeidelpayResponse;
@@ -202,7 +201,7 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
         $quote = null;
 
         $data = $this->getRequest()->getParams();
-        $this->saveHeidelpayTransaction($this->heidelpayResponse, $data, 'RESPONSE');
+        $this->_paymentHelper->saveHeidelpayTransaction($this->heidelpayResponse, $data, 'RESPONSE');
 
         // if something went wrong, return the redirect url without processing the order.
         if ($this->heidelpayResponse->isError()) {
@@ -227,7 +226,8 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
                 // get the quote by transactionid from the heidelpay response
                 /** @var Quote $quote */
                 $quote = $this->quoteRepository->get($identificationTransactionId);
-                $order = $this->createOrderFromQuote($quote);
+                $isGuest = $this->getRequest()->getPost('CRITERION_GUEST') === 'true';
+                $order = $this->_paymentHelper->createOrderFromQuote($quote, $isGuest);
             } catch (\Exception $e) {
                 $this->_logger->error('Heidelpay - Response: Cannot submit the Quote. ' . $e->getMessage());
 
@@ -283,31 +283,9 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
     }
 
     /**
-     * Create an order by submitting the quote.
-     * @param $quote
-     * @return \Magento\Framework\Model\AbstractExtensibleModel|\Magento\Sales\Api\Data\OrderInterface|null|object
-     * @throws \Magento\Framework\Exception\LocalizedException
-     */
-    protected function createOrderFromQuote($quote)
-    {
-        // Ensure to use the currency of the quote.
-        $quote->getStore()->setCurrentCurrencyCode($quote->getQuoteCurrencyCode());
-        $quote->collectTotals();
-        // in case of guest checkout, set some customer related data.
-        if ($this->getRequest()->getPost('CRITERION_GUEST') === 'true') {
-            $quote->setCustomerId(null)
-                ->setCustomerEmail($quote->getBillingAddress()->getEmail())
-                ->setCustomerIsGuest(true)
-                ->setCustomerGroupId(\Magento\Customer\Model\Group::NOT_LOGGED_IN_ID);
-        }
-
-        return $this->_cartManagement->submit($quote);
-    }
-
-    /**
      * If the customer is a guest, we'll delete the additional payment information, which
      * is only used for customer recognition.
-     * @param $quote
+     * @param Quote $quote
      * @throws \Exception
      */
     protected function handleAdditionalPaymentInformation($quote)
@@ -356,40 +334,6 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
                 . $this->heidelpayResponse->getCriterion()->getSecretHash()
             );
             return false;
-        }
-    }
-
-    /**
-     * Save the heidelpay transaction data
-     * @param Response $response
-     * @param $data
-     * @param $source
-     * @return void
-     */
-    protected function saveHeidelpayTransaction($response, $data, $source)
-    {
-        list($paymentMethod, $paymentType) = $this->_paymentHelper->splitPaymentCode(
-            $response->getPayment()->getCode()
-        );
-
-        try {
-            // save the response details into the heidelpay Transactions table.
-            /** @var Transaction $transaction */
-            $transaction = $this->transactionFactory->create();
-            $transaction->setPaymentMethod($paymentMethod)
-                ->setPaymentType($paymentType)
-                ->setTransactionId($response->getIdentification()->getTransactionId())
-                ->setUniqueId($response->getIdentification()->getUniqueId())
-                ->setShortId($response->getIdentification()->getShortId())
-                ->setStatusCode($response->getProcessing()->getStatusCode())
-                ->setResult($response->getProcessing()->getResult())
-                ->setReturnMessage($response->getProcessing()->getReturn())
-                ->setReturnCode($response->getProcessing()->getReturnCode())
-                ->setJsonResponse(json_encode($data))
-                ->setSource($source)
-                ->save();
-        } catch (\Exception $e) {
-            $this->_logger->error('Heidelpay - ' . $source . ': Save transaction error. ' . $e->getMessage());
         }
     }
 }
