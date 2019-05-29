@@ -10,9 +10,14 @@ use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory;
 use Heidelpay\Gateway\Model\TransactionFactory;
 use Magento\Framework\Controller\Result\RawFactory;
 use Magento\Sales\Model\OrderFactory;
+use Heidelpay\Gateway\Model\Transaction;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Model\AbstractExtensibleModel;
+use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Customer\Model\Group;
 use Heidelpay\PhpPaymentApi\Exceptions\HashVerificationException;
 use Heidelpay\PhpPaymentApi\Response as HeidelpayResponse;
+use Heidelpay\PhpPaymentApi\Constants\TransactionType;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Customer\Model\Session;
 use Magento\Customer\Model\Url;
@@ -220,12 +225,12 @@ class Response extends HgwAbstract
         $data = $this->getRequest()->getParams();
 
         // save the heidelpay transaction data
-        list($paymentMethod, $paymentType) = $this->_paymentHelper->splitPaymentCode(
-            $this->heidelpayResponse->getPayment()->getCode()
-        );
+        $code = $this->heidelpayResponse->getPayment()->getCode();
+        list($paymentMethod, $paymentType) = $this->_paymentHelper->splitPaymentCode($code);
 
         try {
             // save the response details into the heidelpay Transactions table.
+            /** @var Transaction $transaction */
             $transaction = $this->transactionFactory->create();
             $transaction->setPaymentMethod($paymentMethod)
                 ->setPaymentType($paymentType)
@@ -262,43 +267,43 @@ class Response extends HgwAbstract
             return $result;
         }
 
-        if ($this->heidelpayResponse->isSuccess()) {
+        // Create order if transaction is successful and not just an initialization
+        if ($paymentType !== TransactionType::INITIALIZE && $this->heidelpayResponse->isSuccess()) {
             try {
                 // get the quote by transactionid from the heidelpay response
                 /** @var Quote $quote */
                 $quote = $this->quoteRepository->get($this->heidelpayResponse->getIdentification()->getTransactionId());
-
-                $quote->getStore()->setCurrentCurrencyCode($quote->getQuoteCurrencyCode());
-                $quote->collectTotals();
-                // in case of guest checkout, set some customer related data.
-                if ($this->getRequest()->getPost('CRITERION_GUEST') === 'true') {
-                    $quote->setCustomerId(null)
-                        ->setCustomerEmail($quote->getBillingAddress()->getEmail())
-                        ->setCustomerIsGuest(true)
-                        ->setCustomerGroupId(Group::NOT_LOGGED_IN_ID);
-                }
-
-                // create an order by submitting the quote.
-                $order = $this->_cartManagement->submit($quote);
+                $order = $this->createOrder($quote);
             } catch (Exception $e) {
                 $this->_logger->error('Heidelpay - Response: Cannot submit the Quote. ' . $e->getMessage());
-
                 return $result;
             }
 
             $data['ORDER_ID'] = $order->getIncrementId();
-
-            $this->_paymentHelper->mapStatus(
-                $data,
-                $order
-            );
-
+            $this->_paymentHelper->mapStatus($data, $order);
             $order->save();
         }
 
         // if the customer is a guest, we'll delete the additional payment information, which
-        // is only used for customer recognition.
-        if (isset($quote) && $quote->getCustomerIsGuest()) {
+        // is used for customer recognition and has already been sent to the payment API at this point.
+        if (isset($quote)) {
+            $this->removeAdditionalPaymentInformation($quote);
+        }
+
+        // return the heidelpay response url as raw response instead of echoing it out.
+        $result->setContents($redirectUrl);
+        return $result;
+    }
+
+    /**
+     * Remove the additional customer information from the payment form.
+     *
+     * @param Quote $quote
+     * @throws Exception
+     */
+    private function removeAdditionalPaymentInformation(Quote $quote)
+    {
+        if ($quote->getCustomerIsGuest()) {
             // create a new instance for the payment information collection.
             $paymentInfoCollection = $this->paymentInformationCollectionFactory->create();
 
@@ -314,11 +319,28 @@ class Response extends HgwAbstract
                 $paymentInfo->delete();
             }
         }
+    }
 
-        $this->_logger->debug('Heidelpay - Response: redirectUrl is ' . $redirectUrl);
+    /**
+     * Create the order object from the given quote.
+     *
+     * @param Quote $quote
+     * @return AbstractExtensibleModel|OrderInterface|object|null
+     * @throws LocalizedException
+     */
+    private function createOrder(Quote $quote)
+    {
+        $quote->getStore()->setCurrentCurrencyCode($quote->getQuoteCurrencyCode());
+        $quote->collectTotals();
+        // in case of guest checkout, set some customer related data.
+        if ($this->getRequest()->getPost('CRITERION_GUEST') === 'true') {
+            $quote->setCustomerId(null)
+                ->setCustomerEmail($quote->getBillingAddress()->getEmail())
+                ->setCustomerIsGuest(true)
+                ->setCustomerGroupId(Group::NOT_LOGGED_IN_ID);
+        }
 
-        // return the heidelpay response url as raw response instead of echoing it out.
-        $result->setContents($redirectUrl);
-        return $result;
+        // create an order by submitting the quote.
+        return $this->_cartManagement->submit($quote);
     }
 }
