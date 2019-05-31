@@ -295,6 +295,8 @@ class Response extends HgwAbstract
         return $result;
     }
 
+    //<editor-fold desc="Helpers">
+
     /**
      * Remove the additional customer information from the payment form.
      *
@@ -343,4 +345,6 @@ class Response extends HgwAbstract
         // create an order by submitting the quote.
         return $this->_cartManagement->submit($quote);
     }
+
+    //</editor-fold>
 }

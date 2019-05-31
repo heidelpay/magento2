@@ -7,6 +7,7 @@ use Heidelpay\Gateway\Controller\HgwAbstract;
 use Heidelpay\Gateway\Helper\Payment as HeidelpayHelper;
 use Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod;
 use Heidelpay\PhpBasketApi\Exception\InvalidBasketitemPositionException;
+use Heidelpay\PhpPaymentApi\Response as HeidelpayResponse;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Customer\Model\Session;
 use Magento\Customer\Model\Url;
@@ -100,7 +101,7 @@ class Index extends HgwAbstract
         $payment = $quote->getPayment()->getMethodInstance();
 
         // get the response object from the initial request.
-        /** @var \Heidelpay\PhpPaymentApi\Response $response */
+        /** @var HeidelpayResponse $response */
         $response = $payment->getHeidelpayUrl($quote);
 
         $this->_logger->debug('Heidelpay init response : ' . print_r($response, 1));
