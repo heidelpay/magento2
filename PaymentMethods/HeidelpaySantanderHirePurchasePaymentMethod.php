@@ -93,6 +93,7 @@ class HeidelpaySantanderHirePurchasePaymentMethod extends HeidelpayAbstractPayme
             $request->getName()->set('birthdate', $paymentInfo->getAdditionalData()->hgw_birthdate);
         }
 
+        // set risk information
         $objectManager = ObjectManager::getInstance();
         /** @var CustomerWrapper $customer */
         $customer = $objectManager->create(CustomerWrapper::class)->setCustomer($quote->getCustomer());
@@ -101,7 +102,7 @@ class HeidelpaySantanderHirePurchasePaymentMethod extends HeidelpayAbstractPayme
                 ->setCustomerOrderCount($customer->numberOfOrders())
                 ->setCustomerSince($customer->customerSince());
 
-        // send the authorize request
+        // send the initialize request
         $this->_heidelpayPaymentMethod->initialize();
 
         return $this->_heidelpayPaymentMethod->getResponse();
