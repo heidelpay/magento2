@@ -3,6 +3,7 @@
 namespace Heidelpay\Gateway\Controller\Index;
 
 use Exception;
+use Heidelpay\Gateway\Block\Hgw;
 use Heidelpay\Gateway\Controller\HgwAbstract;
 use Heidelpay\Gateway\Helper\Payment as HeidelpayHelper;
 use Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod;
@@ -114,10 +115,10 @@ class Index extends HgwAbstract
 
             $resultPage = $this->_resultPageFactory->create();
             $resultPage->getConfig()->getTitle()->prepend(__('Please confirm your payment:'));
-            $resultPage->getLayout()->getBlock('heidelpay_gateway')->setHgwUrl(
-                $response->getPaymentFormUrl()
-            );
-            $resultPage->getLayout()->getBlock('heidelpay_gateway')->setHgwCode($payment->getCode());
+
+            /** @var Hgw $hgwBlock */
+            $hgwBlock = $resultPage->getLayout()->getBlock('heidelpay_gateway');
+            $hgwBlock->setHgwUrl($response->getPaymentFormUrl())->setHgwCode($payment->getCode());
 
             return $resultPage;
         }
