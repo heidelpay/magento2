@@ -1,51 +1,41 @@
 <?php
-
-namespace Heidelpay\Gateway\Model;
-
-use Magento\Framework\Exception\InputException;
-use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Framework\Exception\StateException;
-use Magento\Framework\Exception\ValidatorException;
-use Magento\Framework\Exception\CouldNotSaveException;
-
 /**
- * Transaction Repository
+ * Handles transaction objects.
  *
  * @license Use of this software requires acceptance of the License Agreement. See LICENSE file.
- * @copyright Copyright © 2016-present heidelpay GmbH. All rights reserved.
+ * @copyright Copyright © 2019-present heidelpay GmbH. All rights reserved.
  *
  * @link http://dev.heidelpay.com/magento2
  *
- * @author Stephano Vogel
+ * @author Simon Gabriel
  *
  * @package heidelpay
  * @subpackage magento2
  * @category magento2
  */
-class TransactionRepository
+namespace Heidelpay\Gateway\Model;
+
+use Heidelpay\Gateway\Model\ResourceModel\Transaction as TransactionAlias;
+use Magento\Framework\Exception\NoSuchEntityException;
+
+class TransactionRepository implements TransactionRepositoryInterface
 {
-    /**
-     * @var Transaction[]
-     */
+    /** @var Transaction[] */
     protected $instances = [];
 
-    /**
-     * @var Transaction[]
-     */
+    /** @var Transaction[] */
     protected $instancesByQuoteId = [];
 
-    /**
-     * @var \Heidelpay\Gateway\Model\ResourceModel\Transaction
-     */
+    /** @var TransactionAlias */
     protected $resourceModel;
 
-    /**
-     * @var TransactionFactory
-     */
+    /** @var TransactionFactory */
     protected $transactionFactory;
 
-
+    /**
+     * @param TransactionFactory $transactionFactory
+     * @param TransactionAlias $resourceModel
+     */
     public function __construct(
         TransactionFactory $transactionFactory,
         ResourceModel\Transaction $resourceModel
@@ -55,14 +45,20 @@ class TransactionRepository
     }
 
 
-    public function get($id, $forceReload = false)
+    /**
+     * @param $id
+     * @param bool $forceReload
+     * @return mixed
+     * @throws NoSuchEntityException
+     */
+    public function getById($id, $forceReload = false)
     {
         $cacheKey = $this->getCacheKey([$id]);
-        if (!isset($this->instances[$id][$cacheKey]) || $forceReload) {
+        if ($forceReload || !isset($this->instances[$id][$cacheKey])) {
             $transaction = $this->transactionFactory->create();
 
             if (!$id) {
-                throw new NoSuchEntityException(__('Requested product doesn\'t exist'));
+                throw new NoSuchEntityException(__('Requested transaction does not exist'));
             }
 
             $transaction->load($id);
@@ -73,15 +69,20 @@ class TransactionRepository
         return $this->instances[$id][$cacheKey];
     }
 
-    public function getByQuoteId($quoteId, $forceReload = false)
-    {
-        $cacheKey = $this->getCacheKey([$quoteId]);
-        if (!isset($this->instancesByQuoteId[$quoteId][$cacheKey]) || $forceReload) {
-            $transaction = $this->transactionFactory->create();
-
-            $transactionId = $this->resourceModel;
-        }
-    }
+//    /**
+//     * Fetches a a list of transactions by qouteId.
+//     *
+//     * @param $quoteId
+//     * @param bool $forceReload
+//     */
+//    public function getByQuoteId($quoteId, $forceReload = false)
+//    {
+//        $cacheKey = $this->getCacheKey([$quoteId]);
+//        if ($forceReload || !isset($this->instancesByQuoteId[$quoteId][$cacheKey])) {
+//            $transaction = $this->transactionFactory->create();
+//            $transactionId = $this->resourceModel;
+//        }
+//    }
 
     /**
      * Get key for cache
