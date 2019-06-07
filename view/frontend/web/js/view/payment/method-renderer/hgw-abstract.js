@@ -143,7 +143,7 @@ define(
                 checkoutData.setSelectedPaymentMethod(this.item.method);
 
                 return true;
-            }
+            },
         });
     }
 );
