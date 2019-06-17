@@ -46,9 +46,6 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
     /** @var HeidelpayResponse The heidelpay response object */
     private $heidelpayResponse;
 
-    /** @var TransactionFactory */
-    private $transactionFactory;
-
     /** @var CollectionFactory */
     private $paymentInformationCollectionFactory;
     /**
@@ -129,7 +126,6 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
         $this->resultFactory = $rawResultFactory;
         $this->quoteRepository = $quoteRepository;
         $this->paymentInformationCollectionFactory = $paymentInformationCollectionFactory;
-        $this->transactionFactory = $transactionFactory;
         $this->salesHelper = $salesHelper;
         $this->orderRepository = $orderRepository;
     }
@@ -227,7 +223,6 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
                 $order = $this->_paymentHelper->createOrderFromQuote($quote);
             } catch (\Exception $e) {
                 $this->_logger->error('Heidelpay - Response: Cannot submit the Quote. ' . $e->getMessage());
-
                 return $result;
             }
 
@@ -249,12 +244,13 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
 
     /**
      * Send order confirmation to the customer
-     * @param $order
+     * @param Order $order
      */
     protected function handleOrderMail($order)
     {
         try {
             if ($order && $order->getId()) {
+                $this->_logger->debug('heidelpay Response - sending mail for order' . $order->getIncrementId());
                 $this->_orderSender->send($order);
             }
         } catch (\Exception $e) {

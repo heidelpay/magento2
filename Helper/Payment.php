@@ -2,6 +2,7 @@
 namespace Heidelpay\Gateway\Helper;
 
 use Heidelpay\MessageCodeMapper\MessageCodeMapper;
+use Heidelpay\PhpPaymentApi\Constants\TransactionType;
 use Heidelpay\PhpPaymentApi\Response;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
@@ -11,6 +12,7 @@ use Magento\Quote\Model\QuoteManagement;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Invoice;
 use Heidelpay\Gateway\Model\TransactionFactory;
+use Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod;
 
 /**
  * Heidelpay payment helper
@@ -48,6 +50,12 @@ class Payment extends AbstractHelper
      * @var Heidelpay\Gateway\Model\Transaction
      */
     private $heidelpayTransactionFactory;
+
+    const NEW_ORDER_TRANSACTION_TYPE_ARRAY = [
+        TransactionType::RECEIPT,
+        TransactionType::DEBIT,
+        TransactionType::RESERVATION
+    ];
 
     /**
      * @param Context $context
@@ -103,12 +111,14 @@ class Payment extends AbstractHelper
             return;
         }
 
+        /** @var HeidelpayAbstractPaymentMethod $paymentMethod */
+        $paymentMethod = $order->getPayment()->getMethodInstance();
         if ($data['PROCESSING_RESULT'] == 'NOK') {
-            $order->getPayment()->getMethodInstance()->cancelledTransactionProcessing($order, $message);
+            $paymentMethod->cancelledTransactionProcessing($order, $message);
         } elseif ($this->isProcessing($paymentCode[1], $data)) {
-            $order->getPayment()->getMethodInstance()->processingTransactionProcessing($data, $order);
+            $paymentMethod->processingTransactionProcessing($data, $order);
         } else {
-            $order->getPayment()->getMethodInstance()->pendingTransactionProcessing($data, $order, $message);
+            $paymentMethod->pendingTransactionProcessing($data, $order, $message);
         }
     }
 
@@ -124,6 +134,17 @@ class Payment extends AbstractHelper
         return number_format($number, 2, '.', '');
     }
 
+    public function getDataFromResponse(Response $response)
+    {
+        $data = [];
+
+        foreach ($response->toArray() as $parameterKey => $value) {
+            $data[str_replace('.', '_', $parameterKey)] = $value;
+        }
+
+        return $data;
+    }
+
     /**
      * helper to generate customer payment error messages
      *
@@ -136,6 +157,20 @@ class Payment extends AbstractHelper
     {
         $messageCodeMapper = new MessageCodeMapper($this->localeResolver->getLocale());
         return $messageCodeMapper->getMessage($errorCode);
+    }
+
+    public function handleInvoiceCreation($order, $paymentCode, $uniqueId)
+    {
+        $data['PAYMENT_CODE'] = $paymentCode;
+        if ($order->canInvoice() && !$this->isPreAuthorization($data)) {
+            $invoice = $order->prepareInvoice();
+
+            $invoice->setRequestedCaptureCase(Invoice::CAPTURE_ONLINE);
+            $invoice->setTransactionId($uniqueId);
+            $invoice->register()->pay();
+
+            $this->saveTransaction($invoice);
+        }
     }
 
     /**
@@ -204,11 +239,7 @@ class Payment extends AbstractHelper
 
         $paymentCode = $this->splitPaymentCode($data['PAYMENT_CODE']);
 
-        if ($paymentCode[1] == 'PA') {
-            return true;
-        }
-
-        return false;
+        return $paymentCode[1] === 'PA';
     }
 
     /**
@@ -327,5 +358,15 @@ class Payment extends AbstractHelper
         }
 
         return $this->_cartManagement->submit($quote);
+    }
+
+    /**
+     * Provide information whether a transaction type is able to create an order or not
+     * @param $paymentType
+     * @return bool
+     */
+    public function isNewOrderType($paymentType)
+    {
+        return in_array($paymentType, self::NEW_ORDER_TRANSACTION_TYPE_ARRAY, true);
     }
 }
