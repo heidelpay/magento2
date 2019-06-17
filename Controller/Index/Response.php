@@ -4,7 +4,7 @@ namespace Heidelpay\Gateway\Controller\Index;
 
 use Exception;
 use Heidelpay\Gateway\Controller\HgwAbstract;
-use Heidelpay\Gateway\Helper\Payment as HeidelpayHelper;
+use Heidelpay\Gateway\Helper\Payment;
 use Heidelpay\Gateway\Model\PaymentInformation;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory;
 use Heidelpay\Gateway\Model\TransactionFactory;
@@ -81,7 +81,7 @@ class Response extends HgwAbstract
      * @param CartManagementInterface $cartManagement
      * @param CartRepositoryInterface $quoteObject
      * @param PageFactory $resultPageFactory
-     * @param HeidelpayHelper $paymentHelper
+     * @param Payment $paymentHelper
      * @param OrderSender $orderSender
      * @param InvoiceSender $invoiceSender
      * @param OrderCommentSender $orderCommentSender
@@ -102,7 +102,7 @@ class Response extends HgwAbstract
         CartManagementInterface $cartManagement,
         CartRepositoryInterface $quoteObject,
         PageFactory $resultPageFactory,
-        HeidelpayHelper $paymentHelper,
+        Payment $paymentHelper,
         OrderSender $orderSender,
         InvoiceSender $invoiceSender,
         OrderCommentSender $orderCommentSender,

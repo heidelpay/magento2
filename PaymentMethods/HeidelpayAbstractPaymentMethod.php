@@ -550,7 +550,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
                 '_forced_secure' => true,
                 '_scope_to_url' => true,
                 '_nosid' => true
-            ]),
+            ])
         ];
     }
 

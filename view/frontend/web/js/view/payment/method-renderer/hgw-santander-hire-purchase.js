@@ -45,7 +45,6 @@ define(
             initObservable: function() {
                 this._super()
                     .observe(['hgwSalutation', 'hgwDobYear', 'hgwDobMonth', 'hgwDobDay', 'years']);
-
                 return this;
             },
 
@@ -117,6 +116,11 @@ define(
                 ).format('YYYY-MM-DD');
             },
 
+            /**
+             * Returns true if validation succeeded
+             *
+             * @returns {*}
+             */
             validate: function() {
                 var form = $('#hgw-santander-hire-purchase');
 
