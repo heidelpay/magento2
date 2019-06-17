@@ -20,10 +20,9 @@ use Heidelpay\Gateway\Model\Config\Source\Recognition;
 use Heidelpay\Gateway\Model\PaymentInformation;
 use Heidelpay\Gateway\Model\PaymentInformationFactory;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
-use Heidelpay\Gateway\Model\TransactionRepository;
 use Magento\Quote\Model\QuoteIdMask;
 use Magento\Quote\Model\QuoteIdMaskFactory;
-use Klarna\Kp\Api\QuoteRepositoryInterface;
+use Magento\Quote\Model\QuoteRepository;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Quote\Api\Data\AddressInterface;
@@ -57,7 +56,7 @@ class Payment implements PaymentInterface
     /**
      * Payment Information API constructor.
      *
-     * @param QuoteRepositoryInterface $quoteRepository
+     * @param QuoteRepository $quoteRepository
      * @param QuoteIdMaskFactory $quoteIdMaskFactory
      * @param PaymentInformationFactory $paymentInformationFactory
      * @param EncryptorInterface $encryptor
@@ -66,7 +65,7 @@ class Payment implements PaymentInterface
      * @param ScopeConfigInterface $scopeConfig
      */
     public function __construct(
-        QuoteRepositoryInterface $quoteRepository,
+        QuoteRepository $quoteRepository,
         QuoteIdMaskFactory $quoteIdMaskFactory,
         PaymentInformationFactory $paymentInformationFactory,
         EncryptorInterface $encryptor,
@@ -92,9 +91,8 @@ class Payment implements PaymentInterface
     {
         $result = null;
 
-        /** @var PaymentInformationInterface|Quote $quote */
         // get the quote information by cart id
-        $quote = $this->quoteRepository->getById($quoteId);
+        $quote = $this->quoteRepository->get($quoteId);
 
         // get the recognition configuration for the given payment method and store id.
         $allowRecognition = $this->scopeConfig->getValue(
@@ -149,18 +147,19 @@ class Payment implements PaymentInterface
     {
         $returnValue = true;
 
-        /** @var PaymentInformationInterface|Quote $quote */
         // get the quote information by cart id
-        $quote = $this->quoteRepository->getById($cartId);
+        $quote = $this->quoteRepository->get($cartId);
 
         // if the quote is empty, there is no relation that we can work with... so we return false.
         if ($quote->isEmpty()) {
+            $this->logger->warning('Heidelpay: Could not find quote with id ' . $cartId . '.');
             $returnValue = false;
         }
 
         // save the information with the given quote and additional data.
         // if there is nothing stored, we'll return false...
         if ($returnValue && !$this->savePaymentInformation($quote, $method, $quote->getCustomerEmail(), $additionalData)) {
+            $this->logger->warning('Heidelpay: Could not save payment information for quote id ' . $cartId . '.');
             $returnValue = false;
         }
 
@@ -180,9 +179,8 @@ class Payment implements PaymentInterface
         $quoteIdMask = $this->quoteIdMaskFactory->create()->load($cartId, 'masked_id');
         $quoteId = $quoteIdMask->getQuoteId();
 
-        /** @var PaymentInformationInterface|Quote $quote */
         // get the quote information by cart id
-        $quote = $this->quoteRepository->getById($quoteId);
+        $quote = $this->quoteRepository->get($quoteId);
 
         // if the quote is empty, there is no relation that
         // we can work with... so we return false.
