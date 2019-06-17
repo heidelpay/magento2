@@ -2,16 +2,18 @@
 
 namespace Heidelpay\Gateway\Controller\Index;
 
+use Heidelpay\Gateway\Helper\Payment as PaymentHelper;
+use Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod;
 use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Quote\Model\QuoteRepository;
+use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderCommentSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
-use Magento\Sales\Model\Order\Payment\Transaction;
 use Magento\Sales\Model\Order\Invoice;
+use Magento\Sales\Model\Order\Payment\Transaction;
 use Magento\Sales\Model\OrderRepository;
-use Magento\Sales\Model\Order;
 use Magento\Sales\Model\ResourceModel\Order\Collection;
-use Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod;
 
 /**
  * heidelpay Push Controller
@@ -36,6 +38,18 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
 
     /** @var SearchCriteriaBuilder */
     private $searchCriteriaBuilder;
+    /**
+     * @var PaymentHelper
+     */
+    private $paymentHelper;
+    /**
+     * @var QuoteRepository
+     */
+    private $quoteRepository;
+    /**
+     * @var \Heidelpay\Gateway\Helper\Order
+     */
+    private $orderHelper;
 
     /**
      * @param \Magento\Framework\App\Action\Context $context
@@ -47,7 +61,7 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
      * @param \Magento\Quote\Api\CartManagementInterface $cartManagement
      * @param \Magento\Quote\Api\CartRepositoryInterface $quoteObject
      * @param \Magento\Framework\View\Result\PageFactory $resultPageFactory
-     * @param \Heidelpay\Gateway\Helper\Payment $paymentHelper
+     * @param PaymentHelper $paymentHelper
      * @param OrderSender $orderSender
      * @param InvoiceSender $invoiceSender
      * @param OrderCommentSender $orderCommentSender
@@ -56,6 +70,8 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
      * @param OrderRepository $orderRepository
      * @param \Heidelpay\PhpPaymentApi\Push $heidelpayPush
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param QuoteRepository $quoteRepository
+     * @param \Heidelpay\Gateway\Helper\Order $orderHelper
      */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
@@ -67,7 +83,7 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
         \Magento\Quote\Api\CartManagementInterface $cartManagement,
         \Magento\Quote\Api\CartRepositoryInterface $quoteObject,
         \Magento\Framework\View\Result\PageFactory $resultPageFactory,
-        \Heidelpay\Gateway\Helper\Payment $paymentHelper,
+        PaymentHelper $paymentHelper,
         OrderSender $orderSender,
         InvoiceSender $invoiceSender,
         OrderCommentSender $orderCommentSender,
@@ -75,7 +91,9 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
         \Magento\Customer\Model\Url $customerUrl,
         OrderRepository $orderRepository,
         \Heidelpay\PhpPaymentApi\Push $heidelpayPush,
-        SearchCriteriaBuilder $searchCriteriaBuilder
+        SearchCriteriaBuilder $searchCriteriaBuilder,
+        QuoteRepository $quoteRepository,
+        \Heidelpay\Gateway\Helper\Order $orderHelper
     ) {
         parent::__construct(
             $context,
@@ -98,6 +116,9 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
         $this->orderRepository = $orderRepository;
         $this->heidelpayPush = $heidelpayPush;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->paymentHelper = $paymentHelper;
+        $this->quoteRepository = $quoteRepository;
+        $this->orderHelper = $orderHelper;
     }
 
     /**
@@ -114,7 +135,7 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
             return;
         }
 
-        if ($request->getHeader('Content-Type') != 'application/xml') {
+        if ($request->getHeader('Content-Type') !== 'application/xml') {
             $this->_logger->debug('Heidelpay - Push: Content-Type is not "application/xml"');
         }
 
@@ -134,86 +155,109 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
         }
 
         $pushResponse = $this->heidelpayPush->getResponse();
+        $data = $this->paymentHelper->getDataFromResponse($pushResponse);
         $this->_logger->debug('Push Response: ' . print_r($pushResponse, true));
 
         list($paymentMethod, $paymentType) = $this->_paymentHelper->splitPaymentCode(
             $pushResponse->getPayment()->getCode()
         );
 
-        // in case of receipts, we process the push message for receipts.
-        if ($this->_paymentHelper->isReceiptAble($paymentMethod, $paymentType) && $pushResponse->isSuccess()) {
-            // load the referenced order to receive the order information.
-            $criteria = $this->searchCriteriaBuilder
-                ->addFilter(
-                    'quote_id',
-                    $pushResponse->getIdentification()->getTransactionId()
-                )->create();
+                // in case of receipts, we process the push message for receipts.
+        if ($pushResponse->isSuccess() && $this->paymentHelper->isNewOrderType($paymentType)) {
 
-            /** @var Collection $orderList */
-            $orderList = $this->orderRepository->getList($criteria);
+            $transactionId = $pushResponse->getIdentification()->getTransactionId();
+            $order = $this->orderHelper->fetchOrder($transactionId);
 
-            /** @var Order $order */
-            $order = $orderList->getFirstItem();
-            $payment = $order->getPayment();
+            // create order if it doesn't exists already.
+            if ($order === null || $order->isEmpty()) {
+                $this->_paymentHelper->saveHeidelpayTransaction($pushResponse, $data, 'PUSH');
+                $this->_logger->debug('heidelpay Push - Order does not exist for transaction. heidelpay transaction id: '
+                    . $transactionId);
 
-            /** @var HeidelpayAbstractPaymentMethod $methodInstance */
-            $methodInstance = $payment->getMethodInstance();
-            $transactionID = $pushResponse->getPaymentReferenceId();
-
-            /** @var bool $transactionExists Flag to identify new Transaction*/
-            $transactionExists = $methodInstance->heidelpayTransactionExists($transactionID);
-
-            // If Transaction already exists, push wont be processed.
-            if ($transactionExists) {
-                $this->_logger->debug('heidelpay - Push Response: ' . $transactionID . ' already exists');
-                return;
-            }
-
-            $paidAmount = (float)$pushResponse->getPresentation()->getAmount();
-            $dueLeft = $order->getTotalDue() - $paidAmount;
-
-            $state = Order::STATE_PROCESSING;
-            $comment = 'heidelpay - Purchase Complete';
-
-            // if payment is not complete
-            if ($dueLeft > 0.00) {
-                $state = Order::STATE_PAYMENT_REVIEW;
-                $comment = 'heidelpay - Partly Paid ('
-                    . $this->_paymentHelper->format(
-                        $pushResponse->getPresentation()->getAmount()
-                    )
-                    . ' ' . $pushResponse->getPresentation()->getCurrency() . ')';
-            }
-
-            // set the invoice states to 'paid', if no due is left.
-            if ($dueLeft <= 0.00) {
-                /** @var \Magento\Sales\Model\Order\Invoice $invoice */
-                foreach ($order->getInvoiceCollection() as $invoice) {
-                    $invoice->setState(Invoice::STATE_PAID)->save();
+                $quote = $this->quoteRepository->get($transactionId);
+                try {
+                    $order = $this->paymentHelper->createOrderFromQuote($quote);
+                    if ($order === null || $order->isEmpty())
+                    {
+                        $this->_logger->error('Heidelpay - Response: Cannot submit the Quote. ' . $e->getMessage());
+                        return;
+                    }
+                } catch (\Exception $e) {
+                    $this->_logger->error('Heidelpay - Response: Cannot submit the Quote. ' . $e->getMessage());
+                    return;
                 }
+
+                $this->paymentHelper->mapStatus($data, $order);
+                $this->_logger->debug('order status: ' . $order->getStatus());
+                $this->orderHelper->handleOrderMail($order);
+                $this->orderHelper->handleInvoiceMails($order);
+                $this->orderRepository->save($order);
+                //TODO: Handle additional payment info from response
             }
 
-            $order->setTotalPaid($order->getTotalPaid() + $paidAmount)
-                ->setBaseTotalPaid($order->getBaseTotalPaid() + $paidAmount)
-                ->setState($state)
-                ->addStatusHistoryComment($comment, $state);
+            if ($this->_paymentHelper->isReceiptAble($paymentMethod, $paymentType)) {
+                // load the referenced order to receive the order information.
+                $payment = $order->getPayment();
 
-            // create a heidelpay Transaction.
-            $methodInstance->saveHeidelpayTransaction(
-                $pushResponse,
-                $paymentMethod,
-                $paymentType,
-                'PUSH',
-                []
-            );
+                /** @var HeidelpayAbstractPaymentMethod $methodInstance */
+                $methodInstance = $payment->getMethodInstance();
+                $uniqueId = $pushResponse->getPaymentReferenceId();
 
-            // create a child transaction.
-            $payment->setTransactionId($transactionID)
-                ->setParentTransactionId($pushResponse->getIdentification()->getReferenceId())
-                ->setIsTransactionClosed(true)
-                ->addTransaction(Transaction::TYPE_CAPTURE, null, true);
+                /** @var bool $transactionExists Flag to identify new Transaction */
+                $transactionExists = $methodInstance->heidelpayTransactionExists($uniqueId);
 
-            $this->orderRepository->save($order);
+                // If Transaction already exists, push wont be processed.
+                if ($transactionExists) {
+                    $this->_logger->debug('heidelpay - Push Response: ' . $uniqueId . ' already exists');
+                    return;
+                }
+
+                $paidAmount = (float)$pushResponse->getPresentation()->getAmount();
+                $dueLeft = $order->getTotalDue() - $paidAmount;
+
+                $state = Order::STATE_PROCESSING;
+                $comment = 'heidelpay - Purchase Complete';
+
+                // if payment is not complete
+                if ($dueLeft > 0.00) {
+                    $state = Order::STATE_PAYMENT_REVIEW;
+                    $comment = 'heidelpay - Partly Paid ('
+                        . $this->_paymentHelper->format(
+                            $pushResponse->getPresentation()->getAmount()
+                        )
+                        . ' ' . $pushResponse->getPresentation()->getCurrency() . ')';
+                }
+
+                // set the invoice states to 'paid', if no due is left.
+                if ($dueLeft <= 0.00) {
+                    /** @var \Magento\Sales\Model\Order\Invoice $invoice */
+                    foreach ($order->getInvoiceCollection() as $invoice) {
+                        $invoice->setState(Invoice::STATE_PAID)->save();
+                    }
+                }
+
+                $order->setTotalPaid($order->getTotalPaid() + $paidAmount)
+                    ->setBaseTotalPaid($order->getBaseTotalPaid() + $paidAmount)
+                    ->setState($state)
+                    ->addStatusHistoryComment($comment, $state);
+
+                // create a heidelpay Transaction.
+                $methodInstance->saveHeidelpayTransaction(
+                    $pushResponse,
+                    $paymentMethod,
+                    $paymentType,
+                    'PUSH',
+                    []
+                );
+
+                // create a child transaction.
+                $payment->setTransactionId($uniqueId)
+                    ->setParentTransactionId($pushResponse->getIdentification()->getReferenceId())
+                    ->setIsTransactionClosed(true)
+                    ->addTransaction(Transaction::TYPE_CAPTURE, null, true);
+
+                $this->orderRepository->save($order);
+            }
         }
     }
 }
