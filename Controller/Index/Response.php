@@ -10,6 +10,7 @@ use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory;
 use Heidelpay\Gateway\Model\TransactionFactory;
 use Magento\Framework\Controller\Result\RawFactory;
 use Magento\Sales\Model\OrderFactory;
+use Heidelpay\PhpPaymentApi\Constants\PaymentMethod;
 use Heidelpay\Gateway\Model\Transaction;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\AbstractExtensibleModel;
@@ -267,8 +268,22 @@ class Response extends HgwAbstract
             return $result;
         }
 
-        // Create order if transaction is successful and not just an initialization
-        if ($paymentType !== TransactionType::INITIALIZE && $this->heidelpayResponse->isSuccess()) {
+        if ($paymentType === TransactionType::INITIALIZE && $paymentMethod === PaymentMethod::HIRE_PURCHASE) {
+            if ($this->heidelpayResponse->isSuccess()) {
+                $redirectUrl = $this->_url->getUrl('hgw/index/', [
+                    '_forced_secure' => true,
+                    '_scope_to_url' => true,
+                    '_nosid' => true
+                ]);
+            }
+
+            // return the heidelpay response url as raw response instead of echoing it out.
+            $result->setContents($redirectUrl);
+            return $result;
+        }
+
+        // Create order if transaction is successful
+        if ($this->heidelpayResponse->isSuccess()) {
             try {
                 // get the quote by transactionid from the heidelpay response
                 /** @var Quote $quote */

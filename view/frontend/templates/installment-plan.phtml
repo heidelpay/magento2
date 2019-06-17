@@ -1,0 +1,26 @@
+<?php
+/**
+ * Template file for Hire Purchase payment methods
+ *
+ * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
+ * @copyright Copyright © 2019-present heidelpay GmbH. All rights reserved.
+ * @link  http://dev.heidelpay.com/magento2
+ * @author  Simon Gabriel
+ *
+ * @package  Heidelpay
+ * @subpackage Magento2
+ * @category Magento2
+ * @var $block  Hgw
+ */
+
+use Heidelpay\Gateway\Block\Hgw;
+?>
+
+<div style="text-align: center;">
+    <?php echo __('Hire Purchase Precontract');?>
+    <a href="<?php echo $block->getInstallmentPlanUrl() ?>" target="_blank"><?php echo __('download installment plan');?></a>
+    <br /><br />
+    <button  id="pay-now" type="submit" style="margin-left:200px">
+        <span><?php echo __('pay now') ?></span>
+    </button>
+</div>

@@ -253,6 +253,10 @@ class Payment implements PaymentInterface
                 $result['hgw_birthdate'] = $quote->getCustomer()->getDob();
                 break;
 
+            case 'hgwsanhp':
+                $result['hgw_installment_plan_url'] = 'http://www.google.com';
+                break;
+
             default:
                 $result = null;
                 break;

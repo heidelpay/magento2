@@ -23,6 +23,7 @@ define(
 
             defaults: {
                 template: 'Heidelpay_Gateway/payment/heidelpay-santander-hire-purchase',
+                hgwInstallmentPlanUrl: '',
                 hgwDobYear: '',
                 hgwDobMonth: '',
                 hgwDobDay: '',
@@ -34,11 +35,14 @@ define(
                 this._super();
                 this.getAdditionalPaymentInformation();
 
-                // init years select menu
-                for (var i = (new Date().getFullYear() - 17); i >= new Date().getFullYear() - 120; i--) {
-                    this.years.push(i);
+                if (this.hgwInstallmentPlanUrl !== '') {
+                    this.template = 'Heidelpay_Gateway/payment/heidelpay-santander-hire-purchase-installment-plan';
+                } else {
+                    // init years select menu
+                    for (let i = (new Date().getFullYear() - 17); i >= new Date().getFullYear() - 120; i--) {
+                        this.years.push(i);
+                    }
                 }
-
                 return this;
             },
 
@@ -67,22 +71,10 @@ define(
                             function(data) {
                                 var info = JSON.parse(data);
 
-                                // set salutation and birthdate, if set.
+                                // set link to installment plan
                                 if( info !== null ) {
-                                    if (info.hasOwnProperty('hgw_salutation'))
-                                        parent.hgwSalutation(info.hgw_salutation);
-
-                                    if (info.hasOwnProperty('hgw_birthdate') && info.hgw_birthdate !== null) {
-                                        var date = moment(info.hgw_birthdate, 'YYYY-MM-DD');
-
-                                        parent.hgwDobDay(date.date());
-                                        parent.hgwDobMonth(date.month());
-                                        parent.hgwDobYear(date.year());
-
-                                        // workaround: if month is 'january', the month isn't selected.
-                                        if (date.month() === 0) {
-                                            $("#hgwsanhp_birthdate_month option:eq(1)").prop('selected', true);
-                                        }
+                                    if (info.hasOwnProperty('hgw_installment_plan_url')) {
+                                        parent.hgwInstallmentPlanUrl = info.hgw_installment_plan_url;
                                     }
                                 }
                             }
@@ -125,6 +117,14 @@ define(
                 var form = $('#hgw-santander-hire-purchase');
 
                 return form.validation() && form.validation('isValid');
+            },
+
+            /**
+             * Returns the installmentPlanUrl
+             * @returns {string}
+             */
+            getInstallmentPlan: function () {
+                return this.hgwInstallmentPlanUrl
             }
         });
     }
