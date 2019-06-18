@@ -2,11 +2,15 @@
 namespace Heidelpay\Gateway\Helper;
 
 use Heidelpay\MessageCodeMapper\MessageCodeMapper;
+use Heidelpay\PhpPaymentApi\Response;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\HTTP\ZendClientFactory;
+use Magento\Quote\Model\Quote;
+use Magento\Quote\Model\QuoteManagement;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Invoice;
+use Heidelpay\Gateway\Model\TransactionFactory;
 
 /**
  * Heidelpay payment helper
@@ -38,23 +42,36 @@ class Payment extends AbstractHelper
     /** @var \Magento\Framework\Locale\Resolver */
     protected $localeResolver;
 
+    /** @var QuoteManagement */
+    private $_cartManagement;
+    /**
+     * @var Heidelpay\Gateway\Model\Transaction
+     */
+    private $heidelpayTransactionFactory;
+
     /**
      * @param Context $context
      * @param \Magento\Framework\HTTP\ZendClientFactory $httpClientFactory
      * @param \Magento\Framework\DB\TransactionFactory $transactionFactory
      * @param \Magento\Framework\Locale\Resolver $localeResolver
+     * @param QuoteManagement $cartManagement
+     * @param Heidelpay\Gateway\Model\Transaction $heidelpayTransactionFactory
      */
     public function __construct(
         Context $context,
         \Magento\Framework\HTTP\ZendClientFactory $httpClientFactory,
         \Magento\Framework\DB\TransactionFactory $transactionFactory,
-        \Magento\Framework\Locale\Resolver $localeResolver
+        \Magento\Framework\Locale\Resolver $localeResolver,
+        QuoteManagement $cartManagement,
+        TransactionFactory $heidelpayTransactionFactory
     ) {
         $this->httpClientFactory = $httpClientFactory;
         $this->transactionFactory = $transactionFactory;
         $this->localeResolver = $localeResolver;
 
         parent::__construct($context);
+        $this->_cartManagement = $cartManagement;
+        $this->heidelpayTransactionFactory = $heidelpayTransactionFactory;
     }
 
     public function splitPaymentCode($PAYMENT_CODE)
@@ -254,5 +271,61 @@ class Payment extends AbstractHelper
         $transaction->addObject($invoice)
             ->addObject($invoice->getOrder())
             ->save();
+    }
+
+    /**
+     * Save the heidelpay transaction data
+     * @param Response $response
+     * @param $data
+     * @param $source
+     * @return void
+     */
+    public function saveHeidelpayTransaction($response, $data, $source)
+    {
+        list($paymentMethod, $paymentType) = $this->splitPaymentCode(
+            $response->getPayment()->getCode()
+        );
+
+        try {
+            // save the response details into the heidelpay Transactions table.
+            /** @var Transaction $transaction */
+            $transaction = $this->heidelpayTransactionFactory->create();
+            $transaction->setPaymentMethod($paymentMethod)
+                ->setPaymentType($paymentType)
+                ->setTransactionId($response->getIdentification()->getTransactionId())
+                ->setUniqueId($response->getIdentification()->getUniqueId())
+                ->setShortId($response->getIdentification()->getShortId())
+                ->setStatusCode($response->getProcessing()->getStatusCode())
+                ->setResult($response->getProcessing()->getResult())
+                ->setReturnMessage($response->getProcessing()->getReturn())
+                ->setReturnCode($response->getProcessing()->getReturnCode())
+                ->setJsonResponse(json_encode($data))
+                ->setSource($source)
+                ->save();
+        } catch (\Exception $e) {
+            $this->_logger->error('Heidelpay - ' . $source . ': Save transaction error. ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Create an order by submitting the quote.
+     * @param Quote $quote
+     * @return \Magento\Framework\Model\AbstractExtensibleModel|\Magento\Sales\Api\Data\OrderInterface|null|object
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function createOrderFromQuote($quote)
+    {
+        // Ensure to use the currency of the quote.
+        $quote->getStore()->setCurrentCurrencyCode($quote->getQuoteCurrencyCode());
+        $quote->collectTotals();
+        // in case of guest checkout, set some customer related data.
+        if ($quote->getCustomerId() === null) {
+            $quote->setCustomerId(null)
+                ->setCustomerEmail($quote->getBillingAddress()->getEmail())
+                ->setCustomerIsGuest(true)
+                ->setCustomerGroupId(\Magento\Customer\Model\Group::NOT_LOGGED_IN_ID);
+        }
+
+        return $this->_cartManagement->submit($quote);
     }
 }
