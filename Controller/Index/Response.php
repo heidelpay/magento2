@@ -6,10 +6,10 @@ use Exception;
 use Heidelpay\Gateway\Controller\HgwAbstract;
 use Heidelpay\Gateway\Helper\Payment as HeidelpayHelper;
 use Heidelpay\Gateway\Model\PaymentInformation;
+use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
 use Heidelpay\Gateway\Model\TransactionFactory;
 use Magento\Framework\Controller\Result\RawFactory;
-use Magento\Sales\Model\OrderFactory;
 use Heidelpay\PhpPaymentApi\Constants\PaymentMethod;
 use Heidelpay\PhpPaymentApi\Exceptions\HashVerificationException;
 use Heidelpay\PhpPaymentApi\Response as HeidelpayResponse;
@@ -25,6 +25,8 @@ use Magento\Quote\Api\CartManagementInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\QuoteRepository;
+use Magento\Sales\Helper\Data as SalesHelper;
+use Magento\Sales\Model\OrderFactory;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderCommentSender;
@@ -58,9 +60,6 @@ class Response extends HgwAbstract
 
     /** @var HeidelpayResponse The heidelpay response object */
     private $heidelpayResponse;
-
-    /** @var TransactionFactory */
-    private $transactionFactory;
 
     /** @var CollectionFactory */
     private $paymentInformationCollectionFactory;
@@ -188,10 +187,7 @@ class Response extends HgwAbstract
             return $result;
         }
 
-        $this->_logger->debug(
-            'Heidelpay - Response: Response object: '
-            . print_r($this->heidelpayResponse, true)
-        );
+        $this->_logger->debug('Heidelpay - Response: Response object: ' . print_r($this->heidelpayResponse, true));
 
         /** @var Order $order */
         $order = null;
@@ -221,6 +217,7 @@ class Response extends HgwAbstract
         }
 
         // Create order if transaction is successful and not just an initialization
+        list($paymentMethod, $paymentType) = $this->_paymentHelper->getPaymentMethodAndType($this->heidelpayResponse);
         if ($paymentType === TransactionType::INITIALIZE && $paymentMethod === PaymentMethod::HIRE_PURCHASE) {
             if ($this->heidelpayResponse->isSuccess()) {
                 $redirectUrl = $this->_url->getUrl('checkout/', [
@@ -242,6 +239,8 @@ class Response extends HgwAbstract
                 // get the quote by transactionid from the heidelpay response
                 /** @var Quote $quote */
                 $quote = $this->quoteRepository->get($identificationTransactionId);
+
+                /** @var Order $order */
                 $order = $this->_paymentHelper->createOrderFromQuote($quote);
             } catch (Exception $e) {
                 $this->_logger->error('Heidelpay - Response: Cannot submit the Quote. ' . $e->getMessage());
@@ -284,9 +283,9 @@ class Response extends HgwAbstract
 
     /**
      * Send invoice mails to the customer
-     * @param $order
+     * @param Order $order
      */
-    protected function handleInvoiceMails($order)
+    protected function handleInvoiceMails(Order $order)
     {
         if (!$order->canInvoice() && $this->salesHelper->canSendNewInvoiceEmail($order->getStore()->getId())) {
             $invoices = $order->getInvoiceCollection();

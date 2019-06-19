@@ -1,6 +1,7 @@
 <?php
 namespace Heidelpay\Gateway\Helper;
 
+use Exception;
 use Heidelpay\MessageCodeMapper\Exceptions\MissingLocaleFileException;
 use Heidelpay\MessageCodeMapper\MessageCodeMapper;
 use Heidelpay\PhpPaymentApi\Constants\PaymentMethod;
@@ -11,8 +12,8 @@ use Heidelpay\PhpPaymentApi\Response;
 use Magento\Customer\Model\Group;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
-use Magento\Framework\DB\TransactionFactory;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\DB\TransactionFactory;
 use Magento\Framework\HTTP\ZendClientFactory;
 use Magento\Framework\Locale\Resolver;
 use Magento\Framework\Model\AbstractExtensibleModel;
@@ -281,16 +282,18 @@ class Payment extends AbstractHelper
 
     /**
      * Save the heidelpay transaction data
+     *
      * @param Response $response
-     * @param $data
-     * @param $source
+     * @param array $data
+     * @param string $source
+     *
      * @return void
+     *
+     * @throws Exception
      */
-    public function saveHeidelpayTransaction($response, $data, $source)
+    public function saveHeidelpayTransaction(Response $response, array $data, $source)
     {
-        list($paymentMethod, $paymentType) = $this->splitPaymentCode(
-            $response->getPayment()->getCode()
-        );
+        list($paymentMethod, $paymentType) = $this->getPaymentMethodAndType($response);
 
         try {
             // save the response details into the heidelpay Transactions table.
@@ -308,7 +311,7 @@ class Payment extends AbstractHelper
                 ->setJsonResponse(json_encode($data))
                 ->setSource($source)
                 ->save();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->_logger->error('Heidelpay - ' . $source . ': Save transaction error. ' . $e->getMessage());
         }
     }
@@ -333,5 +336,16 @@ class Payment extends AbstractHelper
         }
 
         return $this->_cartManagement->submit($quote);
+    }
+
+    /**
+     * Returns an array containing the payment method and payment type of the given Response object.
+     *
+     * @param $response
+     * @return array
+     */
+    public function getPaymentMethodAndType(Response $response)
+    {
+        return $this->splitPaymentCode($response->getPayment()->getCode());
     }
 }
