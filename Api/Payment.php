@@ -311,4 +311,17 @@ class Payment implements PaymentInterface
             ->setHeidelpayPaymentReference($paymentRef)
             ->save();
     }
+
+    /**
+     * Fetches and returns the selected installment plan if there is one.
+     *
+     * @param string $quoteId
+     * @param string $paymentMethod The payment method code
+     * @return string
+     */
+    public function getInstallmentPlan($quoteId, $paymentMethod)
+    {
+        $this->logger->error(__METHOD__ . ' ' . $quoteId . ' '. $paymentMethod);
+        return json_encode(['test' => 'test']);
+    }
 }

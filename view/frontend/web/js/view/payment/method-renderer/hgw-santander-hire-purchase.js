@@ -33,16 +33,14 @@ define(
 
             initialize: function () {
                 this._super();
+                this.getInstallmentPlan();
                 this.getAdditionalPaymentInformation();
 
-                if (this.hgwInstallmentPlanUrl !== '') {
-                    this.template = 'Heidelpay_Gateway/payment/heidelpay-santander-hire-purchase-installment-plan';
-                } else {
-                    // init years select menu
-                    for (let i = (new Date().getFullYear() - 17); i >= new Date().getFullYear() - 120; i--) {
-                        this.years.push(i);
-                    }
+                // init years select menu
+                for (let i = (new Date().getFullYear() - 17); i >= new Date().getFullYear() - 120; i--) {
+                    this.years.push(i);
                 }
+
                 return this;
             },
 
@@ -71,10 +69,22 @@ define(
                             function(data) {
                                 var info = JSON.parse(data);
 
-                                // set link to installment plan
+                                // set salutation and birthdate, if set.
                                 if( info !== null ) {
-                                    if (info.hasOwnProperty('hgw_installment_plan_url')) {
-                                        parent.hgwInstallmentPlanUrl = info.hgw_installment_plan_url;
+                                    if (info.hasOwnProperty('hgw_salutation'))
+                                        parent.hgwSalutation(info.hgw_salutation);
+
+                                    if (info.hasOwnProperty('hgw_birthdate') && info.hgw_birthdate !== null) {
+                                        var date = moment(info.hgw_birthdate, 'YYYY-MM-DD');
+
+                                        parent.hgwDobDay(date.date());
+                                        parent.hgwDobMonth(date.month());
+                                        parent.hgwDobYear(date.year());
+
+                                        // workaround: if month is 'january', the month isn't selected.
+                                        if (date.month() === 0) {
+                                            $("#hgwivs_birthdate_month option:eq(1)").prop('selected', true);
+                                        }
                                     }
                                 }
                             }
@@ -120,11 +130,40 @@ define(
             },
 
             /**
-             * Returns the installmentPlanUrl
+             * Fetches the installment plan url if it exists
              * @returns {string}
              */
             getInstallmentPlan: function () {
-                return this.hgwInstallmentPlanUrl
+                var parent = this;
+                var serviceUrl = urlBuilder.createUrl('/hgw/get-installment-plan', {});
+                var hgwPayload = {
+                    quoteId: quote.getQuoteId(),
+                    paymentMethod: this.item.method
+                };
+
+                // todo: start spinner here
+                storage.post(serviceUrl, JSON.stringify(hgwPayload)).done(
+                    function(rawData) {
+                        var data = JSON.parse(rawData);
+
+                        // set link to installment plan
+                        if( data !== null ) {
+                            if (data.hasOwnProperty('hgw_installment_plan_url')) {
+                                console.log('installment_plan_url: ' + data.hgw_installment_plan_url);
+                                parent.hgwInstallmentPlanUrl = data.hgw_installment_plan_url;
+                            }
+                        }
+                    }
+                ).fail(
+                    function(rawData) {
+                        console.log('something went horribly wrong: ' + rawData);
+                    }
+                ).always(
+                    function(rawData) {
+                        // todo stop spinner here
+                        console.log('Whatever');
+                    }
+                );
             }
         });
     }
