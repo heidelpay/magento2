@@ -280,7 +280,7 @@ class Payment implements PaymentInterface
     {
         // make some additional data changes, if necessary
         array_walk($additionalData, static function (&$value, $key) {
-            // if somehow the country code in the IBAN is lowercase, convert it to uppercase.
+            // make sure the country code in the IBAN is uppercase.
             if ($key === 'hgw_iban') {
                 $value = strtoupper($value);
             }
