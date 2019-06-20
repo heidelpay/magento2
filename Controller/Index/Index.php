@@ -12,7 +12,6 @@ use Heidelpay\PhpPaymentApi\Response as HeidelpayResponse;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Customer\Model\Session;
 use Magento\Customer\Model\Url;
-use Heidelpay\PhpPaymentApi\Response as HeidelpayResponse;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\Encryption\Encryptor;
 use Magento\Framework\Escaper;
