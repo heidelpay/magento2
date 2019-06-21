@@ -15,6 +15,7 @@ namespace Heidelpay\Gateway\Model;
 
 use Exception;
 use Heidelpay\Gateway\Api\Data\TransactionSearchResultInterface;
+use Heidelpay\Gateway\Api\Data\TransactionSearchResultInterfaceFactory;
 use Heidelpay\Gateway\Api\TransactionRepositoryInterface;
 use Heidelpay\Gateway\Model\ResourceModel\Transaction as ResourceTransaction;
 use Magento\Framework\Api\SearchCriteriaInterface;
