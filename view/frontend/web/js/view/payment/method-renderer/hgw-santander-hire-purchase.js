@@ -24,6 +24,7 @@ define(
             defaults: {
                 template: 'Heidelpay_Gateway/payment/heidelpay-santander-hire-purchase',
                 hgwInstallmentPlanUrl: '',
+                hgwInstallmentPlanVisible: false,
                 hgwDobYear: '',
                 hgwDobMonth: '',
                 hgwDobDay: '',
@@ -46,7 +47,7 @@ define(
 
             initObservable: function() {
                 this._super()
-                    .observe(['hgwSalutation', 'hgwDobYear', 'hgwDobMonth', 'hgwDobDay', 'years']);
+                    .observe(['hgwSalutation', 'hgwDobYear', 'hgwDobMonth', 'hgwDobDay', 'years', 'hgwInstallmentPlanUrl', 'hgwInstallmentPlanVisible']);
                 return this;
             },
 
@@ -140,27 +141,21 @@ define(
                     paymentMethod: this.item.method
                 };
 
-                // todo: start spinner here
-                storage.post(serviceUrl, JSON.stringify(hgwPayload)).done(
+                storage.get(serviceUrl + '?quoteId=' + quote.getQuoteId() + '&paymentMethod=' + this.item.method, JSON.stringify(hgwPayload)).done(
                     function(rawData) {
                         var data = JSON.parse(rawData);
 
                         // set link to installment plan
                         if( data !== null ) {
                             if (data.hasOwnProperty('hgw_installment_plan_url')) {
-                                console.log('installment_plan_url: ' + data.hgw_installment_plan_url);
-                                parent.hgwInstallmentPlanUrl = data.hgw_installment_plan_url;
+                                parent.hgwInstallmentPlanUrl(data.hgw_installment_plan_url);
+                                parent.hgwInstallmentPlanVisible(true);
                             }
                         }
                     }
                 ).fail(
                     function(rawData) {
-                        console.log('something went horribly wrong: ' + rawData);
-                    }
-                ).always(
-                    function(rawData) {
-                        // todo stop spinner here
-                        console.log('Whatever');
+                        parent.hgwInstallmentPlanVisible(false);
                     }
                 );
             }

@@ -31,10 +31,11 @@
             <!--/ko-->
         </div>
         <img src="https://www.santander.de/media/bilder/logos/logos_privatkunden/logo.gif"/>
-        <div class="hgw-" style="visibility: hidden;">
-            Form downloadlink
+        <div id="hgw-santander-hire-purchase-installment-plan" data-bind="visible: hgwInstallmentPlanVisible">
+            <div><!-- ko i18n: 'Hire Purchase Precontract'--><!-- /ko --></div>
+            <a data-bind="attr: {href: hgwInstallmentPlanUrl}"><!-- ko i18n: 'Hire Purchase Precontract download'--><!-- /ko --></a>
         </div>
-        <form id="hgw-santander-hire-purchase" class="form form-hgw-santander-hire-purchase" data-role="hgw-santander-hire-purchase" disabled="true">
+        <form id="hgw-santander-hire-purchase" class="form form-hgw-santander-hire-purchase" data-role="hgw-santander-hire-purchase">
                 <fieldset class="fieldset payment method" data-bind='attr: {id: "payment_form_" + getCode()}'>
                     <div class="field required">
                         <label for="hgwsanhp_salutation" class="label">
