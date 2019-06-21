@@ -2,6 +2,9 @@
 
 namespace Heidelpay\Gateway\Model;
 
+use Heidelpay\Gateway\Api\Data\TransactionInterface;
+use Magento\Framework\Model\AbstractModel;
+
 /**
  * Transaction resource model
  *
@@ -16,22 +19,27 @@ namespace Heidelpay\Gateway\Model;
  * @subpackage magento2
  * @category magento2
  */
-class Transaction extends \Magento\Framework\Model\AbstractModel
+class Transaction extends AbstractModel implements TransactionInterface
 {
-    public function __construct(
-        \Magento\Framework\Model\Context $context,
-        \Magento\Framework\Registry $registry,
-        \Magento\Payment\Helper\Data $paymentData,
-        \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
-        \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
-        array $data = []
-    ) {
-        parent::__construct($context, $registry, $resource, $resourceCollection, $data);
-    }
+    const ID = 'id';
+    const PAYMENT_METHOD = 'payment_methode';
+    const PAYMENT_TYPE = 'payment_type';
+    const TRANSACTION_ID = 'transactionid';
+    const QUOTE_ID = self::TRANSACTION_ID;
+    const UNIQUE_ID = 'uniqeid';
+    const SHORT_ID = 'shortid';
+    const RESULT = 'result';
+    const STATUS_CODE = 'statuscode';
+    const RETURN_MSG = 'return';
+    const RETURN_CODE = 'returncode';
+    const JSON_RESPONSE = 'jsonresponse';
+    const DATE_TIME = 'datatime';
+    const SOURCE = 'source';
 
+    /** @noinspection MagicMethodsValidityInspection */
     public function _construct()
     {
-        $this->_init('Heidelpay\Gateway\Model\ResourceModel\Transaction');
+        $this->_init(ResourceModel\Transaction::class);
     }
 
     /**
@@ -39,7 +47,7 @@ class Transaction extends \Magento\Framework\Model\AbstractModel
      */
     public function getPaymentMethod()
     {
-        return $this->getData('payment_methode');
+        return $this->getData(self::PAYMENT_METHOD);
     }
 
     /**
@@ -48,7 +56,7 @@ class Transaction extends \Magento\Framework\Model\AbstractModel
      */
     public function setPaymentMethod($paymentMethod)
     {
-        $this->setData('payment_methode', $paymentMethod);
+        $this->setData(self::PAYMENT_METHOD, $paymentMethod);
         return $this;
     }
 
@@ -57,7 +65,7 @@ class Transaction extends \Magento\Framework\Model\AbstractModel
      */
     public function getPaymentType()
     {
-        return $this->getData('payment_type');
+        return $this->getData(self::PAYMENT_TYPE);
     }
 
     /**
@@ -66,7 +74,7 @@ class Transaction extends \Magento\Framework\Model\AbstractModel
      */
     public function setPaymentType($paymentType)
     {
-        $this->setData('payment_type', $paymentType);
+        $this->setData(self::PAYMENT_TYPE, $paymentType);
         return $this;
     }
 
@@ -75,7 +83,7 @@ class Transaction extends \Magento\Framework\Model\AbstractModel
      */
     public function getTransactionId()
     {
-        return $this->getData('transactionid');
+        return $this->getData(self::TRANSACTION_ID);
     }
 
     /**
@@ -84,7 +92,7 @@ class Transaction extends \Magento\Framework\Model\AbstractModel
      */
     public function setTransactionId($transactionId)
     {
-        $this->setData('transactionid', $transactionId);
+        $this->setData(self::TRANSACTION_ID, $transactionId);
         return $this;
     }
 
@@ -93,7 +101,7 @@ class Transaction extends \Magento\Framework\Model\AbstractModel
      */
     public function getUniqueId()
     {
-        return $this->getData('uniqeid');
+        return $this->getData(self::UNIQUE_ID);
     }
 
     /**
@@ -102,7 +110,7 @@ class Transaction extends \Magento\Framework\Model\AbstractModel
      */
     public function setUniqueId($uniqueId)
     {
-        $this->setData('uniqeid', $uniqueId);
+        $this->setData(self::UNIQUE_ID, $uniqueId);
         return $this;
     }
 
@@ -111,7 +119,7 @@ class Transaction extends \Magento\Framework\Model\AbstractModel
      */
     public function getShortId()
     {
-        return $this->getData('shortid');
+        return $this->getData(self::SHORT_ID);
     }
 
     /**
@@ -120,7 +128,7 @@ class Transaction extends \Magento\Framework\Model\AbstractModel
      */
     public function setShortId($shortId)
     {
-        $this->setData('shortid', $shortId);
+        $this->setData(self::SHORT_ID, $shortId);
         return $this;
     }
 
@@ -129,7 +137,7 @@ class Transaction extends \Magento\Framework\Model\AbstractModel
      */
     public function getResult()
     {
-        return $this->getData('result');
+        return $this->getData(self::RESULT);
     }
 
     /**
@@ -138,7 +146,7 @@ class Transaction extends \Magento\Framework\Model\AbstractModel
      */
     public function setResult($result)
     {
-        $this->setData('result', $result);
+        $this->setData(self::RESULT, $result);
         return $this;
     }
 
@@ -147,7 +155,7 @@ class Transaction extends \Magento\Framework\Model\AbstractModel
      */
     public function getStatusCode()
     {
-        return $this->getData('statuscode');
+        return $this->getData(self::STATUS_CODE);
     }
 
     /**
@@ -156,7 +164,7 @@ class Transaction extends \Magento\Framework\Model\AbstractModel
      */
     public function setStatusCode($statusCode)
     {
-        $this->setData('statuscode', $statusCode);
+        $this->setData(self::STATUS_CODE, $statusCode);
         return $this;
     }
 
@@ -165,7 +173,7 @@ class Transaction extends \Magento\Framework\Model\AbstractModel
      */
     public function getReturnMessage()
     {
-        return $this->getData('return');
+        return $this->getData(self::RETURN_MSG);
     }
 
     /**
@@ -174,7 +182,7 @@ class Transaction extends \Magento\Framework\Model\AbstractModel
      */
     public function setReturnMessage($returnMessage)
     {
-        $this->setData('return', $returnMessage);
+        $this->setData(self::RETURN_MSG, $returnMessage);
         return $this;
     }
 
@@ -183,7 +191,7 @@ class Transaction extends \Magento\Framework\Model\AbstractModel
      */
     public function getReturnCode()
     {
-        return $this->getData('returncode');
+        return $this->getData(self::RETURN_CODE);
     }
 
     /**
@@ -192,7 +200,7 @@ class Transaction extends \Magento\Framework\Model\AbstractModel
      */
     public function setReturnCode($returnCode)
     {
-        $this->setData('returncode', $returnCode);
+        $this->setData(self::RETURN_CODE, $returnCode);
         return $this;
     }
 
@@ -201,7 +209,7 @@ class Transaction extends \Magento\Framework\Model\AbstractModel
      */
     public function getJsonResponse()
     {
-        return json_decode($this->getData('jsonresponse'), true);
+        return json_decode($this->getData(self::JSON_RESPONSE), true);
     }
 
     /**
@@ -210,7 +218,7 @@ class Transaction extends \Magento\Framework\Model\AbstractModel
      */
     public function setJsonResponse($jsonResponse)
     {
-        $this->setData('jsonresponse', $jsonResponse);
+        $this->setData(self::JSON_RESPONSE, $jsonResponse);
         return $this;
     }
 
@@ -219,7 +227,7 @@ class Transaction extends \Magento\Framework\Model\AbstractModel
      */
     public function getDatetime()
     {
-        return $this->getData('datatime');
+        return $this->getData(self::DATE_TIME);
     }
 
     /**
@@ -227,7 +235,7 @@ class Transaction extends \Magento\Framework\Model\AbstractModel
      */
     public function getSource()
     {
-        return $this->getData('source');
+        return $this->getData(self::SOURCE);
     }
 
     /**
@@ -236,7 +244,7 @@ class Transaction extends \Magento\Framework\Model\AbstractModel
      */
     public function setSource($source)
     {
-        $this->setData('source', $source);
+        $this->setData(self::SOURCE, $source);
         return $this;
     }
 }

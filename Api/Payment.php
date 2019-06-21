@@ -9,17 +9,28 @@
  *
  * @author Stephano Vogel
  *
- * @package heidelpay
- * @subpackage magento2
- * @category magento2
+ * @package heidelpay/magento2
  */
 namespace Heidelpay\Gateway\Api;
 
+use Exception;
 use Heidelpay\Gateway\Api\Data\PaymentInformationInterface;
+use Heidelpay\Gateway\Api\Data\TransactionInterface;
 use Heidelpay\Gateway\Model\Config\Source\Recognition;
 use Heidelpay\Gateway\Model\PaymentInformation;
 use Heidelpay\Gateway\Model\PaymentInformationFactory;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
+use Heidelpay\Gateway\Model\Transaction;
+use Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod;
+use Heidelpay\PhpPaymentApi\Constants\PaymentMethod;
+use Heidelpay\PhpPaymentApi\Constants\ProcessingResult;
+use Heidelpay\PhpPaymentApi\Constants\TransactionType;
+use Heidelpay\PhpPaymentApi\Response;
+use Klarna\Kp\Api\QuoteRepositoryInterface;
+use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Framework\Api\SortOrder;
+use Magento\Framework\Api\SortOrderBuilder;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Quote\Model\QuoteIdMask;
 use Magento\Quote\Model\QuoteIdMaskFactory;
 use Magento\Quote\Model\QuoteRepository;
@@ -27,6 +38,7 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Quote\Api\Data\AddressInterface;
 use Magento\Quote\Model\Quote;
+use Magento\Sales\Api\Data\TransactionSearchResultInterface;
 use Magento\Store\Model\ScopeInterface;
 use Psr\Log\LoggerInterface;
 
@@ -53,6 +65,15 @@ class Payment implements PaymentInterface
     /** @var PaymentInformationCollectionFactory */
     public $paymentInformationCollectionFactory;
 
+    /** @var SearchCriteriaBuilder */
+    private $searchCriteriaBuilder;
+
+    /** @var TransactionRepositoryInterface */
+    private $transactionRepository;
+
+    /** @var SortOrderBuilder*/
+    private $sortOrderBuilder;
+
     /**
      * Payment Information API constructor.
      *
@@ -63,6 +84,9 @@ class Payment implements PaymentInterface
      * @param PaymentInformationCollectionFactory $paymentInformationCollectionFactory
      * @param LoggerInterface $logger
      * @param ScopeConfigInterface $scopeConfig
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param TransactionRepositoryInterface $transactionRepository
+     * @param SortOrderBuilder $sortOrderBuilder
      */
     public function __construct(
         QuoteRepository $quoteRepository,
@@ -71,7 +95,10 @@ class Payment implements PaymentInterface
         EncryptorInterface $encryptor,
         PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
         LoggerInterface $logger,
-        ScopeConfigInterface $scopeConfig
+        ScopeConfigInterface $scopeConfig,
+        SearchCriteriaBuilder $searchCriteriaBuilder,
+        TransactionRepositoryInterface $transactionRepository,
+        SortOrderBuilder $sortOrderBuilder
     ) {
         $this->quoteRepository = $quoteRepository;
         $this->quoteIdMaskFactory = $quoteIdMaskFactory;
@@ -82,6 +109,9 @@ class Payment implements PaymentInterface
         $this->encryptor = $encryptor;
         $this->logger = $logger;
         $this->scopeConfig = $scopeConfig;
+        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->transactionRepository = $transactionRepository;
+        $this->sortOrderBuilder = $sortOrderBuilder;
     }
 
     /**
@@ -169,6 +199,8 @@ class Payment implements PaymentInterface
 
     /**
      * @inheritdoc
+     *
+     * @throws Exception
      */
     public function saveGuestAdditionalPaymentInfo($cartId, $method, $additionalData)
     {
@@ -251,10 +283,6 @@ class Payment implements PaymentInterface
                 $result['hgw_birthdate'] = $quote->getCustomer()->getDob();
                 break;
 
-            case 'hgwsanhp':
-                $result['hgw_installment_plan_url'] = 'http://www.google.com';
-                break;
-
             default:
                 $result = null;
                 break;
@@ -274,7 +302,10 @@ class Payment implements PaymentInterface
      * @param string $email
      * @param array $additionalData
      * @param string $paymentRef
+     *
      * @return PaymentInformationInterface
+     *
+     * @throws Exception
      */
     private function savePaymentInformation($quote, $method, $email, $additionalData, $paymentRef = null)
     {
@@ -317,11 +348,58 @@ class Payment implements PaymentInterface
      *
      * @param string $quoteId
      * @param string $paymentMethod The payment method code
+     *
      * @return string
+     *
+     * @throws NoSuchEntityException
      */
     public function getInstallmentPlan($quoteId, $paymentMethod)
     {
-        $this->logger->error(__METHOD__ . ' ' . $quoteId . ' '. $paymentMethod);
-        return json_encode(['test' => 'test']);
+        $response = [];
+
+        // do nothing if the payment method does not belong to heidelpay
+        $quote = $this->quoteRepository->get($quoteId);
+        $methodInstance = $quote->getPayment()->getMethodInstance();
+        if (!$methodInstance instanceof HeidelpayAbstractPaymentMethod) {
+            return json_encode([]);
+        }
+
+        // fetch the latest installment plan for the selected HP-method
+        $paymentMethodInstance = $methodInstance->getHeidelpayPaymentMethodInstance();
+        if ($paymentMethodInstance->getPaymentCode() === PaymentMethod::HIRE_PURCHASE) {
+            /** @var TransactionSearchResultInterface $results */
+            $results = $this->getAllHpInsForThisQuote($quoteId);
+            foreach ($results->getItems() as $item) {
+                /** @var TransactionInterface $item */
+                $heidelpayResponse = new Response($item->getJsonResponse());
+                if ($heidelpayResponse->getAccount()->getBrand() === $paymentMethodInstance->getBrand()) {
+                    $contractUrlField = $paymentMethodInstance->getBrand() . '_PDF_URL';
+                    $response['hgw_installment_plan_url'] = $heidelpayResponse->getCriterion()->get($contractUrlField);
+                    break;
+                }
+            }
+        }
+        return json_encode($response);
+    }
+
+    /**
+     * @param $quoteId
+     * @param string $direction
+     * @return TransactionSearchResultInterface
+     */
+    private function getAllHpInsForThisQuote($quoteId, $direction = SortOrder::SORT_DESC)
+    {
+        $sortOrder = $this->sortOrderBuilder->setField(Transaction::ID)->setDirection($direction)->create();
+        $criteria  = $this->searchCriteriaBuilder
+            ->addFilter(Transaction::QUOTE_ID, $quoteId)
+            ->addFilter(Transaction::PAYMENT_TYPE, TransactionType::INITIALIZE)
+            ->addFilter(Transaction::PAYMENT_METHOD, PaymentMethod::HIRE_PURCHASE)
+            ->addFilter(Transaction::RESULT, ProcessingResult::ACK)
+            ->addSortOrder($sortOrder)
+            ->create();
+
+        /** @var TransactionSearchResultInterface $results */
+        $results = $this->transactionRepository->getList($criteria);
+        return $results;
     }
 }

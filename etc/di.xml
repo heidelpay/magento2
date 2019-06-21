@@ -153,4 +153,8 @@
     <preference for="Heidelpay\Gateway\Api\PaymentInterface" type="Heidelpay\Gateway\Api\Payment" />
     <preference for="Heidelpay\Gateway\Api\Data\PaymentInformationInterface" type="Heidelpay\Gateway\Model\PaymentInformation" />
     <preference for="Heidelpay\Gateway\Gateway\Config\HgwMainConfigInterface" type="Heidelpay\Gateway\Gateway\Config\HgwMainConfig" />
+    <preference for="Heidelpay\Gateway\Api\TransactionRepositoryInterface" type="Heidelpay\Gateway\Model\TransactionRepository"/>
+    <preference for="Heidelpay\Gateway\Api\Data\TransactionInterface" type="Heidelpay\Gateway\Model\Transaction"/>
+    <preference for="Heidelpay\Gateway\Api\Data\TransactionSearchResultInterface" type="Heidelpay\Gateway\Model\TransactionSearchResult"/>
+
 </config>
