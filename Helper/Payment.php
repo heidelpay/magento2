@@ -89,14 +89,16 @@ class Payment extends AbstractHelper
     /**
      * Returns an array containing the payment method code and the transaction type code.
      *
+     * @param $paymentCode
+     *
+     * @return array
+     *
      * @see PaymentMethod
      * @see TransactionType
-     * @param $PAYMENT_CODE
-     * @return array
      */
-    public function splitPaymentCode($PAYMENT_CODE)
+    public function splitPaymentCode($paymentCode)
     {
-        return explode('.', $PAYMENT_CODE);
+        return explode('.', $paymentCode);
     }
 
     /**
@@ -273,6 +275,8 @@ class Payment extends AbstractHelper
      * Saves a transaction by the given invoice.
      *
      * @param Invoice $invoice
+     *
+     * @throws Exception
      */
     public function saveTransaction(Invoice $invoice)
     {

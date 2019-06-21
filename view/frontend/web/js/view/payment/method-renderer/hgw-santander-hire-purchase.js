@@ -50,7 +50,6 @@ define(
                 return this;
             },
 
-
             getAdditionalPaymentInformation: function() {
                 // recognition: only when there is a logged in customer
                 if (customer.isLoggedIn()) {

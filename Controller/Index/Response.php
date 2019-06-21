@@ -8,7 +8,6 @@ use Heidelpay\Gateway\Helper\Payment as HeidelpayHelper;
 use Heidelpay\Gateway\Model\PaymentInformation;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
-use Heidelpay\Gateway\Model\TransactionFactory;
 use Magento\Framework\Controller\Result\RawFactory;
 use Heidelpay\PhpPaymentApi\Constants\PaymentMethod;
 use Heidelpay\PhpPaymentApi\Exceptions\HashVerificationException;
@@ -274,7 +273,7 @@ class Response extends HgwAbstract
             if ($order && $order->getId()) {
                 $this->_orderSender->send($order);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->_logger->error(
                 'Heidelpay - Response: Cannot send order confirmation E-Mail. ' . $e->getMessage()
             );
