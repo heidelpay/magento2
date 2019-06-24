@@ -18,10 +18,4 @@
             <resource ref="self" />
         </resources>
     </route>
-    <route url="/V1/hgw/get-installment-plan" method="GET">
-        <service class="Heidelpay\Gateway\Api\PaymentInterface" method="getInstallmentPlan" />
-        <resources>
-            <resource ref="anonymous" />
-        </resources>
-    </route>
 </routes>

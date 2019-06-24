@@ -54,13 +54,4 @@ interface PaymentInterface
      * @return string
      */
     public function saveGuestAdditionalPaymentInfo($cartId, $method, $additionalData);
-
-    /**
-     * Fetches and returns the selected installment plan if there is one.
-     *
-     * @param string $quoteId
-     * @param string $paymentMethod The payment method code
-     * @return string
-     */
-    public function getInstallmentPlan($quoteId, $paymentMethod);
 }

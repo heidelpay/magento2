@@ -23,8 +23,6 @@ define(
 
             defaults: {
                 template: 'Heidelpay_Gateway/payment/heidelpay-santander-hire-purchase',
-                hgwInstallmentPlanUrl: '',
-                hgwInstallmentPlanVisible: false,
                 hgwDobYear: '',
                 hgwDobMonth: '',
                 hgwDobDay: '',
@@ -34,7 +32,6 @@ define(
 
             initialize: function () {
                 this._super();
-                this.getInstallmentPlan();
                 this.getAdditionalPaymentInformation();
 
                 // init years select menu
@@ -127,37 +124,6 @@ define(
                 var form = $('#hgw-santander-hire-purchase');
 
                 return form.validation() && form.validation('isValid');
-            },
-
-            /**
-             * Fetches the installment plan url if it exists
-             * @returns {string}
-             */
-            getInstallmentPlan: function () {
-                var parent = this;
-                var serviceUrl = urlBuilder.createUrl('/hgw/get-installment-plan', {});
-                var hgwPayload = {
-                    quoteId: quote.getQuoteId(),
-                    paymentMethod: this.item.method
-                };
-
-                storage.get(serviceUrl + '?quoteId=' + quote.getQuoteId() + '&paymentMethod=' + this.item.method, JSON.stringify(hgwPayload)).done(
-                    function(rawData) {
-                        var data = JSON.parse(rawData);
-
-                        // set link to installment plan
-                        if( data !== null ) {
-                            if (data.hasOwnProperty('hgw_installment_plan_url')) {
-                                parent.hgwInstallmentPlanUrl(data.hgw_installment_plan_url);
-                                parent.hgwInstallmentPlanVisible(true);
-                            }
-                        }
-                    }
-                ).fail(
-                    function(rawData) {
-                        parent.hgwInstallmentPlanVisible(false);
-                    }
-                );
             }
         });
     }
