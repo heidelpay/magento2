@@ -15,21 +15,11 @@ namespace Heidelpay\Gateway\Api;
 
 use Exception;
 use Heidelpay\Gateway\Api\Data\PaymentInformationInterface;
-use Heidelpay\Gateway\Api\Data\TransactionInterface;
 use Heidelpay\Gateway\Model\Config\Source\Recognition;
 use Heidelpay\Gateway\Model\PaymentInformation;
 use Heidelpay\Gateway\Model\PaymentInformationFactory;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
-use Heidelpay\Gateway\Model\Transaction;
-use Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod;
-use Heidelpay\PhpPaymentApi\Constants\PaymentMethod;
-use Heidelpay\PhpPaymentApi\Constants\ProcessingResult;
-use Heidelpay\PhpPaymentApi\Constants\TransactionType;
-use Heidelpay\PhpPaymentApi\Response;
 use Klarna\Kp\Api\QuoteRepositoryInterface;
-use Magento\Framework\Api\SearchCriteriaBuilder;
-use Magento\Framework\Api\SortOrder;
-use Magento\Framework\Api\SortOrderBuilder;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Quote\Model\QuoteIdMask;
 use Magento\Quote\Model\QuoteIdMaskFactory;
@@ -38,7 +28,6 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Quote\Api\Data\AddressInterface;
 use Magento\Quote\Model\Quote;
-use Magento\Sales\Api\Data\TransactionSearchResultInterface;
 use Magento\Store\Model\ScopeInterface;
 use Psr\Log\LoggerInterface;
 
@@ -65,15 +54,6 @@ class Payment implements PaymentInterface
     /** @var PaymentInformationCollectionFactory */
     public $paymentInformationCollectionFactory;
 
-    /** @var SearchCriteriaBuilder */
-    private $searchCriteriaBuilder;
-
-    /** @var TransactionRepositoryInterface */
-    private $transactionRepository;
-
-    /** @var SortOrderBuilder*/
-    private $sortOrderBuilder;
-
     /**
      * Payment Information API constructor.
      *
@@ -84,9 +64,6 @@ class Payment implements PaymentInterface
      * @param PaymentInformationCollectionFactory $paymentInformationCollectionFactory
      * @param LoggerInterface $logger
      * @param ScopeConfigInterface $scopeConfig
-     * @param SearchCriteriaBuilder $searchCriteriaBuilder
-     * @param TransactionRepositoryInterface $transactionRepository
-     * @param SortOrderBuilder $sortOrderBuilder
      */
     public function __construct(
         QuoteRepository $quoteRepository,
@@ -95,10 +72,7 @@ class Payment implements PaymentInterface
         EncryptorInterface $encryptor,
         PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
         LoggerInterface $logger,
-        ScopeConfigInterface $scopeConfig,
-        SearchCriteriaBuilder $searchCriteriaBuilder,
-        TransactionRepositoryInterface $transactionRepository,
-        SortOrderBuilder $sortOrderBuilder
+        ScopeConfigInterface $scopeConfig
     ) {
         $this->quoteRepository = $quoteRepository;
         $this->quoteIdMaskFactory = $quoteIdMaskFactory;
@@ -109,13 +83,12 @@ class Payment implements PaymentInterface
         $this->encryptor = $encryptor;
         $this->logger = $logger;
         $this->scopeConfig = $scopeConfig;
-        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
-        $this->transactionRepository = $transactionRepository;
-        $this->sortOrderBuilder = $sortOrderBuilder;
     }
 
     /**
      * @inheritdoc
+
+     * @throws NoSuchEntityException
      */
     public function getAdditionalPaymentInformation($quoteId, $paymentMethod)
     {
@@ -172,6 +145,8 @@ class Payment implements PaymentInterface
 
     /**
      * @inheritdoc
+     * @throws NoSuchEntityException*@throws Exception
+     * @throws Exception
      */
     public function saveAdditionalPaymentInfo($cartId, $method, $additionalData)
     {

@@ -219,11 +219,11 @@ class Response extends HgwAbstract
         list($paymentMethod, $paymentType) = $this->_paymentHelper->getPaymentMethodAndType($this->heidelpayResponse);
         if ($paymentType === TransactionType::INITIALIZE && $paymentMethod === PaymentMethod::HIRE_PURCHASE) {
             if ($this->heidelpayResponse->isSuccess()) {
-                $redirectUrl = $this->_url->getUrl('checkout/', [
+                $redirectUrl = $this->_url->getUrl('hgw/index/installmentplan', [
                     '_forced_secure' => true,
                     '_scope_to_url' => true,
                     '_nosid' => true
-                ]) . '#payment';
+                ]);
             }
 
             // return the heidelpay response url as raw response instead of echoing it out.

@@ -19,8 +19,6 @@ use Magento\Framework\View\Element\Template;
  *
  * @method setHgwUrl(string $url)
  * @method getHgwUrl()
- * @method setInstallmentPlanUrl(string $url)
- * @method getInstallmentPlanUrl()
  */
 class Hgw extends Template
 {
