@@ -67,7 +67,7 @@ class Payment extends AbstractHelper
      * @param TransactionFactory $transactionFactory
      * @param Resolver $localeResolver
      * @param QuoteManagement $cartManagement
-     * @param Transaction $heidelpayTransactionFactory
+     * @param HgwTransactionFactory $heidelpayTransactionFactory
      */
     public function __construct(
         Context $context,
@@ -75,7 +75,7 @@ class Payment extends AbstractHelper
         TransactionFactory $transactionFactory,
         Resolver $localeResolver,
         QuoteManagement $cartManagement,
-        Transaction $heidelpayTransactionFactory
+        HgwTransactionFactory $heidelpayTransactionFactory
     ) {
         $this->httpClientFactory = $httpClientFactory;
         $this->transactionFactory = $transactionFactory;
