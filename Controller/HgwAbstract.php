@@ -3,6 +3,7 @@
 namespace Heidelpay\Gateway\Controller;
 
 use Heidelpay\Gateway\Helper\Payment as HeidelpayHelper;
+use Magento\Quote\Model\QuoteManagement;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderCommentSender;
 use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
@@ -45,9 +46,7 @@ abstract class HgwAbstract extends \Magento\Framework\App\Action\Action
 
     protected $_quoteObject;
 
-    /**
-     * @var \Magento\Quote\Model\QuoteManagement
-     */
+    /** @var QuoteManagement */
     protected $_cartManagement;
 
     /**
