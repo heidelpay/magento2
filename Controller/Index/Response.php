@@ -27,6 +27,7 @@ use Magento\Quote\Model\QuoteRepository;
 use Magento\Sales\Helper\Data as SalesHelper;
 use Magento\Sales\Model\OrderFactory;
 use Magento\Sales\Model\Order;
+use Magento\Sales\Model\OrderRepository;
 use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderCommentSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
@@ -66,6 +67,9 @@ class Response extends HgwAbstract
     /** @var SalesHelper  */
     private $salesHelper;
 
+    /** @var OrderRepository */
+    private $orderRepository;
+
     /**
      * heidelpay Response constructor.
      *
@@ -88,6 +92,7 @@ class Response extends HgwAbstract
      * @param QuoteRepository $quoteRepository
      * @param PaymentInformationCollectionFactory $paymentInformationCollectionFactory ,
      * @param SalesHelper $salesHelper
+     * @param OrderRepository $orderRepository
      */
     public function __construct(
         Context $context,
@@ -108,7 +113,8 @@ class Response extends HgwAbstract
         RawFactory $rawResultFactory,
         QuoteRepository $quoteRepository,
         PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
-        SalesHelper $salesHelper
+        SalesHelper $salesHelper,
+        OrderRepository $orderRepository
     ) {
         parent::__construct(
             $context,
@@ -132,6 +138,7 @@ class Response extends HgwAbstract
         $this->quoteRepository = $quoteRepository;
         $this->paymentInformationCollectionFactory = $paymentInformationCollectionFactory;
         $this->salesHelper = $salesHelper;
+        $this->orderRepository = $orderRepository;
     }
 
     /**
@@ -251,7 +258,8 @@ class Response extends HgwAbstract
             $this->_paymentHelper->mapStatus($data, $order);
             $this->handleOrderMail($order);
             $this->handleInvoiceMails($order);
-            $order->save();
+
+            $this->orderRepository->save($order);
         }
 
         $this->handleAdditionalPaymentInformation($quote);
