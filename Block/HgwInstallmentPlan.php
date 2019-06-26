@@ -17,6 +17,8 @@ use Magento\Framework\View\Element\Template;
  *
  * @method setInstallmentPlanUrl(string $url)
  * @method getInstallmentPlanUrl()
+ * @method setInitReferenceId(string $id)
+ * @method getInitReferenceId()
  */
 class HgwInstallmentPlan extends Template
 {

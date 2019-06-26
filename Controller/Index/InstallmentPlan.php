@@ -154,6 +154,7 @@ class InstallmentPlan extends HgwAbstract
         }
 
         $installmentPlanUrl = null;
+        $initRefernceId = null;
 
         // fetch the latest installment plan for the selected HP-method
         $paymentMethodInstance = $methodInstance->getHeidelpayPaymentMethodInstance();
@@ -166,20 +167,20 @@ class InstallmentPlan extends HgwAbstract
                 if ($heidelpayResponse->getAccount()->getBrand() === $paymentMethodInstance->getBrand()) {
                     $contractUrlField = $paymentMethodInstance->getBrand() . '_PDF_URL';
                     $installmentPlanUrl = $heidelpayResponse->getCriterion()->get($contractUrlField);
+                    $initRefernceId = $heidelpayResponse->getPaymentReferenceId();
                     break;
                 }
             }
         }
-        $this->_logger->error('url ' . $installmentPlanUrl);
 
-
-        if (!empty($installmentPlanUrl)) {
+        if (!empty($installmentPlanUrl) && !empty($initRefernceId)) {
             $resultPage = $this->_resultPageFactory->create();
             $resultPage->getConfig()->getTitle()->prepend(__('Please confirm your payment:'));
 
             /** @var HgwInstallmentPlan $hgwInstallmentPlan */
             $hgwInstallmentPlan = $resultPage->getLayout()->getBlock('InstallmentPlan');
             $hgwInstallmentPlan->setInstallmentPlanUrl($installmentPlanUrl);
+            $hgwInstallmentPlan->setInitReferenceId($initRefernceId);
 
             return $resultPage;
         }

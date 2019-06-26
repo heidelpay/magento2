@@ -17,8 +17,12 @@ namespace Heidelpay\Gateway\PaymentMethods;
 
 use Heidelpay\Gateway\Model\PaymentInformation;
 use Heidelpay\Gateway\Wrapper\CustomerWrapper;
+use Heidelpay\PhpBasketApi\Exception\InvalidBasketitemPositionException;
+use Heidelpay\PhpPaymentApi\Exceptions\UndefinedTransactionModeException;
 use Heidelpay\PhpPaymentApi\PaymentMethods\SantanderHirePurchasePaymentMethod;
+use Heidelpay\PhpPaymentApi\Response;
 use Magento\Framework\App\ObjectManager;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Quote\Api\Data\CartInterface;
 
 /**
@@ -69,6 +73,23 @@ class HeidelpaySantanderHirePurchasePaymentMethod extends HeidelpayAbstractPayme
      */
     public function getHeidelpayUrl($quote)
     {
+        return $this->performTransaction($quote);
+    }
+
+    /**
+     * Performs the transaction, either IN if no HP.IN reference Id exists.
+     *
+     * @param $quote
+     * @param mixed $referenceId
+     *
+     * @return Response
+     *
+     * @throws InvalidBasketitemPositionException
+     * @throws LocalizedException
+     * @throws UndefinedTransactionModeException
+     */
+    private function performTransaction($quote, $referenceId = null)
+    {
         // create the collection factory
         $paymentInfoCollection = $this->paymentInformationCollectionFactory->create();
 
@@ -98,12 +119,15 @@ class HeidelpaySantanderHirePurchasePaymentMethod extends HeidelpayAbstractPayme
         /** @var CustomerWrapper $customer */
         $customer = $objectManager->create(CustomerWrapper::class)->setCustomer($quote->getCustomer());
         $request->getRiskInformation()
-                ->setCustomerGuestCheckout($customer->isGuest() ? 'TRUE' : 'FALSE')
-                ->setCustomerOrderCount($customer->numberOfOrders())
-                ->setCustomerSince($customer->customerSince());
+            ->setCustomerGuestCheckout($customer->isGuest() ? 'TRUE' : 'FALSE')
+            ->setCustomerOrderCount($customer->numberOfOrders())
+            ->setCustomerSince($customer->customerSince());
 
-        // send the initialize request
-        $this->_heidelpayPaymentMethod->initialize();
+        if ($referenceId !== null) {
+            $this->_heidelpayPaymentMethod->authorizeOnRegistration($referenceId);
+        } else {
+            $this->_heidelpayPaymentMethod->initialize();
+        }
 
         return $this->_heidelpayPaymentMethod->getResponse();
     }

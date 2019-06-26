@@ -23,17 +23,12 @@ use Heidelpay\Gateway\Block\Hgw;
             <a href="<?php echo trim($block->getInstallmentPlanUrl()) ?>" target="_blank"><?php echo __('Hire Purchase Precontract download') ?></a>
         </div>
         <br /><br />
-        <button  id="pay-now" type="submit" style="margin-left:200px">
-            <span><?php echo __('pay now') ?></span>
-        </button>
+
+        <form id="hp-confirm-form" method="post" action="<?php echo $block->getUrl('Heidelpay_Gateway/hgw'); ?> ">
+            <input type="hidden" name="referenceId" value="<?php echo $block->getInitReferenceId(); ?>">
+            <button id="pay-now" type="submit" style="margin-left:200px">
+                <span><?php echo __('pay now') ?></span>
+            </button>
+        </form>
     </div>
 </div>
-
-<!--<script type="text/x-magento-init">-->
-<!--    {-->
-<!--        "#pay-now": {-->
-<!--            "Heidelpay_Gateway/js/heidelpayCcAfter": { }-->
-<!--         }-->
-<!--            -->
-<!--    }-->
-<!--</script>-->
