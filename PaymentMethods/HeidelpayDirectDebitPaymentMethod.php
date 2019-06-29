@@ -53,7 +53,7 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
      * @throws UndefinedTransactionModeException
      * @throws LocalizedException
      */
-    public function getHeidelpayUrl($quote)
+    public function getHeidelpayUrl($quote, array $data = [])
     {
         $paymentInfoCollection = $this->paymentInformationCollectionFactory->create();
 

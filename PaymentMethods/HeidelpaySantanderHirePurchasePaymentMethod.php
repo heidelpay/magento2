@@ -15,14 +15,12 @@
  */
 namespace Heidelpay\Gateway\PaymentMethods;
 
+use Exception;
 use Heidelpay\Gateway\Model\PaymentInformation;
 use Heidelpay\Gateway\Wrapper\CustomerWrapper;
-use Heidelpay\PhpBasketApi\Exception\InvalidBasketitemPositionException;
 use Heidelpay\PhpPaymentApi\Exceptions\UndefinedTransactionModeException;
 use Heidelpay\PhpPaymentApi\PaymentMethods\SantanderHirePurchasePaymentMethod;
-use Heidelpay\PhpPaymentApi\Response;
 use Magento\Framework\App\ObjectManager;
-use Magento\Framework\Exception\LocalizedException;
 use Magento\Quote\Api\Data\CartInterface;
 
 /**
@@ -57,7 +55,7 @@ class HeidelpaySantanderHirePurchasePaymentMethod extends HeidelpayAbstractPayme
     {
         // in B2C payment methods, we don't want companies to be involved.
         // so, if the address contains a company, return false.
-        if ($quote !== null && !empty($quote->getBillingAddress()->getCompany())) {
+        if ($quote !== null && $quote->getBillingAddress() === null && !empty($quote->getBillingAddress()->getCompany())) {
             return false;
         }
 
@@ -69,26 +67,11 @@ class HeidelpaySantanderHirePurchasePaymentMethod extends HeidelpayAbstractPayme
      * Initial Request to heidelpay payment server to get the form url
      * {@inheritDoc}
      *
+     * @throws UndefinedTransactionModeException
+     * @throws Exception
      * @see \Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod::getHeidelpayUrl()
      */
-    public function getHeidelpayUrl($quote)
-    {
-        return $this->performTransaction($quote);
-    }
-
-    /**
-     * Performs the transaction, either IN if no HP.IN reference Id exists.
-     *
-     * @param $quote
-     * @param mixed $referenceId
-     *
-     * @return Response
-     *
-     * @throws InvalidBasketitemPositionException
-     * @throws LocalizedException
-     * @throws UndefinedTransactionModeException
-     */
-    private function performTransaction($quote, $referenceId = null)
+    public function getHeidelpayUrl($quote, array $data = [])
     {
         // create the collection factory
         $paymentInfoCollection = $this->paymentInformationCollectionFactory->create();
@@ -123,8 +106,8 @@ class HeidelpaySantanderHirePurchasePaymentMethod extends HeidelpayAbstractPayme
             ->setCustomerOrderCount($customer->numberOfOrders())
             ->setCustomerSince($customer->customerSince());
 
-        if ($referenceId !== null) {
-            $this->_heidelpayPaymentMethod->authorizeOnRegistration($referenceId);
+        if (isset($data['referenceId']) && !empty($data['referenceId'])) {
+            $this->_heidelpayPaymentMethod->authorizeOnRegistration($data['referenceId']);
         } else {
             $this->_heidelpayPaymentMethod->initialize();
         }

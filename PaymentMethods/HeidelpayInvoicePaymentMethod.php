@@ -13,8 +13,10 @@
  */
 namespace Heidelpay\Gateway\PaymentMethods;
 
-use Heidelpay\PhpPaymentApi\PaymentMethods\InvoicePaymentMethod;
+use Exception;
 use Heidelpay\Gateway\Block\Info\Invoice as InvoiceBlock;
+use Heidelpay\PhpPaymentApi\Exceptions\UndefinedTransactionModeException;
+use Heidelpay\PhpPaymentApi\PaymentMethods\InvoicePaymentMethod;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Order\Payment\Transaction;
@@ -42,9 +44,10 @@ class HeidelpayInvoicePaymentMethod extends HeidelpayAbstractPaymentMethod
     /**
      * Initial Request to heidelpay payment server to get the form / iframe url
      * {@inheritDoc}
+     * @throws UndefinedTransactionModeException
      * @see \Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod::getHeidelpayUrl()
      */
-    public function getHeidelpayUrl($quote)
+    public function getHeidelpayUrl($quote, array $data = [])
     {
         // set initial data for the request
         parent::getHeidelpayUrl($quote);
@@ -76,6 +79,7 @@ class HeidelpayInvoicePaymentMethod extends HeidelpayAbstractPaymentMethod
 
     /**
      * @inheritdoc
+     * @throws Exception
      */
     public function pendingTransactionProcessing($data, &$order, $message = null)
     {

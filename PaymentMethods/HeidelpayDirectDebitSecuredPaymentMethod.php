@@ -40,7 +40,7 @@ class HeidelpayDirectDebitSecuredPaymentMethod extends HeidelpayAbstractPaymentM
     /**
      * @inheritdoc
      */
-    public function getHeidelpayUrl($quote)
+    public function getHeidelpayUrl($quote, array $data = [])
     {
         $paymentInfoCollection = $this->paymentInformationCollectionFactory->create();
 

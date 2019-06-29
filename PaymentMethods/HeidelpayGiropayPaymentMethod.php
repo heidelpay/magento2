@@ -13,6 +13,7 @@
  */
 namespace Heidelpay\Gateway\PaymentMethods;
 
+use Heidelpay\PhpPaymentApi\Exceptions\UndefinedTransactionModeException;
 use Heidelpay\PhpPaymentApi\PaymentMethods\GiropayPaymentMethod;
 
 class HeidelpayGiropayPaymentMethod extends HeidelpayAbstractPaymentMethod
@@ -36,8 +37,10 @@ class HeidelpayGiropayPaymentMethod extends HeidelpayAbstractPaymentMethod
 
     /**
      * @inheritdoc
+     *
+     * @throws UndefinedTransactionModeException
      */
-    public function getHeidelpayUrl($quote)
+    public function getHeidelpayUrl($quote, array $data = [])
     {
         // set initial data for the request
         parent::getHeidelpayUrl($quote);

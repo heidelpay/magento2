@@ -103,7 +103,7 @@ class Index extends HgwAbstract
 
         // get the response object from the initial request.
         /** @var HeidelpayResponse $response */
-        $response = $payment->getHeidelpayUrl($quote);
+        $response = $payment->getHeidelpayUrl($quote, $this->getRequest()->getParams());
 
         $this->_logger->debug('Heidelpay init response : ' . print_r($response, 1));
 

@@ -3,18 +3,20 @@
 namespace Heidelpay\Gateway\PaymentMethods;
 
 use Exception;
+use Heidelpay\Gateway\Block\Payment\HgwAbstract;
 use Heidelpay\Gateway\Gateway\Config\HgwBasePaymentConfigInterface;
 use Heidelpay\Gateway\Gateway\Config\HgwMainConfigInterface;
 use Heidelpay\Gateway\Helper\BasketHelper;
 use Heidelpay\Gateway\Helper\Payment as PaymentHelper;
 use Heidelpay\Gateway\Model\Config\Source\BookingMode;
-use Heidelpay\Gateway\Model\ResourceModel\Transaction\Collection as TransactionCollection;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
+use Heidelpay\Gateway\Model\ResourceModel\Transaction\Collection as TransactionCollection;
 use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
 use Heidelpay\Gateway\Model\Transaction;
 use Heidelpay\Gateway\Model\TransactionFactory;
 use Heidelpay\PhpBasketApi\Exception\InvalidBasketitemPositionException;
 use Heidelpay\PhpPaymentApi\ParameterGroups\BasketParameterGroup;
+use Heidelpay\PhpPaymentApi\PaymentMethods\PaymentMethodInterface;
 use Heidelpay\PhpPaymentApi\Response;
 use Magento\Framework\Api\AttributeValueFactory;
 use Magento\Framework\Api\ExtensionAttributesFactory;
@@ -43,8 +45,6 @@ use Magento\Sales\Helper\Data;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Order\Payment;
-use Heidelpay\Gateway\Block\Payment\HgwAbstract;
-use Heidelpay\PhpPaymentApi\PaymentMethods\PaymentMethodInterface;
 use Magento\Store\Model\ScopeInterface;
 use RuntimeException;
 
@@ -435,11 +435,11 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
 
     /**
      * @param Quote $quote
+     * @param array $data
      * @throws InvalidBasketitemPositionException
      * @throws LocalizedException
-     * @throws Exception
      */
-    public function getHeidelpayUrl($quote)
+    public function getHeidelpayUrl($quote, array $data = [])
     {
         $this->setupInitialRequest();
 

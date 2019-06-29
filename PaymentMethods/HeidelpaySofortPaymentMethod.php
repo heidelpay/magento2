@@ -13,6 +13,7 @@
  */
 namespace Heidelpay\Gateway\PaymentMethods;
 
+use Heidelpay\PhpPaymentApi\Exceptions\UndefinedTransactionModeException;
 use Heidelpay\PhpPaymentApi\PaymentMethods\SofortPaymentMethod;
 
 class HeidelpaySofortPaymentMethod extends HeidelpayAbstractPaymentMethod
@@ -37,9 +38,10 @@ class HeidelpaySofortPaymentMethod extends HeidelpayAbstractPaymentMethod
     /**
      * Initial Request to heidelpay payment server to get the form / iframe url
      * {@inheritDoc}
+     * @throws UndefinedTransactionModeException
      * @see \Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod::getHeidelpayUrl()
      */
-    public function getHeidelpayUrl($quote)
+    public function getHeidelpayUrl($quote, array $data = [])
     {
         // set initial data for the request
         parent::getHeidelpayUrl($quote);

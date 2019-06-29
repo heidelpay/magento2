@@ -13,8 +13,9 @@
  */
 namespace Heidelpay\Gateway\PaymentMethods;
 
-use Heidelpay\PhpPaymentApi\PaymentMethods\PrepaymentPaymentMethod;
 use Heidelpay\Gateway\Block\Info\Prepayment;
+use Heidelpay\PhpPaymentApi\Exceptions\UndefinedTransactionModeException;
+use Heidelpay\PhpPaymentApi\PaymentMethods\PrepaymentPaymentMethod;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Order\Payment\Transaction;
@@ -42,9 +43,10 @@ class HeidelpayPrepaymentPaymentMethod extends HeidelpayAbstractPaymentMethod
     /**
      * Initial Request to heidelpay payment server to get the form / iframe url
      * {@inheritDoc}
+     * @throws UndefinedTransactionModeException
      * @see \Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod::getHeidelpayUrl()
      */
-    public function getHeidelpayUrl($quote)
+    public function getHeidelpayUrl($quote, array $data = [])
     {
         parent::getHeidelpayUrl($quote);
 

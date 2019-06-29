@@ -61,7 +61,7 @@ class HeidelpayIDealPaymentMethod extends HeidelpayAbstractPaymentMethod
         return $bankList;
     }
 
-    public function getHeidelpayUrl($quote)
+    public function getHeidelpayUrl($quote, array $data = [])
     {
         // create the collection factory
         $paymentInfoCollection = $this->paymentInformationCollectionFactory->create();

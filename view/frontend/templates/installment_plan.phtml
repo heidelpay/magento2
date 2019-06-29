@@ -17,14 +17,14 @@ use Heidelpay\Gateway\Block\Hgw;
 
 <div style="width:100%; display:flex; flex-wrap: wrap;justify-content: center;">
     <div>
-        <img src="https://www.santander.de/media/bilder/logos/logos_privatkunden/logo.gif"/>
+        <img src="https://www.santander.de/media/bilder/logos/logos_privatkunden/logo.gif" alt="Santander Logo"/>
         <div class="hgw_installment_plan">
             <strong><?php echo __('Hire Purchase Precontract') ?><br/></strong>
             <a href="<?php echo trim($block->getInstallmentPlanUrl()) ?>" target="_blank"><?php echo __('Hire Purchase Precontract download') ?></a>
         </div>
         <br /><br />
 
-        <form id="hp-confirm-form" method="post" action="<?php echo $block->getUrl('Heidelpay_Gateway/hgw'); ?> ">
+        <form id="hp-confirm-form" method="post" action="<?php echo $block->getUrl('hgw/'); ?> ">
             <input type="hidden" name="referenceId" value="<?php echo $block->getInitReferenceId(); ?>">
             <button id="pay-now" type="submit" style="margin-left:200px">
                 <span><?php echo __('pay now') ?></span>

@@ -13,9 +13,9 @@
  */
 namespace Heidelpay\Gateway\PaymentMethods;
 
+use Heidelpay\Gateway\Block\Info\InvoiceSecured;
 use Heidelpay\Gateway\Model\PaymentInformation;
 use Heidelpay\PhpPaymentApi\PaymentMethods\InvoiceB2CSecuredPaymentMethod;
-use Heidelpay\Gateway\Block\Info\InvoiceSecured;
 use Magento\Quote\Api\Data\CartInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Invoice;
@@ -46,7 +46,7 @@ class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMetho
      * @inheritDoc
      * @see \Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod::getHeidelpayUrl()
      */
-    public function getHeidelpayUrl($quote)
+    public function getHeidelpayUrl($quote, array $data = [])
     {
         // create the collection factory
         $paymentInfoCollection = $this->paymentInformationCollectionFactory->create();

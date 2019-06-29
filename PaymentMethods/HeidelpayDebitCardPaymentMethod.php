@@ -13,8 +13,8 @@
  */
 namespace Heidelpay\Gateway\PaymentMethods;
 
-use Heidelpay\PhpPaymentApi\PaymentMethods\DebitCardPaymentMethod;
 use Heidelpay\Gateway\Model\Config\Source\BookingMode;
+use Heidelpay\PhpPaymentApi\PaymentMethods\DebitCardPaymentMethod;
 
 class HeidelpayDebitCardPaymentMethod extends HeidelpayAbstractPaymentMethod
 {
@@ -44,7 +44,7 @@ class HeidelpayDebitCardPaymentMethod extends HeidelpayAbstractPaymentMethod
      *
      * @see \Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod::getHeidelpayUrl()
      */
-    public function getHeidelpayUrl($quote)
+    public function getHeidelpayUrl($quote, array $data = [])
     {
         // set initial data for the request
         parent::getHeidelpayUrl($quote);
