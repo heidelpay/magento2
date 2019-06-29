@@ -118,7 +118,7 @@ class Index extends HgwAbstract
 
             /** @var Hgw $hgwBlock */
             $hgwBlock = $resultPage->getLayout()->getBlock('heidelpay_gateway');
-            $hgwBlock->setHgwUrl($response->getPaymentFormUrl())->setHgwCode($payment->getCode());
+            $hgwBlock->setHgwUrl($response->getPaymentFormUrl());
 
             return $resultPage;
         }
