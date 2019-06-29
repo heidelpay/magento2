@@ -13,6 +13,7 @@
  */
 namespace Heidelpay\Gateway\PaymentMethods;
 
+use Exception;
 use Heidelpay\Gateway\Block\Info\Prepayment;
 use Heidelpay\PhpPaymentApi\Exceptions\UndefinedTransactionModeException;
 use Heidelpay\PhpPaymentApi\PaymentMethods\PrepaymentPaymentMethod;
@@ -20,13 +21,14 @@ use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Order\Payment\Transaction;
 
+/** @noinspection LongInheritanceChainInspection */
+/**
+ * @property PrepaymentPaymentMethod $_heidelpayPaymentMethod
+ */
 class HeidelpayPrepaymentPaymentMethod extends HeidelpayAbstractPaymentMethod
 {
     /** @var string PaymentCode */
     const CODE = 'hgwpp';
-
-    /** @var PrepaymentPaymentMethod */
-    protected $_heidelpayPaymentMethod;
 
     /**
      * {@inheritDoc}
@@ -76,6 +78,7 @@ class HeidelpayPrepaymentPaymentMethod extends HeidelpayAbstractPaymentMethod
 
     /**
      * @inheritdoc
+     * @throws Exception
      */
     public function pendingTransactionProcessing($data, &$order, $message = null)
     {

@@ -14,22 +14,18 @@
  */
 namespace Heidelpay\Gateway\PaymentMethods;
 
-use Exception;
 use Heidelpay\Gateway\Model\PaymentInformation;
-use Heidelpay\PhpBasketApi\Exception\InvalidBasketitemPositionException;
 use Heidelpay\PhpPaymentApi\Exceptions\UndefinedTransactionModeException;
 use Heidelpay\PhpPaymentApi\PaymentMethods\DirectDebitPaymentMethod;
-use Heidelpay\PhpPaymentApi\Response;
-use Magento\Framework\Exception\LocalizedException;
-use Magento\Quote\Model\Quote;
 
+/** @noinspection LongInheritanceChainInspection */
+/**
+ * @property DirectDebitPaymentMethod $_heidelpayPaymentMethod
+ */
 class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
 {
     /** @var string PaymentCode */
     const CODE = 'hgwdd';
-
-    /** @var DirectDebitPaymentMethod */
-    protected $_heidelpayPaymentMethod;
 
     /**
      * {@inheritDoc}
@@ -43,15 +39,8 @@ class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
     }
 
     /**
-     * Fires the initial request to the heidelpay payment provider.
-     *
-     * @param Quote $quote
-     *
-     * @return Response
-     * @throws Exception
-     * @throws InvalidBasketitemPositionException
+     * {@inheritDoc}
      * @throws UndefinedTransactionModeException
-     * @throws LocalizedException
      */
     public function getHeidelpayUrl($quote, array $data = [])
     {

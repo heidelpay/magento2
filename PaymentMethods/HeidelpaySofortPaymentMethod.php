@@ -16,13 +16,14 @@ namespace Heidelpay\Gateway\PaymentMethods;
 use Heidelpay\PhpPaymentApi\Exceptions\UndefinedTransactionModeException;
 use Heidelpay\PhpPaymentApi\PaymentMethods\SofortPaymentMethod;
 
+/** @noinspection LongInheritanceChainInspection */
+/**
+ * @property SofortPaymentMethod $_heidelpayPaymentMethod
+ */
 class HeidelpaySofortPaymentMethod extends HeidelpayAbstractPaymentMethod
 {
     /** @var string PaymentCode */
     const CODE = 'hgwsue';
-
-    /** @var SofortPaymentMethod */
-    protected $_heidelpayPaymentMethod;
 
     /**
      * {@inheritDoc}

@@ -21,13 +21,14 @@ use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Order\Payment\Transaction;
 
+/** @noinspection LongInheritanceChainInspection */
+/**
+ * @property InvoicePaymentMethod $_heidelpayPaymentMethod
+ */
 class HeidelpayInvoicePaymentMethod extends HeidelpayAbstractPaymentMethod
 {
     /** @var string Payment Code */
     const CODE = 'hgwiv';
-
-    /** @var InvoicePaymentMethod */
-    protected $_heidelpayPaymentMethod;
 
     /**
      * {@inheritDoc}

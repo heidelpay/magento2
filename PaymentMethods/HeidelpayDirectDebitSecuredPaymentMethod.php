@@ -15,16 +15,18 @@
 namespace Heidelpay\Gateway\PaymentMethods;
 
 use Heidelpay\Gateway\Model\PaymentInformation;
+use Heidelpay\PhpPaymentApi\Exceptions\UndefinedTransactionModeException;
 use Heidelpay\PhpPaymentApi\PaymentMethods\DirectDebitB2CSecuredPaymentMethod;
 use Magento\Quote\Api\Data\CartInterface;
 
+/** @noinspection LongInheritanceChainInspection */
+/**
+ * @property DirectDebitB2CSecuredPaymentMethod $_heidelpayPaymentMethod
+ */
 class HeidelpayDirectDebitSecuredPaymentMethod extends HeidelpayAbstractPaymentMethod
 {
     /** @var string PaymentCode */
     const CODE = 'hgwdds';
-
-    /** @var DirectDebitB2CSecuredPaymentMethod */
-    protected $_heidelpayPaymentMethod;
 
     /**
      * {@inheritDoc}
@@ -39,6 +41,8 @@ class HeidelpayDirectDebitSecuredPaymentMethod extends HeidelpayAbstractPaymentM
 
     /**
      * @inheritdoc
+     *
+     * @throws UndefinedTransactionModeException
      */
     public function getHeidelpayUrl($quote, array $data = [])
     {

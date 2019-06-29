@@ -14,15 +14,17 @@
 namespace Heidelpay\Gateway\PaymentMethods;
 
 use Heidelpay\Gateway\Model\Config\Source\BookingMode;
+use Heidelpay\PhpPaymentApi\Exceptions\UndefinedTransactionModeException;
 use Heidelpay\PhpPaymentApi\PaymentMethods\PayPalPaymentMethod;
 
+/** @noinspection LongInheritanceChainInspection */
+/**
+ * @property PayPalPaymentMethod $_heidelpayPaymentMethod
+ */
 class HeidelpayPayPalPaymentMethod extends HeidelpayAbstractPaymentMethod
 {
     /** @var string PaymentCode */
     const CODE = 'hgwpal';
-
-    /** @var PayPalPaymentMethod */
-    protected $_heidelpayPaymentMethod;
 
     /**
      * {@inheritDoc}
@@ -40,6 +42,7 @@ class HeidelpayPayPalPaymentMethod extends HeidelpayAbstractPaymentMethod
     /**
      * Initial Request to heidelpay payment server to get the form / iframe url
      * {@inheritDoc}
+     * @throws UndefinedTransactionModeException
      * @see \Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod::getHeidelpayUrl()
      */
     public function getHeidelpayUrl($quote, array $data = [])

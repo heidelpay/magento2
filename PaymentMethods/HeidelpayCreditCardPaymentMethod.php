@@ -14,15 +14,17 @@
 namespace Heidelpay\Gateway\PaymentMethods;
 
 use Heidelpay\Gateway\Model\Config\Source\BookingMode;
+use Heidelpay\PhpPaymentApi\Exceptions\UndefinedTransactionModeException;
 use Heidelpay\PhpPaymentApi\PaymentMethods\CreditCardPaymentMethod;
 
+/** @noinspection LongInheritanceChainInspection */
+/**
+ * @property CreditCardPaymentMethod $_heidelpayPaymentMethod
+ */
 class HeidelpayCreditCardPaymentMethod extends HeidelpayAbstractPaymentMethod
 {
     /** @var string PaymentCode */
     const CODE = 'hgwcc';
-
-    /** @var CreditCardPaymentMethod */
-    protected $_heidelpayPaymentMethod;
 
     /**
      * {@inheritDoc}
@@ -42,6 +44,7 @@ class HeidelpayCreditCardPaymentMethod extends HeidelpayAbstractPaymentMethod
      * Initial Request to heidelpay payment server to get the form / iframe url
      * {@inheritDoc}
      *
+     * @throws UndefinedTransactionModeException
      * @see \Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod::getHeidelpayUrl()
      */
     public function getHeidelpayUrl($quote, array $data = [])

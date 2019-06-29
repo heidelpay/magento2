@@ -15,19 +15,21 @@ namespace Heidelpay\Gateway\PaymentMethods;
 
 use Heidelpay\Gateway\Block\Info\InvoiceSecured;
 use Heidelpay\Gateway\Model\PaymentInformation;
+use Heidelpay\PhpPaymentApi\Exceptions\UndefinedTransactionModeException;
 use Heidelpay\PhpPaymentApi\PaymentMethods\InvoiceB2CSecuredPaymentMethod;
 use Magento\Quote\Api\Data\CartInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Order\Payment\Transaction;
 
+/** @noinspection LongInheritanceChainInspection */
+/**
+ * @property InvoiceB2CSecuredPaymentMethod $_heidelpayPaymentMethod
+ */
 class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMethod
 {
     /** @var string Payment Code */
     const CODE = 'hgwivs';
-
-    /** @var InvoiceB2CSecuredPaymentMethod */
-    protected $_heidelpayPaymentMethod;
 
     /**
      * {@inheritDoc}
@@ -44,6 +46,7 @@ class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMetho
 
     /**
      * @inheritDoc
+     * @throws UndefinedTransactionModeException
      * @see \Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod::getHeidelpayUrl()
      */
     public function getHeidelpayUrl($quote, array $data = [])
@@ -120,6 +123,7 @@ class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMetho
 
     /**
      * @inheritdoc
+     * @throws \Exception
      */
     public function pendingTransactionProcessing($data, &$order, $message = null)
     {

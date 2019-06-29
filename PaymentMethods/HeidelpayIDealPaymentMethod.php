@@ -18,12 +18,14 @@ use Heidelpay\PhpPaymentApi\Exceptions\UndefinedTransactionModeException;
 use Heidelpay\PhpPaymentApi\PaymentMethods\IDealPaymentMethod;
 use Heidelpay\PhpPaymentApi\Response;
 
+/** @noinspection LongInheritanceChainInspection */
+/**
+ * @property IDealPaymentMethod $_heidelpayPaymentMethod
+ */
 class HeidelpayIDealPaymentMethod extends HeidelpayAbstractPaymentMethod
 {
+    /** @var string PaymentCode */
     const CODE = 'hgwidl';
-
-    /** @var IDealPaymentMethod $_heidelpayPaymentMethod*/
-    protected $_heidelpayPaymentMethod;
 
     /**
      * {@inheritDoc}
@@ -61,6 +63,10 @@ class HeidelpayIDealPaymentMethod extends HeidelpayAbstractPaymentMethod
         return $bankList;
     }
 
+    /**
+     * {@inheritDoc}
+     * @throws UndefinedTransactionModeException
+     */
     public function getHeidelpayUrl($quote, array $data = [])
     {
         // create the collection factory

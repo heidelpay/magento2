@@ -23,6 +23,7 @@ use Heidelpay\PhpPaymentApi\PaymentMethods\SantanderHirePurchasePaymentMethod;
 use Magento\Framework\App\ObjectManager;
 use Magento\Quote\Api\Data\CartInterface;
 
+/** @noinspection LongInheritanceChainInspection */
 /**
  * @property SantanderHirePurchasePaymentMethod $_heidelpayPaymentMethod
  */

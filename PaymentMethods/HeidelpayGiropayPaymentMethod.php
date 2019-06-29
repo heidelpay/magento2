@@ -16,13 +16,14 @@ namespace Heidelpay\Gateway\PaymentMethods;
 use Heidelpay\PhpPaymentApi\Exceptions\UndefinedTransactionModeException;
 use Heidelpay\PhpPaymentApi\PaymentMethods\GiropayPaymentMethod;
 
+/** @noinspection LongInheritanceChainInspection */
+/**
+ * @property GiropayPaymentMethod $_heidelpayPaymentMethod
+ */
 class HeidelpayGiropayPaymentMethod extends HeidelpayAbstractPaymentMethod
 {
     /** @var string PaymentCode */
     const CODE = 'hgwgp';
-
-    /** @var GiropayPaymentMethod */
-    protected $_heidelpayPaymentMethod;
 
     /**
      * {@inheritDoc}
