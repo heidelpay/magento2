@@ -123,10 +123,10 @@ class Index extends HgwAbstract
             return $resultPage;
         }
 
-        $this->_logger->error('Heidelpay init error : ' . $response->getError()['message']);
-
         // get an error message for the given error code, and add it to the message container.
-        $message = $this->_paymentHelper->handleError($response->getError()['code']);
+        $code = $response->getError()['code'];
+        $this->_logger->error('Heidelpay init error (' . $code . '): ' . $response->getError()['message']);
+        $message = $this->_paymentHelper->handleError($code);
         $this->messageManager->addErrorMessage($this->escaper->escapeHtml($message));
 
         return $this->_redirect('checkout/cart/', ['_secure' => true]);

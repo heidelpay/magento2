@@ -11,6 +11,7 @@ This project does not follow a versioning standard. Versions are crafted after t
 ### Fixed
 - A problem where a transaction was processed a second time via push when using "sofort". That caused the paid amount to be displayed
 incorrectly.
+- A problem which led to a missing error message for the customer.
 
 ### Changed 
 - Refactored paymentMethods. Simplify configuration and reduce duplicate code in payment methods.
