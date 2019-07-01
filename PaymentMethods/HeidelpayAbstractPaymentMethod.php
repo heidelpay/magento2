@@ -531,10 +531,8 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
             ->setReturnMessage($response->getProcessing()->getReturn())
             ->setReturnCode($response->getProcessing()->getReturnCode())
             ->setJsonResponse(json_encode($data))
-            ->setSource($source);
-
-        $this->transactionResource->save($transaction);
-
+            ->setSource($source)
+            ->save();
     }
 
     /**
@@ -670,8 +668,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
                 ->setIsCustomerNotified(true);
         }
 
-        // if the order can be invoiced and is no Pre-Authorization,
-        // create one and save it into a transaction.
+        // if the order can be invoiced and is no Pre-Authorization, create one and save it into a transaction.
         if ($order->canInvoice() && !$this->_paymentHelper->isPreAuthorization($data)) {
             $invoice = $order->prepareInvoice();
 
