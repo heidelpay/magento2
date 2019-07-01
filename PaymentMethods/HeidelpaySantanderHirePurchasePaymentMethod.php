@@ -22,6 +22,9 @@ use Heidelpay\PhpPaymentApi\Exceptions\UndefinedTransactionModeException;
 use Heidelpay\PhpPaymentApi\PaymentMethods\SantanderHirePurchasePaymentMethod;
 use Magento\Framework\App\ObjectManager;
 use Magento\Quote\Api\Data\CartInterface;
+use Magento\Sales\Model\Order;
+use Magento\Sales\Model\Order\Invoice;
+use Magento\Sales\Model\Order\Payment\Transaction;
 
 /** @noinspection LongInheritanceChainInspection */
 /**
@@ -114,5 +117,35 @@ class HeidelpaySantanderHirePurchasePaymentMethod extends HeidelpayAbstractPayme
         }
 
         return $this->_heidelpayPaymentMethod->getResponse();
+    }
+
+    /**
+     * @inheritdoc
+     * @throws Exception
+     */
+    public function pendingTransactionProcessing($data, &$order, $message = null)
+    {
+        $payment = $order->getPayment();
+        $payment->setTransactionId($data['IDENTIFICATION_UNIQUEID']);
+        $payment->setIsTransactionClosed(false);
+        $payment->addTransaction(Transaction::TYPE_AUTH, null, true);
+
+        $order->setState(Order::STATE_PROCESSING)
+            ->addCommentToStatusHistory($message, Order::STATE_PROCESSING)
+            ->setIsCustomerNotified(true);
+
+        // payment is pending at the beginning, so we set the total paid sum to 0.
+        $order->setTotalPaid(0.00)->setBaseTotalPaid(0.00);
+
+        // if the order can be invoiced, create one and save it into a transaction.
+        if ($order->canInvoice()) {
+            $invoice = $order->prepareInvoice();
+            $invoice->setRequestedCaptureCase(Invoice::CAPTURE_ONLINE)
+                ->setTransactionId($data['IDENTIFICATION_UNIQUEID'])
+                ->setIsPaid(false)
+                ->register();
+
+            $this->_paymentHelper->saveTransaction($invoice);
+        }
     }
 }
