@@ -359,7 +359,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
     public function refund(InfoInterface $payment, $amount)
     {
         /** @var Payment $payment */
-        if (!$this->canRefund()) {
+        if (!$this->_canRefund) {
             throw new LocalizedException(__('The refund action is not available.'));
         }
 
