@@ -4,9 +4,18 @@ namespace Heidelpay\Gateway\Controller\Adminhtml\Order\Shipment;
 
 use Heidelpay\Gateway\Gateway\Config\HgwBasePaymentConfigInterface;
 use Heidelpay\Gateway\Gateway\Config\HgwMainConfigInterface;
+use Heidelpay\Gateway\Helper\Payment;
 use Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod;
+use Heidelpay\PhpPaymentApi\Response;
 use Heidelpay\PhpPaymentApi\TransactionTypes\FinalizeTransactionType;
+use Magento\Backend\App\Action\Context;
+use Magento\Framework\Encryption\Encryptor;
 use Magento\Sales\Model\Order;
+use Magento\Sales\Model\Order\Email\Sender\ShipmentSender;
+use Magento\Sales\Model\OrderRepository;
+use Magento\Shipping\Controller\Adminhtml\Order\ShipmentLoader;
+use Magento\Shipping\Model\Shipping\LabelGenerator;
+use Psr\Log\LoggerInterface;
 
 /**
  * Save Controller
@@ -26,47 +35,39 @@ use Magento\Sales\Model\Order;
  */
 class Save extends \Magento\Shipping\Controller\Adminhtml\Order\Shipment\Save
 {
-    /**
-     * @var \Magento\Sales\Model\OrderRepository
-     */
+    /** @var OrderRepository */
     protected $orderResository;
 
-    /**
-     * @var \Psr\Log\LoggerInterface
-     */
+    /** @var LoggerInterface */
     protected $logger;
 
-    /**
-     * @var \Magento\Framework\Encryption\Encryptor
-     */
+    /** @var Encryptor */
     protected $encryptor;
 
-    /**
-     * @var \Heidelpay\Gateway\Helper\Payment
-     */
+    /** @var Payment */
     protected $paymentHelper;
 
     /**
      * Save constructor.
      *
-     * @param \Magento\Backend\App\Action\Context $context
-     * @param \Magento\Shipping\Controller\Adminhtml\Order\ShipmentLoader $shipmentLoader
-     * @param \Magento\Shipping\Model\Shipping\LabelGenerator $labelGenerator
-     * @param \Magento\Sales\Model\Order\Email\Sender\ShipmentSender $shipmentSender
-     * @param \Psr\Log\LoggerInterface $logger
-     * @param \Magento\Framework\Encryption\Encryptor $encryptor
-     * @param \Magento\Sales\Model\OrderRepository $orderRepository
-     * @param \Heidelpay\Gateway\Helper\Payment $paymentHelper
+     * @param Context $context
+     * @param ShipmentLoader $shipmentLoader
+     * @param LabelGenerator $labelGenerator
+     * @param ShipmentSender $shipmentSender
+     * @param LoggerInterface $logger
+     * @param Encryptor $encryptor
+     * @param OrderRepository $orderRepository
+     * @param Payment $paymentHelper
      */
     public function __construct(
-        \Magento\Backend\App\Action\Context $context,
-        \Magento\Shipping\Controller\Adminhtml\Order\ShipmentLoader $shipmentLoader,
-        \Magento\Shipping\Model\Shipping\LabelGenerator $labelGenerator,
-        \Magento\Sales\Model\Order\Email\Sender\ShipmentSender $shipmentSender,
-        \Psr\Log\LoggerInterface $logger,
-        \Magento\Framework\Encryption\Encryptor $encryptor,
-        \Magento\Sales\Model\OrderRepository $orderRepository,
-        \Heidelpay\Gateway\Helper\Payment $paymentHelper
+        Context $context,
+        ShipmentLoader $shipmentLoader,
+        LabelGenerator $labelGenerator,
+        ShipmentSender $shipmentSender,
+        LoggerInterface $logger,
+        Encryptor $encryptor,
+        OrderRepository $orderRepository,
+        Payment $paymentHelper
     ) {
         $this->orderResository = $orderRepository;
         $this->logger = $logger;
@@ -88,11 +89,11 @@ class Save extends \Magento\Shipping\Controller\Adminhtml\Order\Shipment\Save
         }
 
         // get the order to receive heidelpay payment method instance
-        /** @var \Magento\Sales\Model\Order $order */
+        /** @var Order $order */
         $order = $this->orderResository->get($this->getRequest()->getParam('order_id'));
 
         // get the payment method instance and the heidelpay method instance
-        /** @var \Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod $method */
+        /** @var HeidelpayAbstractPaymentMethod $method */
         $method = $order->getPayment()->getMethodInstance();
 
         // only fire the shipping when a heidelpay payment method is used.
@@ -101,7 +102,7 @@ class Save extends \Magento\Shipping\Controller\Adminhtml\Order\Shipment\Save
             $heidelpayMethod = $method->getHeidelpayPaymentMethodInstance();
 
             // if the payment method uses the Finalize Transaction type, we'll send a FIN request to the payment api.
-            if (in_array(FinalizeTransactionType::class, class_uses($heidelpayMethod))) {
+            if (in_array(FinalizeTransactionType::class, class_uses($heidelpayMethod), true)) {
                 /** @var HgwMainConfigInterface $mainConfig */
                 $mainConfig = $method->getMainConfig();
 
@@ -125,7 +126,7 @@ class Save extends \Magento\Shipping\Controller\Adminhtml\Order\Shipment\Save
                 );
 
                 // send the finalize request
-                /** @var \Heidelpay\PhpPaymentApi\Response $response */
+                /** @var Response $response */
                 $heidelpayMethod->finalize($order->getPayment()->getLastTransId());
 
                 // if the response isn't successful, redirect back to the order view.
@@ -145,8 +146,7 @@ class Save extends \Magento\Shipping\Controller\Adminhtml\Order\Shipment\Save
 
                 // set order state to "pending payment"
                 $state = Order::STATE_PENDING_PAYMENT;
-                $order->setState($state)
-                    ->addStatusHistoryComment('heidelpay - Finalizing Order', true);
+                $order->setState($state)->addCommentToStatusHistory('heidelpay - Finalizing Order', true);
 
                 $this->orderResository->save($order);
 
