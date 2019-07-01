@@ -42,8 +42,6 @@ class HeidelpaySantanderHirePurchasePaymentMethod extends HeidelpayAbstractPayme
     {
         parent::setup();
         $this->_canAuthorize            = true;
-        $this->_canRefund               = true;
-        $this->_canRefundInvoicePartial = true;
         $this->_usingBasket             = true;
     }
 
