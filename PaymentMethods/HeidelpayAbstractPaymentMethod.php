@@ -585,7 +585,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
             $billingStreet .= $street . ' ';
         }
 
-        $user['CRITERION.GUEST'] = $order->getCustomer()->getId() === null;
+        $user['CRITERION.GUEST'] = $order->getCustomer()->getId() === null ? 'true' : 'false';
 
         $user['NAME.COMPANY']    = ($billing->getCompany() === false) ? null : trim($billing->getCompany());
         $user['NAME.GIVEN']      = trim($billing->getFirstname());
