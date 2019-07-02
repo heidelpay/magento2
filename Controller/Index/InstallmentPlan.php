@@ -156,7 +156,7 @@ class InstallmentPlan extends HgwAbstract
         $paymentMethodInstance = $methodInstance->getHeidelpayPaymentMethodInstance();
         if ($paymentMethodInstance->getPaymentCode() === PaymentMethod::HIRE_PURCHASE) {
             /** @var TransactionSearchResultInterface $results */
-            $results = $this->getAllHpInsForThisQuote($quote);
+            $results = $this->getInitializationsForQuote($quote);
             foreach ($results->getItems() as $item) {
                 /** @var TransactionInterface $item */
                 $heidelpayResponse = new Response($item->getJsonResponse());
@@ -191,11 +191,13 @@ class InstallmentPlan extends HgwAbstract
     }
 
     /**
+     * Returns all Initialization transactions for HirePurchase payment methods of the given quote.
+     *
      * @param Quote $quote
      * @param string $direction
      * @return TransactionSearchResultInterface
      */
-    private function getAllHpInsForThisQuote(Quote $quote, $direction = SortOrder::SORT_DESC)
+    private function getInitializationsForQuote(Quote $quote, $direction = SortOrder::SORT_DESC)
     {
         $sortOrder = $this->sortOrderBuilder->setField(Transaction::ID)->setDirection($direction)->create();
         $criteria  = $this->searchCriteriaBuilder
