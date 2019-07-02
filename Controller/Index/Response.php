@@ -222,7 +222,7 @@ class Response extends HgwAbstract
             return $result;
         }
 
-        // Create order if transaction is successful and not just an initialization
+        // Redirect to installment plan if response is an initialization.
         list($paymentMethod, $paymentType) = $this->_paymentHelper->getPaymentMethodAndType($this->heidelpayResponse);
         if ($paymentType === TransactionType::INITIALIZE && $paymentMethod === PaymentMethod::HIRE_PURCHASE) {
             if ($this->heidelpayResponse->isSuccess()) {
