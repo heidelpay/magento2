@@ -48,21 +48,17 @@ class InstallmentPlan extends HgwAbstract
 {
     /** @var Escaper */
     private $escaper;
-    /**
-     * @var SearchCriteriaBuilder
-     */
+
+    /** @var SearchCriteriaBuilder */
     private $searchCriteriaBuilder;
-    /**
-     * @var TransactionRepositoryInterface
-     */
+
+    /** @var TransactionRepositoryInterface */
     private $transactionRepository;
-    /**
-     * @var SortOrderBuilder
-     */
+
+    /** @var SortOrderBuilder */
     private $sortOrderBuilder;
 
     /**
-     * InstallmentPlan constructor.
      * @param Context $context
      * @param Session $customerSession
      * @param CheckoutSession $checkoutSession
@@ -154,7 +150,7 @@ class InstallmentPlan extends HgwAbstract
         }
 
         $installmentPlanUrl = null;
-        $initRefernceId = null;
+        $initReferenceId = null;
 
         // fetch the latest installment plan for the selected HP-method
         $paymentMethodInstance = $methodInstance->getHeidelpayPaymentMethodInstance();
@@ -167,20 +163,20 @@ class InstallmentPlan extends HgwAbstract
                 if ($heidelpayResponse->getAccount()->getBrand() === $paymentMethodInstance->getBrand()) {
                     $contractUrlField = $paymentMethodInstance->getBrand() . '_PDF_URL';
                     $installmentPlanUrl = $heidelpayResponse->getCriterion()->get($contractUrlField);
-                    $initRefernceId = $heidelpayResponse->getPaymentReferenceId();
+                    $initReferenceId = $heidelpayResponse->getPaymentReferenceId();
                     break;
                 }
             }
         }
 
-        if (!empty($installmentPlanUrl) && !empty($initRefernceId)) {
+        if (!empty($installmentPlanUrl) && !empty($initReferenceId)) {
             $resultPage = $this->_resultPageFactory->create();
             $resultPage->getConfig()->getTitle()->prepend(__('Please confirm your payment:'));
 
             /** @var HgwInstallmentPlan $hgwInstallmentPlan */
             $hgwInstallmentPlan = $resultPage->getLayout()->getBlock('InstallmentPlan');
             $hgwInstallmentPlan->setInstallmentPlanUrl($installmentPlanUrl);
-            $hgwInstallmentPlan->setInitReferenceId($initRefernceId);
+            $hgwInstallmentPlan->setInitReferenceId($initReferenceId);
 
             return $resultPage;
         }
