@@ -257,4 +257,24 @@ class IntegrationTestAbstract extends AbstractController
         }
     }
 
+    /**
+     * @param string $title
+     * @param array $data
+     */
+    protected function echoToConsole($title, array $data = [])
+    {
+        echo "\n" . $title . ': ' . print_r($data, true);
+    }
+
+    /**
+     * @param string $title
+     * @param array $data
+     */
+    protected function debugOutput($title, array $data = [])
+    {
+        if (self::ENABLE_DEBUG_OUTPUT) {
+            $this->echoToConsole($title);
+        }
+    }
+
 }
