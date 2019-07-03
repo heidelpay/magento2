@@ -1,11 +1,13 @@
 <?php
 /**
- * This is the payment class for heidelpay prepayment
+ * This is the payment class for heidelpay santander hire purchase payment method.
  *
  * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
- * @copyright Copyright © 2016-present heidelpay GmbH. All rights reserved.
+ * @copyright Copyright © 2019-present heidelpay GmbH. All rights reserved.
+ *
  * @link http://dev.heidelpay.com/magento2
- * @author Jens Richter
+ *
+ * @author Simon Gabriel
  *
  * @package heidelpay
  * @subpackage magento2
@@ -13,10 +15,12 @@
  */
 namespace Heidelpay\Gateway\PaymentMethods;
 
-use Heidelpay\Gateway\Block\Info\InvoiceSecured;
+use Exception;
 use Heidelpay\Gateway\Model\PaymentInformation;
+use Heidelpay\Gateway\Wrapper\CustomerWrapper;
 use Heidelpay\PhpPaymentApi\Exceptions\UndefinedTransactionModeException;
-use Heidelpay\PhpPaymentApi\PaymentMethods\InvoiceB2CSecuredPaymentMethod;
+use Heidelpay\PhpPaymentApi\PaymentMethods\SantanderHirePurchasePaymentMethod;
+use Magento\Framework\App\ObjectManager;
 use Magento\Quote\Api\Data\CartInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Invoice;
@@ -24,12 +28,12 @@ use Magento\Sales\Model\Order\Payment\Transaction;
 
 /** @noinspection LongInheritanceChainInspection */
 /**
- * @property InvoiceB2CSecuredPaymentMethod $_heidelpayPaymentMethod
+ * @property SantanderHirePurchasePaymentMethod $_heidelpayPaymentMethod
  */
-class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMethod
+class HeidelpaySantanderHirePurchasePaymentMethod extends HeidelpayAbstractPaymentMethod
 {
-    /** @var string Payment Code */
-    const CODE = 'hgwivs';
+    /** @var string PaymentCode */
+    const CODE = 'hgwsanhp';
 
     /**
      * {@inheritDoc}
@@ -38,15 +42,35 @@ class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMetho
     {
         parent::setup();
         $this->_canAuthorize            = true;
-        $this->_canRefund               = true;
-        $this->_canRefundInvoicePartial = true;
         $this->_usingBasket             = true;
-        $this->_formBlockType           = InvoiceSecured::class;
     }
 
     /**
-     * @inheritDoc
+     * Determines if the payment method will be displayed at the checkout.
+     * For B2C methods, the payment method should not be displayed.
+     *
+     * Else, refer to the parent isActive method.
+     *
+     * @inheritdoc
+     */
+    public function isAvailable(CartInterface $quote = null)
+    {
+        // in B2C payment methods, we don't want companies to be involved.
+        // so, if the address contains a company, return false.
+        if ($quote !== null && $quote->getBillingAddress() === null && !empty($quote->getBillingAddress()->getCompany())) {
+            return false;
+        }
+
+        // process the parent isAvailable method
+        return parent::isAvailable($quote);
+    }
+
+    /**
+     * Initial Request to heidelpay payment server to get the form url
+     * {@inheritDoc}
+     *
      * @throws UndefinedTransactionModeException
+     * @throws Exception
      * @see \Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod::getHeidelpayUrl()
      */
     public function getHeidelpayUrl($quote, array $data = [])
@@ -66,64 +90,36 @@ class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMetho
         parent::getHeidelpayUrl($quote);
 
         // add salutation and birthdate to the request
+        $request = $this->_heidelpayPaymentMethod->getRequest();
         if (isset($paymentInfo->getAdditionalData()->hgw_salutation)) {
-            $this->_heidelpayPaymentMethod->getRequest()->getName()
-                ->set('salutation', $paymentInfo->getAdditionalData()->hgw_salutation);
+            $request->getName()->set('salutation', $paymentInfo->getAdditionalData()->hgw_salutation);
         }
 
         if (isset($paymentInfo->getAdditionalData()->hgw_birthdate)) {
-            $this->_heidelpayPaymentMethod->getRequest()->getName()
-                ->set('birthdate', $paymentInfo->getAdditionalData()->hgw_birthdate);
+            $request->getName()->set('birthdate', $paymentInfo->getAdditionalData()->hgw_birthdate);
         }
 
-        // send the authorize request
-        $this->_heidelpayPaymentMethod->authorize();
+        // set risk information
+        $objectManager = ObjectManager::getInstance();
+        /** @var CustomerWrapper $customer */
+        $customer = $objectManager->create(CustomerWrapper::class)->setCustomer($quote->getCustomer());
+        $request->getRiskInformation()
+            ->setCustomerGuestCheckout($customer->isGuest() ? 'TRUE' : 'FALSE')
+            ->setCustomerOrderCount($customer->numberOfOrders())
+            ->setCustomerSince($customer->customerSince());
+
+        if (isset($data['referenceId']) && !empty($data['referenceId'])) {
+            $this->_heidelpayPaymentMethod->authorizeOnRegistration($data['referenceId']);
+        } else {
+            $this->_heidelpayPaymentMethod->initialize();
+        }
 
         return $this->_heidelpayPaymentMethod->getResponse();
     }
 
     /**
      * @inheritdoc
-     */
-    public function additionalPaymentInformation($response)
-    {
-        return __(
-            'Please transfer the amount of <strong>%1 %2</strong> '
-            . 'to the following account after your order has arrived:<br /><br />'
-            . 'Holder: %3<br/>IBAN: %4<br/>BIC: %5<br/><br/><i>'
-            . 'Please use only this identification number as the descriptor :</i><br/><strong>%6</strong>',
-            $this->_paymentHelper->format($response['PRESENTATION_AMOUNT']),
-            $response['PRESENTATION_CURRENCY'],
-            $response['CONNECTOR_ACCOUNT_HOLDER'],
-            $response['CONNECTOR_ACCOUNT_IBAN'],
-            $response['CONNECTOR_ACCOUNT_BIC'],
-            $response['IDENTIFICATION_SHORTID']
-        );
-    }
-
-    /**
-     * Determines if the payment method will be displayed at the checkout.
-     * For B2C methods, the payment method should not be displayed.
-     *
-     * Else, refer to the parent isActive method.
-     *
-     * @inheritdoc
-     */
-    public function isAvailable(CartInterface $quote = null)
-    {
-        // in B2C payment methods, we don't want companies to be involved.
-        // so, if the address contains a company, return false.
-        if ($quote !== null && !empty($quote->getBillingAddress()->getCompany())) {
-            return false;
-        }
-
-        // process the parent isAvailable method
-        return parent::isAvailable($quote);
-    }
-
-    /**
-     * @inheritdoc
-     * @throws \Exception
+     * @throws Exception
      */
     public function pendingTransactionProcessing($data, &$order, $message = null)
     {

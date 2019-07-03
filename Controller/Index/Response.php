@@ -2,21 +2,36 @@
 
 namespace Heidelpay\Gateway\Controller\Index;
 
+use Exception;
+use Heidelpay\Gateway\Controller\HgwAbstract;
 use Heidelpay\Gateway\Helper\Payment as HeidelpayHelper;
-use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
+use Heidelpay\Gateway\Model\PaymentInformation;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory;
-use Heidelpay\Gateway\Model\TransactionFactory;
+use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
+use Magento\Framework\Controller\Result\RawFactory;
+use Heidelpay\PhpPaymentApi\Constants\PaymentMethod;
 use Heidelpay\PhpPaymentApi\Exceptions\HashVerificationException;
 use Heidelpay\PhpPaymentApi\Response as HeidelpayResponse;
-use Magento\Framework\Controller\Result\RawFactory;
+use Heidelpay\PhpPaymentApi\Constants\TransactionType;
+use Magento\Checkout\Model\Session as CheckoutSession;
+use Magento\Customer\Model\Session;
+use Magento\Customer\Model\Url;
+use Magento\Framework\App\Action\Context;
+use Magento\Framework\Encryption\Encryptor;
+use Magento\Framework\Url\Helper\Data;
+use Magento\Framework\View\Result\PageFactory;
+use Magento\Quote\Api\CartManagementInterface;
+use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\QuoteRepository;
 use Magento\Sales\Helper\Data as SalesHelper;
+use Magento\Sales\Model\OrderFactory;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\OrderRepository;
 use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderCommentSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
+use Psr\Log\LoggerInterface;
 
 /**
  * Notification handler for the payment response
@@ -38,7 +53,7 @@ use Magento\Sales\Model\Order\Email\Sender\OrderSender;
  *
  * @package heidelpay\magento2\controllers
  */
-class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
+class Response extends HgwAbstract
 {
     /** @var QuoteRepository */
     private $quoteRepository;
@@ -46,65 +61,58 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
     /** @var HeidelpayResponse The heidelpay response object */
     private $heidelpayResponse;
 
-    /** @var TransactionFactory */
-    private $transactionFactory;
-
     /** @var CollectionFactory */
     private $paymentInformationCollectionFactory;
-    /**
-     * @var SalesHelper
-     */
+
+    /** @var SalesHelper  */
     private $salesHelper;
-    /**
-     * @var OrderRepository
-     */
+
+    /** @var OrderRepository */
     private $orderRepository;
 
     /**
      * heidelpay Response constructor.
      *
-     * @param \Magento\Framework\App\Action\Context $context
-     * @param \Magento\Customer\Model\Session $customerSession
-     * @param \Magento\Checkout\Model\Session $checkoutSession
-     * @param \Magento\Sales\Model\OrderFactory $orderFactory
-     * @param \Magento\Framework\Url\Helper\Data $urlHelper
-     * @param \Psr\Log\LoggerInterface $logger
-     * @param \Magento\Quote\Api\CartManagementInterface $cartManagement
-     * @param \Magento\Quote\Api\CartRepositoryInterface $quoteObject
-     * @param \Magento\Framework\View\Result\PageFactory $resultPageFactory
+     * @param Context $context
+     * @param Session $customerSession
+     * @param CheckoutSession $checkoutSession
+     * @param OrderFactory $orderFactory
+     * @param Data $urlHelper
+     * @param LoggerInterface $logger
+     * @param CartManagementInterface $cartManagement
+     * @param CartRepositoryInterface $quoteObject
+     * @param PageFactory $resultPageFactory
      * @param HeidelpayHelper $paymentHelper
      * @param OrderSender $orderSender
      * @param InvoiceSender $invoiceSender
      * @param OrderCommentSender $orderCommentSender
-     * @param \Magento\Framework\Encryption\Encryptor $encryptor
-     * @param \Magento\Customer\Model\Url $customerUrl
+     * @param Encryptor $encryptor
+     * @param Url $customerUrl
      * @param RawFactory $rawResultFactory
      * @param QuoteRepository $quoteRepository
      * @param PaymentInformationCollectionFactory $paymentInformationCollectionFactory ,
-     * @param TransactionFactory $transactionFactory
      * @param SalesHelper $salesHelper
      * @param OrderRepository $orderRepository
      */
     public function __construct(
-        \Magento\Framework\App\Action\Context $context,
-        \Magento\Customer\Model\Session $customerSession,
-        \Magento\Checkout\Model\Session $checkoutSession,
-        \Magento\Sales\Model\OrderFactory $orderFactory,
-        \Magento\Framework\Url\Helper\Data $urlHelper,
-        \Psr\Log\LoggerInterface $logger,
-        \Magento\Quote\Api\CartManagementInterface $cartManagement,
-        \Magento\Quote\Api\CartRepositoryInterface $quoteObject,
-        \Magento\Framework\View\Result\PageFactory $resultPageFactory,
+        Context $context,
+        Session $customerSession,
+        CheckoutSession $checkoutSession,
+        OrderFactory $orderFactory,
+        Data $urlHelper,
+        LoggerInterface $logger,
+        CartManagementInterface $cartManagement,
+        CartRepositoryInterface $quoteObject,
+        PageFactory $resultPageFactory,
         HeidelpayHelper $paymentHelper,
         OrderSender $orderSender,
         InvoiceSender $invoiceSender,
         OrderCommentSender $orderCommentSender,
-        \Magento\Framework\Encryption\Encryptor $encryptor,
-        \Magento\Customer\Model\Url $customerUrl,
+        Encryptor $encryptor,
+        Url $customerUrl,
         RawFactory $rawResultFactory,
         QuoteRepository $quoteRepository,
         PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
-        TransactionFactory $transactionFactory,
         SalesHelper $salesHelper,
         OrderRepository $orderRepository
     ) {
@@ -129,14 +137,13 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
         $this->resultFactory = $rawResultFactory;
         $this->quoteRepository = $quoteRepository;
         $this->paymentInformationCollectionFactory = $paymentInformationCollectionFactory;
-        $this->transactionFactory = $transactionFactory;
         $this->salesHelper = $salesHelper;
         $this->orderRepository = $orderRepository;
     }
 
     /**
      * @inheritdoc
-     * @throws \Exception
+     * @throws Exception
      */
     public function execute()
     {
@@ -173,7 +180,7 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
         // initialize the Response object with data from the request.
         try {
             $this->heidelpayResponse = HeidelpayResponse::fromPost($this->getRequest()->getParams());
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->_logger->error(
                 'Heidelpay - Response: Cannot initialize response object from Post Request. ' . $e->getMessage()
             );
@@ -186,10 +193,7 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
             return $result;
         }
 
-        $this->_logger->debug(
-            'Heidelpay - Response: Response object: '
-            . print_r($this->heidelpayResponse, true)
-        );
+        $this->_logger->debug('Heidelpay - Response: Response object: ' . print_r($this->heidelpayResponse, true));
 
         /** @var Order $order */
         $order = null;
@@ -218,16 +222,34 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
             return $result;
         }
 
+        // Redirect to installment plan if response is an initialization.
+        list($paymentMethod, $paymentType) = $this->_paymentHelper->getPaymentMethodAndType($this->heidelpayResponse);
+        if ($paymentType === TransactionType::INITIALIZE && $paymentMethod === PaymentMethod::HIRE_PURCHASE) {
+            if ($this->heidelpayResponse->isSuccess()) {
+                $redirectUrl = $this->_url->getUrl('hgw/index/installmentplan', [
+                    '_forced_secure' => true,
+                    '_scope_to_url' => true,
+                    '_nosid' => true
+                ]);
+            }
+
+            // return the heidelpay response url as raw response instead of echoing it out.
+            $result->setContents($redirectUrl);
+            return $result;
+        }
+
+        // Create order if transaction is successful
         if ($this->heidelpayResponse->isSuccess()) {
             try {
                 $identificationTransactionId = $this->heidelpayResponse->getIdentification()->getTransactionId();
                 // get the quote by transactionid from the heidelpay response
                 /** @var Quote $quote */
                 $quote = $this->quoteRepository->get($identificationTransactionId);
-                $order = $this->_paymentHelper->createOrderFromQuote($quote);
-            } catch (\Exception $e) {
-                $this->_logger->error('Heidelpay - Response: Cannot submit the Quote. ' . $e->getMessage());
 
+                /** @var Order $order */
+                $order = $this->_paymentHelper->createOrderFromQuote($quote);
+            } catch (Exception $e) {
+                $this->_logger->error('Heidelpay - Response: Cannot submit the Quote. ' . $e->getMessage());
                 return $result;
             }
 
@@ -247,6 +269,8 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
         return $result;
     }
 
+    //<editor-fold desc="Helpers">
+
     /**
      * Send order confirmation to the customer
      * @param $order
@@ -257,7 +281,7 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
             if ($order && $order->getId()) {
                 $this->_orderSender->send($order);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->_logger->error(
                 'Heidelpay - Response: Cannot send order confirmation E-Mail. ' . $e->getMessage()
             );
@@ -266,9 +290,9 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
 
     /**
      * Send invoice mails to the customer
-     * @param $order
+     * @param Order $order
      */
-    protected function handleInvoiceMails($order)
+    protected function handleInvoiceMails(Order $order)
     {
         if (!$order->canInvoice() && $this->salesHelper->canSendNewInvoiceEmail($order->getStore()->getId())) {
             $invoices = $order->getInvoiceCollection();
@@ -283,7 +307,7 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
      * If the customer is a guest, we'll delete the additional payment information, which
      * is only used for customer recognition.
      * @param Quote $quote
-     * @throws \Exception
+     * @throws Exception
      */
     protected function handleAdditionalPaymentInformation($quote)
     {
@@ -292,7 +316,7 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
             $paymentInfoCollection = $this->paymentInformationCollectionFactory->create();
 
             // load the payment information and delete it.
-            /** @var \Heidelpay\Gateway\Model\PaymentInformation $paymentInfo */
+            /** @var PaymentInformation $paymentInfo */
             $paymentInfo = $paymentInfoCollection->loadByCustomerInformation(
                 $quote->getStoreId(),
                 $quote->getBillingAddress()->getEmail(),
@@ -335,4 +359,6 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
             return false;
         }
     }
+
+    //</editor-fold>
 }

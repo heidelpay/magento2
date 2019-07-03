@@ -1,11 +1,5 @@
 <?php
-
-namespace Heidelpay\Gateway\PaymentMethods;
-
-use Heidelpay\PhpPaymentApi\PaymentMethods\SofortPaymentMethod;
 /**
- * heidelpay sofort payment method
- *
  * This is the payment class for heidelpay sofort
  *
  * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
@@ -17,48 +11,38 @@ use Heidelpay\PhpPaymentApi\PaymentMethods\SofortPaymentMethod;
  * @subpackage magento2
  * @category magento2
  */
+namespace Heidelpay\Gateway\PaymentMethods;
+
+use Heidelpay\PhpPaymentApi\Exceptions\UndefinedTransactionModeException;
+use Heidelpay\PhpPaymentApi\PaymentMethods\SofortPaymentMethod;
+
+/** @noinspection LongInheritanceChainInspection */
+/**
+ * @property SofortPaymentMethod $_heidelpayPaymentMethod
+ */
 class HeidelpaySofortPaymentMethod extends HeidelpayAbstractPaymentMethod
 {
-    /**
-     * Payment Code
-     * @var string PayentCode
-     */
+    /** @var string PaymentCode */
     const CODE = 'hgwsue';
 
     /**
-     * Payment Code
-     * @var string PayentCode
+     * {@inheritDoc}
      */
-    protected $_code = self::CODE;
-
-    /**
-     * isGateway
-     * @var boolean
-     */
-    protected $_isGateway = true;
-
-    /**
-     * canAuthorize
-     * @var boolean
-     */
-    protected $_canAuthorize = true;
-
-    /**
-     * @var boolean */
-    protected $_canRefund = true;
-
-    /** @var boolean */
-    protected $_canRefundInvoicePartial = true;
-
-    /** @var SofortPaymentMethod */
-    protected $_heidelpayPaymentMethod;
+    protected function setup()
+    {
+        parent::setup();
+        $this->_canAuthorize = true;
+        $this->_canRefund = true;
+        $this->_canRefundInvoicePartial = true;
+    }
 
     /**
      * Initial Request to heidelpay payment server to get the form / iframe url
      * {@inheritDoc}
+     * @throws UndefinedTransactionModeException
      * @see \Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod::getHeidelpayUrl()
      */
-    public function getHeidelpayUrl($quote)
+    public function getHeidelpayUrl($quote, array $data = [])
     {
         // set initial data for the request
         parent::getHeidelpayUrl($quote);

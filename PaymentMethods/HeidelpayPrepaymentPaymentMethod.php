@@ -1,12 +1,5 @@
 <?php
-
-namespace Heidelpay\Gateway\PaymentMethods;
-
-use Heidelpay\PhpPaymentApi\PaymentMethods\PrepaymentPaymentMethod;
-
 /**
- * Heidelpay prepayment payment method
- *
  * This is the payment class for heidelpay prepayment
  *
  * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
@@ -18,53 +11,44 @@ use Heidelpay\PhpPaymentApi\PaymentMethods\PrepaymentPaymentMethod;
  * @subpackage magento2
  * @category magento2
  */
+namespace Heidelpay\Gateway\PaymentMethods;
+
+use Exception;
+use Heidelpay\Gateway\Block\Info\Prepayment;
+use Heidelpay\PhpPaymentApi\Exceptions\UndefinedTransactionModeException;
+use Heidelpay\PhpPaymentApi\PaymentMethods\PrepaymentPaymentMethod;
+use Magento\Sales\Model\Order;
+use Magento\Sales\Model\Order\Invoice;
+use Magento\Sales\Model\Order\Payment\Transaction;
+
+/** @noinspection LongInheritanceChainInspection */
+/**
+ * @property PrepaymentPaymentMethod $_heidelpayPaymentMethod
+ */
 class HeidelpayPrepaymentPaymentMethod extends HeidelpayAbstractPaymentMethod
 {
-    /**
-     * Payment Code
-     * @var string PayentCode
-     */
+    /** @var string PaymentCode */
     const CODE = 'hgwpp';
 
     /**
-     * Payment Code
-     * @var string PayentCode
+     * {@inheritDoc}
      */
-    protected $_code = self::CODE;
-
-    /**
-     * Info Block Class (used for Order/Invoice details)
-     * @var string
-     */
-    protected $_infoBlockType = 'Heidelpay\Gateway\Block\Info\Prepayment';
-
-    /**
-     * isGateway
-     * @var boolean
-     */
-    protected $_isGateway = true;
-
-    /**
-     * canAuthorize
-     * @var boolean
-     */
-    protected $_canAuthorize = true;
-
-    /** @var boolean */
-    protected $_canRefund = true;
-
-    /** @var boolean */
-    protected $_canRefundInvoicePartial = true;
-
-    /** @var PrepaymentPaymentMethod */
-    protected $_heidelpayPaymentMethod;
+    protected function setup()
+    {
+        parent::setup();
+        $this->_canAuthorize = true;
+        $this->_canRefund = true;
+        $this->_canRefundInvoicePartial = true;
+        $this->_formBlockType = Prepayment::class;
+    }
 
     /**
      * Initial Request to heidelpay payment server to get the form / iframe url
      * {@inheritDoc}
+     * @throws UndefinedTransactionModeException
      * @see \Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod::getHeidelpayUrl()
      */
-    public function getHeidelpayUrl($quote)
+    public function getHeidelpayUrl($quote, array $data = [])
     {
         parent::getHeidelpayUrl($quote);
 
@@ -94,15 +78,17 @@ class HeidelpayPrepaymentPaymentMethod extends HeidelpayAbstractPaymentMethod
 
     /**
      * @inheritdoc
+     * @throws Exception
      */
     public function pendingTransactionProcessing($data, &$order, $message = null)
     {
-        $order->getPayment()->setTransactionId($data['IDENTIFICATION_UNIQUEID']);
-        $order->getPayment()->setIsTransactionClosed(false);
-        $order->getPayment()->addTransaction(\Magento\Sales\Model\Order\Payment\Transaction::TYPE_AUTH, null, true);
+        $payment = $order->getPayment();
+        $payment->setTransactionId($data['IDENTIFICATION_UNIQUEID']);
+        $payment->setIsTransactionClosed(false);
+        $payment->addTransaction(Transaction::TYPE_AUTH, null, true);
 
-        $order->setState(\Magento\Sales\Model\Order::STATE_PENDING_PAYMENT)
-            ->addStatusHistoryComment($message, \Magento\Sales\Model\Order::STATE_PENDING_PAYMENT)
+        $order->setState(Order::STATE_PENDING_PAYMENT)
+            ->addStatusHistoryComment($message, Order::STATE_PENDING_PAYMENT)
             ->setIsCustomerNotified(true);
 
         // payment is pending at the beginning, so we set the total paid sum to 0.
@@ -111,7 +97,7 @@ class HeidelpayPrepaymentPaymentMethod extends HeidelpayAbstractPaymentMethod
         // if the order can be invoiced, create one and save it into a transaction.
         if ($order->canInvoice()) {
             $invoice = $order->prepareInvoice();
-            $invoice->setRequestedCaptureCase(\Magento\Sales\Model\Order\Invoice::CAPTURE_ONLINE)
+            $invoice->setRequestedCaptureCase(Invoice::CAPTURE_ONLINE)
                 ->setTransactionId($data['IDENTIFICATION_UNIQUEID'])
                 ->setIsPaid(false)
                 ->register();

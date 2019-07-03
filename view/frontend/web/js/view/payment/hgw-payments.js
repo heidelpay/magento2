@@ -52,6 +52,10 @@ define(
             {
                 type: 'hgwidl',
                 component: 'Heidelpay_Gateway/js/view/payment/method-renderer/hgw-ideal'
+            },
+            {
+                type: 'hgwsanhp',
+                component: 'Heidelpay_Gateway/js/view/payment/method-renderer/hgw-santander-hire-purchase'
             }
         );
         return Component.extend({});

@@ -4,9 +4,14 @@
 
 This project does not follow a versioning standard. Versions are crafted after the dates; for example, the version 17.7.25 was released on July, 25th in 2017
 ## X.X.X
+
+### Added
+- Santander hire purchase payment method.
+
 ### Fixed
 - A problem where a transaction was processed a second time via push when using "sofort". That caused the paid amount to be displayed
 incorrectly.
+- A problem which led to a missing error message for the customer.
 
 ### Changed 
 - Refactored paymentMethods. Simplify configuration and reduce duplicate code in payment methods.

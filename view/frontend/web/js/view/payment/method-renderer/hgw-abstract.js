@@ -33,7 +33,7 @@ define(
             },
 
             /**
-             * Indicates if the payment method is storing addtional
+             * Indicates if the payment method is storing additional
              * information for the payment.
              *
              * @returns {boolean}
@@ -143,7 +143,7 @@ define(
                 checkoutData.setSelectedPaymentMethod(this.item.method);
 
                 return true;
-            }
+            },
         });
     }
 );

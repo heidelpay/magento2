@@ -80,6 +80,12 @@
             <argument name ="paymentMethod" xsi:type="object">Heidelpay\PhpPaymentApi\PaymentMethods\SofortPaymentMethod</argument>
         </arguments>
     </type>
+    <type name="Heidelpay\Gateway\PaymentMethods\HeidelpaySantanderHirePurchasePaymentMethod">
+        <arguments>
+            <argument name ="paymentConfig" xsi:type="object">HgwSantanderHirePurchaseConfig</argument>
+            <argument name ="paymentMethod" xsi:type="object">Heidelpay\PhpPaymentApi\PaymentMethods\SantanderHirePurchasePaymentMethod</argument>
+        </arguments>
+    </type>
 
     <!-- Config readers -->
     <virtualType name="HgwInvoiceSecuredConfig" type="Heidelpay\Gateway\Gateway\Config\HgwBasePaymentConfig">
@@ -137,9 +143,18 @@
             <argument name="methodCode" xsi:type="const">Heidelpay\Gateway\PaymentMethods\HeidelpayIDealPaymentMethod::CODE</argument>
         </arguments>
     </virtualType>
+    <virtualType name="HgwSantanderHirePurchaseConfig" type="Heidelpay\Gateway\Gateway\Config\HgwBasePaymentConfig">
+        <arguments>
+            <argument name="methodCode" xsi:type="const">Heidelpay\Gateway\PaymentMethods\HeidelpaySantanderHirePurchasePaymentMethod::CODE</argument>
+        </arguments>
+    </virtualType>
 
     <!-- Preferences -->
     <preference for="Heidelpay\Gateway\Api\PaymentInterface" type="Heidelpay\Gateway\Api\Payment" />
     <preference for="Heidelpay\Gateway\Api\Data\PaymentInformationInterface" type="Heidelpay\Gateway\Model\PaymentInformation" />
     <preference for="Heidelpay\Gateway\Gateway\Config\HgwMainConfigInterface" type="Heidelpay\Gateway\Gateway\Config\HgwMainConfig" />
+    <preference for="Heidelpay\Gateway\Api\TransactionRepositoryInterface" type="Heidelpay\Gateway\Model\TransactionRepository"/>
+    <preference for="Heidelpay\Gateway\Api\Data\TransactionInterface" type="Heidelpay\Gateway\Model\Transaction"/>
+    <preference for="Heidelpay\Gateway\Api\Data\TransactionSearchResultInterface" type="Heidelpay\Gateway\Model\TransactionSearchResult"/>
+
 </config>

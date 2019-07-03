@@ -1,12 +1,5 @@
 <?php
-
-namespace Heidelpay\Gateway\PaymentMethods;
-
-use Heidelpay\PhpPaymentApi\PaymentMethods\DirectDebitPaymentMethod;
-
 /**
- * Heidelpay Direct Debit
- *
  * The heidelpay Direct Debit payment method.
  *
  * @license Use of this software requires acceptance of the License Agreement. See LICENSE file.
@@ -19,46 +12,42 @@ use Heidelpay\PhpPaymentApi\PaymentMethods\DirectDebitPaymentMethod;
  * @subpackage magento2
  * @category magento2
  */
+namespace Heidelpay\Gateway\PaymentMethods;
+
+use Heidelpay\Gateway\Model\PaymentInformation;
+use Heidelpay\PhpPaymentApi\Exceptions\UndefinedTransactionModeException;
+use Heidelpay\PhpPaymentApi\PaymentMethods\DirectDebitPaymentMethod;
+
+/** @noinspection LongInheritanceChainInspection */
+/**
+ * @property DirectDebitPaymentMethod $_heidelpayPaymentMethod
+ */
 class HeidelpayDirectDebitPaymentMethod extends HeidelpayAbstractPaymentMethod
 {
-    /**
-     * Payment Code
-     * @var string PayentCode
-     */
+    /** @var string PaymentCode */
     const CODE = 'hgwdd';
 
-    /** @var string heidelpay gateway payment code */
-    protected $_code = self::CODE;
-
-    /** @var bool */
-    protected $_canAuthorize = true;
-
-    /** @var boolean */
-    protected $_canRefund = true;
-
-    /** @var boolean */
-    protected $_canRefundInvoicePartial = true;
-
-    /** @var DirectDebitPaymentMethod */
-    protected $_heidelpayPaymentMethod;
+    /**
+     * {@inheritDoc}
+     */
+    protected function setup()
+    {
+        parent::setup();
+        $this->_canAuthorize = true;
+        $this->_canRefund = true;
+        $this->_canRefundInvoicePartial = true;
+    }
 
     /**
-     * Fires the initial request to the heidelpay payment provider.
-     *
-     * @param \Magento\Quote\Model\Quote $quote
-     * @return \Heidelpay\PhpPaymentApi\Response
-     * @throws \Exception
-     * @throws \Heidelpay\PhpBasketApi\Exception\InvalidBasketitemPositionException
-     * @throws \Heidelpay\PhpPaymentApi\Exceptions\UndefinedTransactionModeException
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * {@inheritDoc}
+     * @throws UndefinedTransactionModeException
      */
-    public function getHeidelpayUrl($quote)
+    public function getHeidelpayUrl($quote, array $data = [])
     {
-        // create the collection factory
         $paymentInfoCollection = $this->paymentInformationCollectionFactory->create();
 
         // load the payment information by store id, customer email address and payment method
-        /** @var \Heidelpay\Gateway\Model\PaymentInformation $paymentInfo */
+        /** @var PaymentInformation $paymentInfo */
         $paymentInfo = $paymentInfoCollection->loadByCustomerInformation(
             $quote->getStoreId(),
             $quote->getBillingAddress()->getEmail(),

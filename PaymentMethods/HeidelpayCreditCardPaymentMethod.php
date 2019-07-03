@@ -1,14 +1,5 @@
 <?php
-
-namespace Heidelpay\Gateway\PaymentMethods;
-
-use Heidelpay\PhpPaymentApi\PaymentMethods\CreditCardPaymentMethod;
-use Heidelpay\Gateway\Model\Config\Source\BookingMode;
-
-
 /**
- * Heidelpay credit card payment method
- *
  * This is the payment class for heidelpay credit card
  *
  * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
@@ -20,67 +11,43 @@ use Heidelpay\Gateway\Model\Config\Source\BookingMode;
  * @subpackage magento2
  * @category magento2
  */
+namespace Heidelpay\Gateway\PaymentMethods;
+
+use Heidelpay\Gateway\Model\Config\Source\BookingMode;
+use Heidelpay\PhpPaymentApi\Exceptions\UndefinedTransactionModeException;
+use Heidelpay\PhpPaymentApi\PaymentMethods\CreditCardPaymentMethod;
+
+/** @noinspection LongInheritanceChainInspection */
+/**
+ * @property CreditCardPaymentMethod $_heidelpayPaymentMethod
+ */
 class HeidelpayCreditCardPaymentMethod extends HeidelpayAbstractPaymentMethod
 {
-    /**
-     * Payment Code
-     * @var string PayentCode
-     */
+    /** @var string PaymentCode */
     const CODE = 'hgwcc';
 
     /**
-     * Payment Code
-     * @var string PayentCode
+     * {@inheritDoc}
      */
-    protected $_code = self::CODE;
-
-    /**
-     * isGateway
-     * @var boolean
-     */
-    protected $_isGateway = true;
-
-    /**
-     * canAuthorize
-     * @var boolean
-     */
-    protected $_canAuthorize = true;
-
-    /** @var boolean */
-    protected $_canCapture = true;
-
-    /** @var boolean */
-    protected $_canCapturePartial = true;
-
-    /** @var boolean */
-    protected $_canRefund = true;
-
-    /** @var boolean */
-    protected $_canRefundInvoicePartial = true;
-
-    /** @var CreditCardPaymentMethod */
-    protected $_heidelpayPaymentMethod;
-
-    /**
-     * Active redirect
-     *
-     * This function will return false, if the used payment method needs additional
-     * customer payment data to pursue.
-     *
-     * @return boolean
-     */
-    public function activeRedirect()
+    protected function setup()
     {
-        return false;
+        parent::setup();
+        $this->_canCapture = true;
+        $this->_canAuthorize = true;
+        $this->_canCapturePartial = true;
+        $this->_canRefund = true;
+        $this->_canRefundInvoicePartial = true;
+        $this->_usingActiveRedirect = false;
     }
 
     /**
      * Initial Request to heidelpay payment server to get the form / iframe url
      * {@inheritDoc}
      *
+     * @throws UndefinedTransactionModeException
      * @see \Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod::getHeidelpayUrl()
      */
-    public function getHeidelpayUrl($quote)
+    public function getHeidelpayUrl($quote, array $data = [])
     {
         // set initial data for the request
         parent::getHeidelpayUrl($quote);
@@ -89,14 +56,15 @@ class HeidelpayCreditCardPaymentMethod extends HeidelpayAbstractPaymentMethod
         $paymentFrameOrigin = $url[0] . '//' . $url[2];
         $preventAsyncRedirect = 'FALSE';
         $cssPath = $this->mainConfig->getDefaultCss();
+        $bookingMode = $this->getBookingMode();
 
         // make an authorize request, if set...
-        if ($this->getBookingMode() === BookingMode::AUTHORIZATION) {
+        if ($bookingMode === BookingMode::AUTHORIZATION) {
             $this->_heidelpayPaymentMethod->authorize($paymentFrameOrigin, $preventAsyncRedirect, $cssPath);
         }
 
         // ... else if no booking mode is set or bookingmode is set to 'debit', make a debit request.
-        if ($this->getBookingMode() === null || $this->getBookingMode() === BookingMode::DEBIT) {
+        if ($bookingMode === null || $bookingMode === BookingMode::DEBIT) {
             $this->_heidelpayPaymentMethod->debit($paymentFrameOrigin, $preventAsyncRedirect, $cssPath);
         }
 

@@ -1,12 +1,5 @@
 <?php
-
-namespace Heidelpay\Gateway\PaymentMethods;
-
-use Heidelpay\PhpPaymentApi\PaymentMethods\GiropayPaymentMethod;
-
 /**
- * heidelpay giropay Payment Method
- *
  * heidelpay Payment Method for giropay.
  *
  * @license Use of this software requires acceptance of the License Agreement. See LICENSE file.
@@ -18,35 +11,37 @@ use Heidelpay\PhpPaymentApi\PaymentMethods\GiropayPaymentMethod;
  * @subpackage magento2
  * @category magento2
  */
+namespace Heidelpay\Gateway\PaymentMethods;
+
+use Heidelpay\PhpPaymentApi\Exceptions\UndefinedTransactionModeException;
+use Heidelpay\PhpPaymentApi\PaymentMethods\GiropayPaymentMethod;
+
+/** @noinspection LongInheritanceChainInspection */
+/**
+ * @property GiropayPaymentMethod $_heidelpayPaymentMethod
+ */
 class HeidelpayGiropayPaymentMethod extends HeidelpayAbstractPaymentMethod
 {
-    /**
-     * Payment Code
-     * @var string PayentCode
-     */
+    /** @var string PaymentCode */
     const CODE = 'hgwgp';
 
     /**
-     * @var string heidelpay gateway payment code
+     * {@inheritDoc}
      */
-    protected $_code = self::CODE;
-
-    /** @var bool */
-    protected $_canAuthorize = true;
-
-    /** @var boolean */
-    protected $_canRefund = true;
-
-    /** @var boolean */
-    protected $_canRefundInvoicePartial = true;
-
-    /** @var GiropayPaymentMethod */
-    protected $_heidelpayPaymentMethod;
+    protected function setup()
+    {
+        parent::setup();
+        $this->_canAuthorize = true;
+        $this->_canRefund = true;
+        $this->_canRefundInvoicePartial = true;
+    }
 
     /**
      * @inheritdoc
+     *
+     * @throws UndefinedTransactionModeException
      */
-    public function getHeidelpayUrl($quote)
+    public function getHeidelpayUrl($quote, array $data = [])
     {
         // set initial data for the request
         parent::getHeidelpayUrl($quote);

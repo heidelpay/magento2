@@ -1,14 +1,6 @@
 <?php
-
-namespace Heidelpay\Gateway\PaymentMethods;
-
-use Heidelpay\PhpPaymentApi\PaymentMethods\PayPalPaymentMethod;
-use Heidelpay\Gateway\Model\Config\Source\BookingMode;
-
 /**
- * heidelpay PayPal payment method
- *
- * This is the payment class for heidelpay PayPal
+ * This is the payment class for heidelpay PayPal.
  *
  * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
  * @copyright Copyright © 2016-present heidelpay GmbH. All rights reserved.
@@ -19,64 +11,53 @@ use Heidelpay\Gateway\Model\Config\Source\BookingMode;
  * @subpackage magento2
  * @category magento2
  */
+namespace Heidelpay\Gateway\PaymentMethods;
+
+use Heidelpay\Gateway\Model\Config\Source\BookingMode;
+use Heidelpay\PhpPaymentApi\Exceptions\UndefinedTransactionModeException;
+use Heidelpay\PhpPaymentApi\PaymentMethods\PayPalPaymentMethod;
+
+/** @noinspection LongInheritanceChainInspection */
+/**
+ * @property PayPalPaymentMethod $_heidelpayPaymentMethod
+ */
 class HeidelpayPayPalPaymentMethod extends HeidelpayAbstractPaymentMethod
 {
-    /**
-     * Payment Code
-     * @var string PayentCode
-     */
+    /** @var string PaymentCode */
     const CODE = 'hgwpal';
 
     /**
-     * Payment Code
-     * @var string PayentCode
+     * {@inheritDoc}
      */
-    protected $_code = self::CODE;
-
-    /**
-     * isGateway
-     * @var boolean
-     */
-    protected $_isGateway = true;
-
-    /**
-     * canAuthorize
-     * @var boolean
-     */
-    protected $_canAuthorize = true;
-
-    /** @var boolean */
-    protected $_canCapture = true;
-
-    /** @var boolean */
-    protected $_canCapturePartial = true;
-
-    /** @var boolean */
-    protected $_canRefund = true;
-
-    /** @var boolean */
-    protected $_canRefundInvoicePartial = true;
-
-    /** @var PayPalPaymentMethod */
-    protected $_heidelpayPaymentMethod;
+    protected function setup()
+    {
+        parent::setup();
+        $this->_canCapture = true;
+        $this->_canAuthorize = true;
+        $this->_canCapturePartial = true;
+        $this->_canRefund = true;
+        $this->_canRefundInvoicePartial = true;
+    }
 
     /**
      * Initial Request to heidelpay payment server to get the form / iframe url
      * {@inheritDoc}
+     * @throws UndefinedTransactionModeException
      * @see \Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod::getHeidelpayUrl()
      */
-    public function getHeidelpayUrl($quote)
+    public function getHeidelpayUrl($quote, array $data = [])
     {
         // set initial data for the request
         parent::getHeidelpayUrl($quote);
+        $bookingMode = $this->getBookingMode();
 
         // make an authorize request, if set...
-        if ($this->getBookingMode() === BookingMode::AUTHORIZATION) {
+        if ($bookingMode === BookingMode::AUTHORIZATION) {
             $this->_heidelpayPaymentMethod->authorize();
         }
 
         // ... else if no booking mode is set or bookingmode is set to 'debit', make a debit request.
-        if ($this->getBookingMode() === null || $this->getBookingMode() === BookingMode::DEBIT) {
+        if ($bookingMode === null || $bookingMode === BookingMode::DEBIT) {
             $this->_heidelpayPaymentMethod->debit();
         }
 

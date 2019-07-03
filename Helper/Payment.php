@@ -1,16 +1,29 @@
 <?php
 namespace Heidelpay\Gateway\Helper;
 
+use Exception;
+use Heidelpay\MessageCodeMapper\Exceptions\MissingLocaleFileException;
 use Heidelpay\MessageCodeMapper\MessageCodeMapper;
+use Heidelpay\PhpPaymentApi\Constants\PaymentMethod;
+use Heidelpay\PhpPaymentApi\Constants\ProcessingResult;
+use Heidelpay\PhpPaymentApi\Constants\StatusCode;
+use Heidelpay\PhpPaymentApi\Constants\TransactionType;
 use Heidelpay\PhpPaymentApi\Response;
+use Magento\Customer\Model\Group;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\DB\TransactionFactory;
 use Magento\Framework\HTTP\ZendClientFactory;
+use Magento\Framework\Locale\Resolver;
+use Magento\Framework\Model\AbstractExtensibleModel;
 use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\QuoteManagement;
+use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Invoice;
-use Heidelpay\Gateway\Model\TransactionFactory;
+use Heidelpay\Gateway\Model\Transaction;
+use Heidelpay\Gateway\Model\TransactionFactory as HgwTransactionFactory;
 
 /**
  * Heidelpay payment helper
@@ -36,34 +49,33 @@ class Payment extends AbstractHelper
     /** @var ZendClientFactory */
     protected $httpClientFactory;
 
-    /** @var \Magento\Framework\DB\TransactionFactory */
+    /** @var TransactionFactory */
     protected $transactionFactory;
 
-    /** @var \Magento\Framework\Locale\Resolver */
+    /** @var Resolver */
     protected $localeResolver;
 
     /** @var QuoteManagement */
     private $_cartManagement;
-    /**
-     * @var Heidelpay\Gateway\Model\Transaction
-     */
+
+    /** @var HgwTransactionFactory */
     private $heidelpayTransactionFactory;
 
     /**
      * @param Context $context
-     * @param \Magento\Framework\HTTP\ZendClientFactory $httpClientFactory
-     * @param \Magento\Framework\DB\TransactionFactory $transactionFactory
-     * @param \Magento\Framework\Locale\Resolver $localeResolver
+     * @param ZendClientFactory $httpClientFactory
+     * @param TransactionFactory $transactionFactory
+     * @param Resolver $localeResolver
      * @param QuoteManagement $cartManagement
-     * @param Heidelpay\Gateway\Model\Transaction $heidelpayTransactionFactory
+     * @param HgwTransactionFactory $heidelpayTransactionFactory
      */
     public function __construct(
         Context $context,
-        \Magento\Framework\HTTP\ZendClientFactory $httpClientFactory,
-        \Magento\Framework\DB\TransactionFactory $transactionFactory,
-        \Magento\Framework\Locale\Resolver $localeResolver,
+        ZendClientFactory $httpClientFactory,
+        TransactionFactory $transactionFactory,
+        Resolver $localeResolver,
         QuoteManagement $cartManagement,
-        TransactionFactory $heidelpayTransactionFactory
+        HgwTransactionFactory $heidelpayTransactionFactory
     ) {
         $this->httpClientFactory = $httpClientFactory;
         $this->transactionFactory = $transactionFactory;
@@ -74,41 +86,44 @@ class Payment extends AbstractHelper
         $this->heidelpayTransactionFactory = $heidelpayTransactionFactory;
     }
 
-    public function splitPaymentCode($PAYMENT_CODE)
+    /**
+     * Returns an array containing the payment method code and the transaction type code.
+     *
+     * @param $paymentCode
+     *
+     * @return array
+     *
+     * @see PaymentMethod
+     * @see TransactionType
+     */
+    public function splitPaymentCode($paymentCode)
     {
-        return preg_split('/\./', $PAYMENT_CODE);
+        return explode('.', $paymentCode);
     }
 
     /**
-     * @param array                      $data
-     * @param \Magento\Sales\Model\Order $order
-     * @param bool                       $message
+     * @param array $data
+     * @param Order $order
+     * @param bool  $message
      */
     public function mapStatus($data, $order, $message = false)
     {
         $paymentCode = $this->splitPaymentCode($data['PAYMENT_CODE']);
-
         $message = !empty($message) ? $message : $data['PROCESSING_RETURN'];
 
-        $quoteID = ($order->getLastQuoteId() === false)
-            ? $order->getQuoteId()
-            : $order->getLastQuoteId(); // last_quote_id workaround for trusted shop buyerprotection
-
         // If an order has been canceled, closed or complete -> do not change order status.
-        if ($order->getStatus() == Order::STATE_CANCELED
-            || $order->getStatus() == Order::STATE_CLOSED
-            || $order->getStatus() == Order::STATE_COMPLETE
-        ) {
+        if (in_array($order->getStatus(), [Order::STATE_CANCELED, Order::STATE_CLOSED, Order::STATE_COMPLETE], true)) {
             // you can use this event for example to get a notification when a canceled order has been paid
             return;
         }
 
-        if ($data['PROCESSING_RESULT'] == 'NOK') {
-            $order->getPayment()->getMethodInstance()->cancelledTransactionProcessing($order, $message);
+        $payment = $order->getPayment();
+        if ($data['PROCESSING_RESULT'] === ProcessingResult::NOK) {
+            $payment->getMethodInstance()->cancelledTransactionProcessing($order, $message);
         } elseif ($this->isProcessing($paymentCode[1], $data)) {
-            $order->getPayment()->getMethodInstance()->processingTransactionProcessing($data, $order);
+            $payment->getMethodInstance()->processingTransactionProcessing($data, $order);
         } else {
-            $order->getPayment()->getMethodInstance()->pendingTransactionProcessing($data, $order, $message);
+            $payment->getMethodInstance()->pendingTransactionProcessing($data, $order, $message);
         }
     }
 
@@ -130,7 +145,7 @@ class Payment extends AbstractHelper
      * @param string|null $errorCode
      *
      * @return string
-     * @throws \Heidelpay\MessageCodeMapper\Exceptions\MissingLocaleFileException
+     * @throws MissingLocaleFileException
      */
     public function handleError($errorCode = null)
     {
@@ -169,7 +184,7 @@ class Payment extends AbstractHelper
             return false;
         }
 
-        return $order->getOrderCurrencyCode() == $data['PRESENTATION_CURRENCY'];
+        return $order->getOrderCurrencyCode() === $data['PRESENTATION_CURRENCY'];
     }
 
     /**
@@ -186,9 +201,15 @@ class Payment extends AbstractHelper
             return false;
         }
 
-        return in_array($paymentCode, ['CP', 'DB', 'FI', 'RC'])
-            && $data['PROCESSING_RESULT'] == 'ACK'
-            && $data['PROCESSING_STATUS_CODE'] != 80;
+        $processingTransactions = [
+            TransactionType::CAPTURE,
+            TransactionType::DEBIT,
+            TransactionType::FINALIZE,
+            TransactionType::RECEIPT
+        ];
+        return in_array($paymentCode, $processingTransactions, true)
+            && $data['PROCESSING_RESULT'] === ProcessingResult::ACK
+            && $data['PROCESSING_STATUS_CODE'] !== StatusCode::WAITING;
     }
 
     /**
@@ -201,14 +222,8 @@ class Payment extends AbstractHelper
         if (!isset($data['PAYMENT_CODE'])) {
             return false;
         }
-
-        $paymentCode = $this->splitPaymentCode($data['PAYMENT_CODE']);
-
-        if ($paymentCode[1] == 'PA') {
-            return true;
-        }
-
-        return false;
+        list(, $paymentCode) = $this->splitPaymentCode($data['PAYMENT_CODE']);
+        return $paymentCode === TransactionType::RESERVATION;
     }
 
     /**
@@ -221,21 +236,20 @@ class Payment extends AbstractHelper
      */
     public function isReceiptAble($paymentMethod, $paymentType)
     {
-        if ($paymentType !== 'RC') {
+        if ($paymentType !== TransactionType::RECEIPT) {
             return false;
         }
 
         switch ($paymentMethod) {
-            case 'DD':
-            case 'PP':
-            case 'IV':
-            case 'OT':
-            case 'PC':
-            case 'MP':
-            case 'HP':
+            case PaymentMethod::DIRECT_DEBIT:
+            case PaymentMethod::PREPAYMENT:
+            case PaymentMethod::INVOICE:
+            case PaymentMethod::ONLINE_TRANSFER:
+            case PaymentMethod::PAYMENT_CARD:
+            case PaymentMethod::MOBILE_PAYMENT:
+            case PaymentMethod::HIRE_PURCHASE:
                 $return = true;
                 break;
-
             default:
                 $return = false;
                 break;
@@ -245,46 +259,45 @@ class Payment extends AbstractHelper
     }
 
     /**
-     * Checks if the given paymentcode is viable for a refund transaction.
+     * Checks if the given payment code is viable for a refund transaction.
      *
-     * @param string $paymentcode
+     * @param string $paymentCode
      *
      * @return bool
      */
-    public function isRefundable($paymentcode)
+    public function isRefundable($paymentCode)
     {
-        if ($paymentcode === 'DB' || $paymentcode === 'CP' || $paymentcode === 'RC') {
-            return true;
-        }
-
-        return false;
+        $refundableTransactions = [TransactionType::DEBIT, TransactionType::CAPTURE, TransactionType::RECEIPT];
+        return in_array($paymentCode, $refundableTransactions, true);
     }
 
     /**
      * Saves a transaction by the given invoice.
      *
      * @param Invoice $invoice
+     *
+     * @throws Exception
      */
     public function saveTransaction(Invoice $invoice)
     {
         $transaction = $this->transactionFactory->create();
-        $transaction->addObject($invoice)
-            ->addObject($invoice->getOrder())
-            ->save();
+        $transaction->addObject($invoice)->addObject($invoice->getOrder())->save();
     }
 
     /**
      * Save the heidelpay transaction data
+     *
      * @param Response $response
-     * @param $data
-     * @param $source
+     * @param array $data
+     * @param string $source
+     *
      * @return void
+     *
+     * @throws Exception
      */
-    public function saveHeidelpayTransaction($response, $data, $source)
+    public function saveHeidelpayTransaction(Response $response, array $data, $source)
     {
-        list($paymentMethod, $paymentType) = $this->splitPaymentCode(
-            $response->getPayment()->getCode()
-        );
+        list($paymentMethod, $paymentType) = $this->getPaymentMethodAndType($response);
 
         try {
             // save the response details into the heidelpay Transactions table.
@@ -302,7 +315,7 @@ class Payment extends AbstractHelper
                 ->setJsonResponse(json_encode($data))
                 ->setSource($source)
                 ->save();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->_logger->error('Heidelpay - ' . $source . ': Save transaction error. ' . $e->getMessage());
         }
     }
@@ -310,8 +323,8 @@ class Payment extends AbstractHelper
     /**
      * Create an order by submitting the quote.
      * @param Quote $quote
-     * @return \Magento\Framework\Model\AbstractExtensibleModel|\Magento\Sales\Api\Data\OrderInterface|null|object
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @return AbstractExtensibleModel|OrderInterface|null|object
+     * @throws LocalizedException
      */
     public function createOrderFromQuote($quote)
     {
@@ -323,9 +336,20 @@ class Payment extends AbstractHelper
             $quote->setCustomerId(null)
                 ->setCustomerEmail($quote->getBillingAddress()->getEmail())
                 ->setCustomerIsGuest(true)
-                ->setCustomerGroupId(\Magento\Customer\Model\Group::NOT_LOGGED_IN_ID);
+                ->setCustomerGroupId(Group::NOT_LOGGED_IN_ID);
         }
 
         return $this->_cartManagement->submit($quote);
+    }
+
+    /**
+     * Returns an array containing the payment method and payment type of the given Response object.
+     *
+     * @param $response
+     * @return array
+     */
+    public function getPaymentMethodAndType(Response $response)
+    {
+        return $this->splitPaymentCode($response->getPayment()->getCode());
     }
 }
