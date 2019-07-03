@@ -32,7 +32,7 @@ class PushResponse
             <Reason code="00">SUCCESSFULL</Reason>
             <Return code="000.100.112">Request successfully processed in 'Merchant in Connector Test Mode'</Return>
         </Processing>
-        <Payment code="OT.RC">
+        <Payment>
             <Clearing>
                 <Amount>53.55</Amount>
                 <Currency>EUR</Currency>
@@ -44,6 +44,17 @@ class PushResponse
                 <Usage>4242.8116.1848 Heidelpay QA </Usage>
             </Presentation>
         </Payment>
+        <Connector>
+            <Account>
+                <Country>DE</Country>
+                <Bic>HEIDELPAYXY</Bic>
+                <Bank>10000000</Bank>
+                <Number>1234567890</Number>
+                <Holder>Heidelpay QA</Holder>
+                <Iban>DE01000000001234567890</Iban>
+                <Usage>4260.7131.1424</Usage>
+            </Account>
+        </Connector>
         <Account>
             <Expiry/>
             <Brand>SOFORT</Brand>
@@ -68,12 +79,7 @@ class PushResponse
             <ResponseUrl>https://test-heidelpay.hpcgw.net/ngw/responsePa?state=9158be8fffffffff17fcff09</ResponseUrl>
         </Frontend>
         <Analysis>
-            <Criterion name="SHOP.TYPE">Magento 2.2.8-Community</Criterion>
-            <Criterion name="SDK_NAME">Heidelpay\PhpPaymentApi</Criterion>
             <Criterion name="SECRET">d83f0dae2fca921d00cb70559762a365e55870e0cad5384177a931379e04d0204fb8d01ee16ef109f27ec67fb181e748d688119cf82966f59ab1db476d460a5e</Criterion>
-            <Criterion name="SDK_VERSION">v1.8.0</Criterion>
-            <Criterion name="PAYMENT_METHOD">SofortPaymentMethod</Criterion>
-            <Criterion name="SHOPMODULE.VERSION">Heidelpay Gateway 19.5.08</Criterion>
             <Criterion name="GUEST">false</Criterion>
         </Analysis>
         <RequestTimestamp>2019-06-12 15:53:04</RequestTimestamp>
@@ -81,6 +87,12 @@ class PushResponse
 </Response>
 XML;
 
+    /**
+     * Provides a Xml template string for testing purposes. Its not completely authentic since it also contains a Connector node.
+     *
+     * @param array $specifyValue
+     * @return null|string|string[]
+     */
     public function providePushXml(array $specifyValue = [])
     {
         $xmlString = $this->xmlString;
