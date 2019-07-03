@@ -88,7 +88,7 @@ class HeidelpayPrepaymentPaymentMethod extends HeidelpayAbstractPaymentMethod
         $payment->addTransaction(Transaction::TYPE_AUTH, null, true);
 
         $order->setState(Order::STATE_PENDING_PAYMENT)
-            ->addCommentToStatusHistory($message, Order::STATE_PENDING_PAYMENT)
+            ->addStatusHistoryComment($message, Order::STATE_PENDING_PAYMENT)
             ->setIsCustomerNotified(true);
 
         // payment is pending at the beginning, so we set the total paid sum to 0.
