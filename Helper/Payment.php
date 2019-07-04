@@ -26,6 +26,7 @@ use Magento\Sales\Model\Order\Invoice;
 use Heidelpay\Gateway\Model\Transaction;
 use Heidelpay\Gateway\Model\TransactionFactory as HgwTransactionFactory;
 use Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod;
+use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
 
 
 /**
@@ -69,6 +70,10 @@ class Payment extends AbstractHelper
         TransactionType::DEBIT,
         TransactionType::RESERVATION
     ];
+    /**
+     * @var PaymentInformationCollectionFactory
+     */
+    private $paymentInformationCollectionFactory;
 
     /**
      * @param Context $context
@@ -84,6 +89,7 @@ class Payment extends AbstractHelper
         TransactionFactory $transactionFactory,
         Resolver $localeResolver,
         QuoteManagement $cartManagement,
+        PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
         HgwTransactionFactory $heidelpayTransactionFactory
     ) {
         $this->httpClientFactory = $httpClientFactory;
@@ -93,6 +99,7 @@ class Payment extends AbstractHelper
         parent::__construct($context);
         $this->_cartManagement = $cartManagement;
         $this->heidelpayTransactionFactory = $heidelpayTransactionFactory;
+        $this->paymentInformationCollectionFactory = $paymentInformationCollectionFactory;
     }
 
     /**
@@ -396,5 +403,31 @@ class Payment extends AbstractHelper
     public function isNewOrderType($paymentType)
     {
         return in_array($paymentType, self::NEW_ORDER_TRANSACTION_TYPE_ARRAY, true);
+    }
+
+    /**
+     * If the customer is a guest, we'll delete the additional payment information, which
+     * is only used for customer recognition.
+     * @param Quote $quote
+     * @throws \Exception
+     */
+    public function handleAdditionalPaymentInformation($quote)
+    {
+        if ($quote !== null && $quote->getCustomerIsGuest()) {
+            // create a new instance for the payment information collection.
+            $paymentInfoCollection = $this->paymentInformationCollectionFactory->create();
+
+            // load the payment information and delete it.
+            /** @var \Heidelpay\Gateway\Model\PaymentInformation $paymentInfo */
+            $paymentInfo = $paymentInfoCollection->loadByCustomerInformation(
+                $quote->getStoreId(),
+                $quote->getBillingAddress()->getEmail(),
+                $quote->getPayment()->getMethod()
+            );
+
+            if (!$paymentInfo->isEmpty()) {
+                $paymentInfo->delete();
+            }
+        }
     }
 }

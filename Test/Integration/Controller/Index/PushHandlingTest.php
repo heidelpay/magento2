@@ -90,7 +90,7 @@ class PushHandlingTest extends IntegrationTestAbstract
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function testPushCreatesNewTransaction($paymentCode = 'OT.RC', $paymentMethod)
+    public function testPushCreatesNewTransaction($paymentCode, $paymentMethod)
     {
         list($quote, $xml) = $this->prepareRequest($paymentCode, $paymentMethod);
         $this->dispatch(self::CONTROLLER_PATH);
@@ -115,16 +115,23 @@ class PushHandlingTest extends IntegrationTestAbstract
         $this->assertNotNull($heidelpayTransaction);
         $this->assertFalse($heidelpayTransaction->isEmpty());
 
+        $isPreAuthorization = 'PA' ===$this->paymentHelper->splitPaymentCode($paymentCode)[1];
          // Check Amounts
-        $this->assertEquals(
-            $fetchedOrder->getGrandTotal(),
-            $xml->Transaction->Payment->Clearing->Amount,
-            'grand total amount doesn\'t match');
+            $this->assertEquals(
+                $fetchedOrder->getGrandTotal(),
+                $xml->Transaction->Payment->Clearing->Amount,
+                'grand total amount doesn\'t match');
 
-        $this->assertEquals(
-            (float)$xml->Transaction->Payment->Clearing->Amount,
-            (float)$fetchedOrder->getTotalPaid(),
-            'Order state: ' .$fetchedOrder->getStatus() .'. total paid amount doesn\'t match');
+        if (!$isPreAuthorization)
+        {
+            $this->assertEquals(
+                (float)$xml->Transaction->Payment->Clearing->Amount,
+                (float)$fetchedOrder->getTotalPaid(),
+                'Order state: ' .$fetchedOrder->getStatus() .'. Total paid amount doesn\'t match');
+
+            $this->assertEquals('processing', $fetchedOrder->getState());
+        }
+
     }
 
     public function dataProviderPushCreatesNewTransactionDP()
@@ -134,6 +141,7 @@ class PushHandlingTest extends IntegrationTestAbstract
             'Create from CC.DB' => ['CC.DB', 'hgwcc'],
             'Create from DD.DB' => ['DD.DB', 'hgwdd'],
             'Create from OT.RC' => ['OT.RC', 'hgwsue'],
+            'Create from OT.PA' => ['OT.PA', 'hgwsue'],
             'Create from PP.RC' => ['PP.RC', 'hgwpp'],
         ];
     }
