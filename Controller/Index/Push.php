@@ -36,19 +36,9 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
     /** @var \Heidelpay\PhpPaymentApi\Push */
     private $heidelpayPush;
 
-    /** @var SearchCriteriaBuilder */
-    private $searchCriteriaBuilder;
-    /**
-     * @var PaymentHelper
-     */
-    private $paymentHelper;
-    /**
-     * @var QuoteRepository
-     */
+    /** @var QuoteRepository */
     private $quoteRepository;
-    /**
-     * @var \Heidelpay\Gateway\Helper\Order
-     */
+    /** @var \Heidelpay\Gateway\Helper\Order */
     private $orderHelper;
 
     /**
@@ -91,7 +81,6 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
         \Magento\Customer\Model\Url $customerUrl,
         OrderRepository $orderRepository,
         \Heidelpay\PhpPaymentApi\Push $heidelpayPush,
-        SearchCriteriaBuilder $searchCriteriaBuilder,
         QuoteRepository $quoteRepository,
         \Heidelpay\Gateway\Helper\Order $orderHelper
     ) {
@@ -115,8 +104,6 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
 
         $this->orderRepository = $orderRepository;
         $this->heidelpayPush = $heidelpayPush;
-        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
-        $this->paymentHelper = $paymentHelper;
         $this->quoteRepository = $quoteRepository;
         $this->orderHelper = $orderHelper;
     }
@@ -155,7 +142,7 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
         }
 
         $pushResponse = $this->heidelpayPush->getResponse();
-        $data = $this->paymentHelper->getDataFromResponse($pushResponse);
+        $data = $this->_paymentHelper->getDataFromResponse($pushResponse);
         $this->_logger->debug('Push Response: ' . print_r($pushResponse, true));
 
         list($paymentMethod, $paymentType) = $this->_paymentHelper->splitPaymentCode(
@@ -163,10 +150,11 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
         );
 
                 // in case of receipts, we process the push message for receipts.
-        if ($pushResponse->isSuccess() && $this->paymentHelper->isNewOrderType($paymentType)) {
+        if ($pushResponse->isSuccess() && $this->_paymentHelper->isNewOrderType($paymentType)) {
 
             $transactionId = $pushResponse->getIdentification()->getTransactionId();
             $order = $this->orderHelper->fetchOrder($transactionId);
+            $quote = $this->quoteRepository->get($transactionId);
 
             // create order if it doesn't exists already.
             if ($order === null || $order->isEmpty()) {
@@ -174,9 +162,8 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
                 $this->_logger->debug('heidelpay Push - Order does not exist for transaction. heidelpay transaction id: '
                     . $transactionId);
 
-                $quote = $this->quoteRepository->get($transactionId);
                 try {
-                    $order = $this->paymentHelper->createOrderFromQuote($quote);
+                    $order = $this->_paymentHelper->createOrderFromQuote($quote);
                     if ($order === null || $order->isEmpty())
                     {
                         $this->_logger->error('Heidelpay - Response: Cannot submit the Quote. ' . $e->getMessage());
@@ -187,13 +174,14 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
                     return;
                 }
 
-                $this->paymentHelper->mapStatus($data, $order);
+                $this->_paymentHelper->mapStatus($data, $order);
                 $this->_logger->debug('order status: ' . $order->getStatus());
                 $this->orderHelper->handleOrderMail($order);
                 $this->orderHelper->handleInvoiceMails($order);
                 $this->orderRepository->save($order);
-                //TODO: Handle additional payment info from response
             }
+            $this->_paymentHelper->handleAdditionalPaymentInformation($quote);
+
 
             if ($this->_paymentHelper->isReceiptAble($paymentMethod, $paymentType)) {
                 // load the referenced order to receive the order information.

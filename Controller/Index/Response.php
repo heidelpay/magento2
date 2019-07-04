@@ -235,7 +235,7 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
             $this->orderRepository->save($order);
         }
 
-        $this->handleAdditionalPaymentInformation($quote);
+        $this->_paymentHelper->handleAdditionalPaymentInformation($quote);
         $this->_logger->debug('Heidelpay - Response: redirectUrl is ' . $redirectUrl);
 
         // return the heidelpay response url as raw response instead of echoing it out.
@@ -271,32 +271,6 @@ class Response extends \Heidelpay\Gateway\Controller\HgwAbstract
 
             foreach ($invoices as $invoice) {
                 $this->_invoiceSender->send($invoice);
-            }
-        }
-    }
-
-    /**
-     * If the customer is a guest, we'll delete the additional payment information, which
-     * is only used for customer recognition.
-     * @param Quote $quote
-     * @throws \Exception
-     */
-    protected function handleAdditionalPaymentInformation($quote)
-    {
-        if ($quote !== null && $quote->getCustomerIsGuest()) {
-            // create a new instance for the payment information collection.
-            $paymentInfoCollection = $this->paymentInformationCollectionFactory->create();
-
-            // load the payment information and delete it.
-            /** @var \Heidelpay\Gateway\Model\PaymentInformation $paymentInfo */
-            $paymentInfo = $paymentInfoCollection->loadByCustomerInformation(
-                $quote->getStoreId(),
-                $quote->getBillingAddress()->getEmail(),
-                $quote->getPayment()->getMethod()
-            );
-
-            if (!$paymentInfo->isEmpty()) {
-                $paymentInfo->delete();
             }
         }
     }
