@@ -7,9 +7,10 @@ define(
         'Magento_Checkout/js/action/select-payment-method',
         'Magento_Checkout/js/checkout-data',
         'Magento_Checkout/js/model/quote',
+        'Magento_Checkout/js/action/select-billing-address',
         'moment'
     ],
-    function ($, Component, placeOrderAction, additionalValidators, selectPaymentMethodAction, checkoutData, quote) {
+    function ($, Component, placeOrderAction, additionalValidators, selectPaymentMethodAction, checkoutData, quote, selectBillingAddress) {
         'use strict';
 
         // add IBAN validator
@@ -29,7 +30,8 @@ define(
             savesAdditionalData: false,
 
             defaults: {
-                template: 'Heidelpay_Gateway/payment/heidelpay-form'
+                template: 'Heidelpay_Gateway/payment/heidelpay-form',
+                useShippingAddressAsBillingAddress: false
             },
 
             /**
@@ -61,21 +63,8 @@ define(
              * Function to receive the customer's full name.
              */
             getFullName: function() {
-                var name = '', billingAddress = quote.billingAddress();
-
-                if (billingAddress !== null) {
-                    if (typeof billingAddress.firstname !== 'undefined' && billingAddress.firstname !== null) {
-                        name += billingAddress.firstname;
-                    }
-
-                    if (typeof billingAddress.middlename !== 'undefined' && billingAddress.middlename !== null) {
-                        name += ' ' + billingAddress.middlename;
-                    }
-
-                    if (typeof billingAddress.lastname !== 'undefined' && billingAddress.lastname !== null) {
-                        name += ' ' + billingAddress.lastname;
-                    }
-                }
+                var billingAddress = quote.billingAddress();
+                var name = this.getNameFromAddress(billingAddress);
 
                 // fallback, if name isn't set yet.
                 if (name === '') {
@@ -96,6 +85,25 @@ define(
                     }
                 }
 
+                return name;
+            },
+
+            getNameFromAddress: function(address) {
+                var name = '';
+
+                if (address !== null) {
+                    if (typeof address.firstname !== 'undefined' && address.firstname !== null) {
+                        name += address.firstname;
+                    }
+
+                    if (typeof address.middlename !== 'undefined' && address.middlename !== null) {
+                        name += ' ' + address.middlename;
+                    }
+
+                    if (typeof address.lastname !== 'undefined' && address.lastname !== null) {
+                        name += ' ' + address.lastname;
+                    }
+                }
                 return name;
             },
 
@@ -142,8 +150,12 @@ define(
                 selectPaymentMethodAction(this.getData());
                 checkoutData.setSelectedPaymentMethod(this.item.method);
 
+                if(this.useShippingAddressAsBillingAddress) {
+                    selectBillingAddress(quote.shippingAddress());
+                }
+
                 return true;
-            },
+            }
         });
     }
 );

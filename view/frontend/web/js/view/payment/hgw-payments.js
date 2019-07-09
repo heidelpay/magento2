@@ -23,7 +23,7 @@ define(
             },
             {
                 type: 'hgwpal',
-                component: 'Heidelpay_Gateway/js/view/payment/method-renderer/hgw-abstract'
+                component: 'Heidelpay_Gateway/js/view/payment/method-renderer/hgw-paypal'
             },
             {
                 type: 'hgwpp',

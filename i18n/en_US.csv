@@ -25,6 +25,7 @@
 "Insert 0 to disable limit.","Insert 0 to disable limit."
 "If 'Debit' is enabled the card will be charged immediately. Otherwise the amount will first be authorised and charged at order creation.","If 'Debit' is enabled the card will be charged immediately. Otherwise the amount will first be authorised and charged at order creation."
 "An unexpected error occurred. Please contact us to get further information.","An unexpected error occurred. Please contact us to get further information."
+"Billing address should be same as shipping address.","Billing address should be same as shipping address."
 
 "Never","Never"
 "Same Shipping Address","Same Shipping Address"

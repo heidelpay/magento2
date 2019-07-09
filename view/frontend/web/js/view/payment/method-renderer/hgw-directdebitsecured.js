@@ -29,7 +29,8 @@ define(
                 hgwDobYear: '',
                 hgwDobMonth: '',
                 hgwDobDay: '',
-                years: [null]
+                years: [null],
+                useShippingAddressAsBillingAddress: true
             },
 
             initialize: function () {

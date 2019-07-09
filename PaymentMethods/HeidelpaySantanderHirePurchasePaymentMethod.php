@@ -25,6 +25,8 @@ use Magento\Quote\Api\Data\CartInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Order\Payment\Transaction;
+use Magento\Quote\Model\Quote;
+
 
 /** @noinspection LongInheritanceChainInspection */
 /**
@@ -43,6 +45,7 @@ class HeidelpaySantanderHirePurchasePaymentMethod extends HeidelpayAbstractPayme
         parent::setup();
         $this->_canAuthorize            = true;
         $this->_usingBasket             = true;
+        $this->useShippingAddressAsBillingAddress   = true;
     }
 
     /**

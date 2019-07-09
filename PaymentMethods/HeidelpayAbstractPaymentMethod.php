@@ -14,6 +14,7 @@ use Heidelpay\Gateway\Model\ResourceModel\Transaction\Collection as TransactionC
 use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
 use Heidelpay\Gateway\Model\Transaction;
 use Heidelpay\Gateway\Model\TransactionFactory;
+use Heidelpay\Gateway\PaymentMethods\Exceptions\CheckoutValidationException;
 use Heidelpay\PhpBasketApi\Exception\InvalidBasketitemPositionException;
 use Heidelpay\PhpPaymentApi\ParameterGroups\BasketParameterGroup;
 use Heidelpay\PhpPaymentApi\PaymentMethods\PaymentMethodInterface;
@@ -64,6 +65,9 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
 {
     /** @var string PaymentCode */
     const CODE = 'hgwabstract';
+
+    /** @var boolean */
+    protected $useShippingAddressAsBillingAddress;
 
     /** @var boolean */
     protected $_usingBasket;
@@ -231,6 +235,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
         $this->_usingBasket             = false;
         $this->_usingActiveRedirect     = true;
         $this->_formBlockType           = HgwAbstract::class;
+        $this->useShippingAddressAsBillingAddress = false;
     }
 
     /**
@@ -442,7 +447,6 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
     public function getHeidelpayUrl($quote, array $data = [])
     {
         $this->setupInitialRequest();
-
         $user = $this->getUser($quote);
         $this->_heidelpayPaymentMethod->getRequest()->customerAddress(
             $user['NAME.GIVEN'],                   // Given name
@@ -795,5 +799,47 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
         $heidelpayTransaction = $collection->loadByTransactionId($transactionID);
 
         return !$heidelpayTransaction === null && !$heidelpayTransaction->isEmpty();
+    }
+
+    /**
+     * @param Quote $quote
+     * @return bool
+     */
+    protected function billingAddressEqualsShippingAddress($quote)
+    {
+        $shippingAddress = $quote->getShippingAddress();
+        $billingAddress = $quote->getBillingAddress();
+
+        return ($billingAddress->getFirstname() === $shippingAddress->getFirstname()
+            && $billingAddress->getLastname() === $shippingAddress->getLastname()
+            && $billingAddress->getStreet() === $shippingAddress->getStreet()
+            && $billingAddress->getPostcode() === $shippingAddress->getPostcode()
+            && $billingAddress->getCity() === $shippingAddress->getCity()
+            && $billingAddress->getCountryId() === $shippingAddress->getCountryId()
+            && $billingAddress->getEmail() === $shippingAddress->getEmail()
+            && $billingAddress->getCompany() === $shippingAddress->getCompany()
+            && $billingAddress->getTelephone() === $shippingAddress->getTelephone()
+        );
+    }
+
+    /**
+     * @param Quote $quote
+     * @throws CheckoutValidationException
+     */
+    public function validateEqualAddress($quote)
+    {
+        $isEqualAddress = $this->billingAddressEqualsShippingAddress($quote);
+        $this->_logger->debug('isEqualAddress: ' . ($isEqualAddress ? 'Yes' : 'NO'));
+
+        if (!$isEqualAddress) {
+            throw new CheckoutValidationException(
+                __('Billing address should be same as shipping address.')
+            );
+        }
+    }
+
+    public function getUseShippingAddressAsBillingAddress()
+    {
+        return $this->useShippingAddressAsBillingAddress;
     }
 }

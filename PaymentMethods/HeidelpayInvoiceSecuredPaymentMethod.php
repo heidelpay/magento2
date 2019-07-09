@@ -42,6 +42,7 @@ class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMetho
         $this->_canRefundInvoicePartial = true;
         $this->_usingBasket             = true;
         $this->_formBlockType           = InvoiceSecured::class;
+        $this->useShippingAddressAsBillingAddress   = true;
     }
 
     /**
