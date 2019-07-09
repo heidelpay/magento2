@@ -28,14 +28,12 @@ define(
                 hgwDobDay: '',
                 hgwSalutation: '',
                 years: [null],
-                billingEqualsShipping: true
+                useShippingAddressAsBillingAddress: true
             },
 
             initialize: function () {
                 this._super();
                 this.getAdditionalPaymentInformation();
-
-                //$('#checkbox_billing_equals_shipping').prop('checked', true);
 
                 // init years select menu
                 for (let i = (new Date().getFullYear() - 17); i >= new Date().getFullYear() - 120; i--) {

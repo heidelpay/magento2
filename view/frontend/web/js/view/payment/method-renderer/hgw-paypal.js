@@ -14,7 +14,7 @@ define(
 
         return Component.extend({
             defaults: {
-                billingEqualsShipping: true
+                useShippingAddressAsBillingAddress: true
             }
 
         });

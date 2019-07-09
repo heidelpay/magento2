@@ -28,7 +28,7 @@ define(
                 hgwDobDay: '',
                 hgwSalutation: '',
                 years: [null],
-                billingEqualsShipping: true
+                useShippingAddressAsBillingAddress: true
             },
 
             initialize: function () {

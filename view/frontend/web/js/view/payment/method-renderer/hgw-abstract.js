@@ -31,7 +31,7 @@ define(
 
             defaults: {
                 template: 'Heidelpay_Gateway/payment/heidelpay-form',
-                billingEqualsShipping: false
+                useShippingAddressAsBillingAddress: false
             },
 
             /**
@@ -150,12 +150,12 @@ define(
                 selectPaymentMethodAction(this.getData());
                 checkoutData.setSelectedPaymentMethod(this.item.method);
 
-                if(this.billingEqualsShipping) {
+                if(this.useShippingAddressAsBillingAddress) {
                     selectBillingAddress(quote.shippingAddress());
                 }
 
                 return true;
-            },
+            }
         });
     }
 );

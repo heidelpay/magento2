@@ -66,7 +66,8 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
     /** @var string PaymentCode */
     const CODE = 'hgwabstract';
 
-    protected $useShippingAddressOnly = false;
+    /** @var boolean */
+    protected $useShippingAddressAsBillingAddress;
 
     /** @var boolean */
     protected $_usingBasket;
@@ -234,6 +235,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
         $this->_usingBasket             = false;
         $this->_usingActiveRedirect     = true;
         $this->_formBlockType           = HgwAbstract::class;
+        $this->useShippingAddressAsBillingAddress = false;
     }
 
     /**
@@ -803,7 +805,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
      * @param Quote $quote
      * @return bool
      */
-    protected function isEqualAddress($quote)
+    protected function billingAddressEqualsShippingAddress($quote)
     {
         $shippingAddress = $quote->getShippingAddress();
         $billingAddress = $quote->getBillingAddress();
@@ -822,17 +824,22 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
 
     /**
      * @param Quote $quote
+     * @throws CheckoutValidationException
      */
     public function validateEqualAddress($quote)
     {
-        $isEqualAddress = $this->isEqualAddress($quote);
+        $isEqualAddress = $this->billingAddressEqualsShippingAddress($quote);
         $this->_logger->debug('isEqualAddress: ' . ($isEqualAddress ? 'Yes' : 'NO'));
-        $quote->setBillingAddress($quote->getShippingAddress());
 
-        if (!$isEqualAddress && $this->useShippingAddressOnly) {
+        if (!$isEqualAddress) {
             throw new CheckoutValidationException(
                 __('Billing address should be same as shipping address.')
             );
         }
+    }
+
+    public function getUseShippingAddressAsBillingAddress()
+    {
+        return $this->useShippingAddressAsBillingAddress;
     }
 }

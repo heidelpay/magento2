@@ -37,7 +37,7 @@ class HeidelpayPayPalPaymentMethod extends HeidelpayAbstractPaymentMethod
         $this->_canCapturePartial = true;
         $this->_canRefund = true;
         $this->_canRefundInvoicePartial = true;
-        $this->useShippingAddressOnly   = true;
+        $this->useShippingAddressAsBillingAddress   = true;
     }
 
     /**

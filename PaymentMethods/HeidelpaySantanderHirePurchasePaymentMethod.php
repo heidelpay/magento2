@@ -45,7 +45,7 @@ class HeidelpaySantanderHirePurchasePaymentMethod extends HeidelpayAbstractPayme
         parent::setup();
         $this->_canAuthorize            = true;
         $this->_usingBasket             = true;
-        $this->useShippingAddressOnly   = true;
+        $this->useShippingAddressAsBillingAddress   = true;
     }
 
     /**
@@ -81,9 +81,6 @@ class HeidelpaySantanderHirePurchasePaymentMethod extends HeidelpayAbstractPayme
         // create the collection factory
         $paymentInfoCollection = $this->paymentInformationCollectionFactory->create();
 
-        $this->_logger->debug('ShippingAddress: ' . print_r($quote->getShippingAddress()->toString(), 1));
-        $this->_logger->debug('Setting Billing address: ' . print_r($quote->getBillingAddress()->toString(), 1));
-
         // load the payment information by store id, customer email address and payment method
         /** @var PaymentInformation $paymentInfo */
         $paymentInfo = $paymentInfoCollection->loadByCustomerInformation(
@@ -91,7 +88,6 @@ class HeidelpaySantanderHirePurchasePaymentMethod extends HeidelpayAbstractPayme
             $quote->getBillingAddress()->getEmail(),
             $quote->getPayment()->getMethod()
         );
-
 
         // set initial data for the request
         parent::getHeidelpayUrl($quote);
@@ -152,26 +148,5 @@ class HeidelpaySantanderHirePurchasePaymentMethod extends HeidelpayAbstractPayme
 
             $this->_paymentHelper->saveTransaction($invoice);
         }
-    }
-
-    /**
-     * @param Quote $quote
-     * @return bool
-     */
-    protected function isEqualAddress($quote)
-    {
-        $shippingAddress = $quote->getShippingAddress();
-        $billingAddress = $quote->getBillingAddress();
-
-        return ($billingAddress->getFirstname() === $shippingAddress->getFirstname()
-            && $billingAddress->getLastname() === $shippingAddress->getLastname()
-            && $billingAddress->getStreet() === $shippingAddress->getStreet()
-            && $billingAddress->getPostcode() === $shippingAddress->getPostcode()
-            && $billingAddress->getCity() === $shippingAddress->getCity()
-            && $billingAddress->getCountryId() === $shippingAddress->getCountryId()
-            && $billingAddress->getEmail() === $shippingAddress->getEmail()
-            && $billingAddress->getCompany() === $shippingAddress->getCompany()
-            && $billingAddress->getTelephone() === $shippingAddress->getTelephone()
-        );
     }
 }
