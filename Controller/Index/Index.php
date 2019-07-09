@@ -6,6 +6,7 @@ use Exception;
 use Heidelpay\Gateway\Controller\HgwAbstract;
 use Heidelpay\Gateway\Block\Hgw;
 use Heidelpay\Gateway\Helper\Payment as HeidelpayHelper;
+use Heidelpay\Gateway\PaymentMethods\Exceptions\CheckoutValidationException;
 use Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod;
 use Heidelpay\PhpBasketApi\Exception\InvalidBasketitemPositionException;
 use Heidelpay\PhpPaymentApi\Response as HeidelpayResponse;
@@ -91,15 +92,25 @@ class Index extends HgwAbstract
         $session = $this->getCheckout();
         $quote = $session->getQuote();
 
+        $errorMessage = __('An unexpected error occurred. Please contact us to get further information.');
         if (!$quote->getId()) {
-            $message = __('An unexpected error occurred. Please contact us to get further information.');
-            $this->messageManager->addErrorMessage($this->escaper->escapeHtml($message));
+            $this->messageManager->addErrorMessage($this->escaper->escapeHtml($errorMessage));
 
             return $this->_redirect('checkout/cart/', ['_secure' => true]);
         }
 
         /** @var HeidelpayAbstractPaymentMethod $payment */
         $payment = $quote->getPayment()->getMethodInstance();
+
+        try {
+            $payment->validateEqualAddress($quote);
+        } catch (CheckoutValidationException $exception) {
+            $this->messageManager->addErrorMessage($exception->getMessage());
+            return $this->_redirect('checkout/cart/', ['_secure' => true]);
+        } catch (\Exception $exception) {
+            $this->messageManager->addErrorMessage($errorMessage);
+            return $this->_redirect('checkout/cart/', ['_secure' => true]);
+        }
 
         // get the response object from the initial request.
         /** @var HeidelpayResponse $response */
@@ -123,11 +134,11 @@ class Index extends HgwAbstract
             return $resultPage;
         }
 
-        // get an error message for the given error code, and add it to the message container.
+        // get an error errorMessage for the given error code, and add it to the errorMessage container.
         $code = $response->getError()['code'];
-        $this->_logger->error('Heidelpay init error (' . $code . '): ' . $response->getError()['message']);
-        $message = $this->_paymentHelper->handleError($code);
-        $this->messageManager->addErrorMessage($this->escaper->escapeHtml($message));
+        $this->_logger->error('Heidelpay init error (' . $code . '): ' . $response->getError()['errorMessage']);
+        $errorMessage = $this->_paymentHelper->handleError($code);
+        $this->messageManager->addErrorMessage($this->escaper->escapeHtml($errorMessage));
 
         return $this->_redirect('checkout/cart/', ['_secure' => true]);
     }

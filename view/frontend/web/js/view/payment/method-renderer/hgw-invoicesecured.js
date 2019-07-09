@@ -27,7 +27,8 @@ define(
                 hgwDobMonth: '',
                 hgwDobDay: '',
                 hgwSalutation: '',
-                years: [null]
+                years: [null],
+                billingEqualsShipping: true
             },
 
             initialize: function () {

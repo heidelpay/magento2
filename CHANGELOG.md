@@ -15,6 +15,7 @@ incorrectly.
 
 ### Changed 
 - Refactored paymentMethods. Simplify configuration and reduce duplicate code in payment methods.
+- Compatibility with magento 2.2.9 and 2.3.2: Change address handling in checkout.
 
 ## 19.5.8
 ### Fixed

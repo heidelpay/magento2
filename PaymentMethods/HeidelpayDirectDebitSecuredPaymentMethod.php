@@ -37,6 +37,7 @@ class HeidelpayDirectDebitSecuredPaymentMethod extends HeidelpayAbstractPaymentM
         $this->_canAuthorize = true;
         $this->_canRefund = true;
         $this->_canRefundInvoicePartial = true;
+        $this->useShippingAddressOnly   = true;
     }
 
     /**

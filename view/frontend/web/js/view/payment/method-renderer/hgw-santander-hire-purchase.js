@@ -8,7 +8,7 @@ define(
         'Magento_Checkout/js/model/payment/additional-validators',
         'Magento_Customer/js/model/customer',
         'Magento_Checkout/js/model/quote',
-        'moment'
+        'moment',
     ],
     function ($, Component, placeOrderAction, urlBuilder, storage, additionalValidators, customer, quote, moment) {
         'use strict';
@@ -27,12 +27,15 @@ define(
                 hgwDobMonth: '',
                 hgwDobDay: '',
                 hgwSalutation: '',
-                years: [null]
+                years: [null],
+                billingEqualsShipping: true
             },
 
             initialize: function () {
                 this._super();
                 this.getAdditionalPaymentInformation();
+
+                //$('#checkbox_billing_equals_shipping').prop('checked', true);
 
                 // init years select menu
                 for (let i = (new Date().getFullYear() - 17); i >= new Date().getFullYear() - 120; i--) {
@@ -122,6 +125,7 @@ define(
              */
             validate: function() {
                 var form = $('#hgw-santander-hire-purchase');
+
 
                 return form.validation() && form.validation('isValid');
             }

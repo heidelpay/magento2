@@ -25,11 +25,6 @@
         <!-- ko foreach: getRegion('messages') -->
         <!-- ko template: getTemplate() --><!-- /ko -->
         <!--/ko-->
-        <div class="payment-method-billing-address">
-            <!-- ko foreach: $parent.getRegion(getBillingAddressFormName()) -->
-            <!-- ko template: getTemplate() --><!-- /ko -->
-            <!--/ko-->
-        </div>
         <img src="https://www.santander.de/media/bilder/logos/logos_privatkunden/logo.gif"/>
         <form id="hgw-santander-hire-purchase" class="form form-hgw-santander-hire-purchase" data-role="hgw-santander-hire-purchase">
                 <fieldset class="fieldset payment method" data-bind='attr: {id: "payment_form_" + getCode()}'>
@@ -156,7 +151,12 @@
                     </div>
                 </fieldset>
             </form>
-
+        <div class="payment-method-billing-address">
+            <!-- ko foreach: $parent.getRegion(getBillingAddressFormName()) -->
+            <!-- ko template: getTemplate() -->
+            <!-- /ko -->
+            <!--/ko-->
+        </div>
         <div class="checkout-agreements-block">
             <!-- ko foreach: $parent.getRegion('before-place-order') -->
             <!-- ko template: getTemplate() --><!-- /ko -->

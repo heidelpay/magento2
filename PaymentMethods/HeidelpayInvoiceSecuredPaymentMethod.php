@@ -42,6 +42,7 @@ class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMetho
         $this->_canRefundInvoicePartial = true;
         $this->_usingBasket             = true;
         $this->_formBlockType           = InvoiceSecured::class;
+        $this->useShippingAddressOnly   = true;
     }
 
     /**
@@ -61,6 +62,10 @@ class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMetho
             $quote->getBillingAddress()->getEmail(),
             $quote->getPayment()->getMethod()
         );
+
+        if($quote->getBillingAddress() !== $quote->getShippingAddress()) {
+            $quote->setBillingAddress($quote->getShippingAddress());
+        }
 
         // set initial data for the request
         parent::getHeidelpayUrl($quote);
