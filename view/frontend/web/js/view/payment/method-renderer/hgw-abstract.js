@@ -64,7 +64,7 @@ define(
              */
             getFullName: function() {
                 var billingAddress = quote.billingAddress();
-                var name = this.getNameFromAddress(billingAddress)
+                var name = this.getNameFromAddress(billingAddress);
 
                 // fallback, if name isn't set yet.
                 if (name === '') {
