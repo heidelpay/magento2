@@ -798,7 +798,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
         /** @var Transaction $heidelpayTransaction */
         $heidelpayTransaction = $collection->loadByTransactionId($transactionID);
 
-        return !$heidelpayTransaction === null && !$heidelpayTransaction->isEmpty();
+        return $heidelpayTransaction !== null && !$heidelpayTransaction->isEmpty();
     }
 
     /**
