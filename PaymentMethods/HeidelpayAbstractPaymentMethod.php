@@ -816,7 +816,6 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
             && $billingAddress->getPostcode() === $shippingAddress->getPostcode()
             && $billingAddress->getCity() === $shippingAddress->getCity()
             && $billingAddress->getCountryId() === $shippingAddress->getCountryId()
-            && $billingAddress->getEmail() === $shippingAddress->getEmail()
             && $billingAddress->getCompany() === $shippingAddress->getCompany()
             && $billingAddress->getTelephone() === $shippingAddress->getTelephone()
         );
