@@ -8,7 +8,6 @@ use Heidelpay\PhpPaymentApi\Constants\TransactionType;
 use Heidelpay\PhpPaymentApi\Constants\PaymentMethod;
 use Heidelpay\PhpPaymentApi\Constants\ProcessingResult;
 use Heidelpay\PhpPaymentApi\Constants\StatusCode;
-use Heidelpay\PhpPaymentApi\Constants\TransactionType;
 use Heidelpay\PhpPaymentApi\Response;
 use Magento\Customer\Model\Group;
 use Magento\Framework\App\Helper\AbstractHelper;
