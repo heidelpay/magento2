@@ -40,6 +40,7 @@ class HeidelpayPrepaymentPaymentMethod extends HeidelpayAbstractPaymentMethod
         $this->_canRefund = true;
         $this->_canRefundInvoicePartial = true;
         $this->_formBlockType = Prepayment::class;
+        $this->_infoBlockType = Prepayment::class;
     }
 
     /**
