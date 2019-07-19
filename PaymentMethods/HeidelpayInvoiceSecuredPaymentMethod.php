@@ -13,7 +13,7 @@
  */
 namespace Heidelpay\Gateway\PaymentMethods;
 
-use Heidelpay\Gateway\Block\Info\InvoiceSecured;
+use Heidelpay\Gateway\Block\Info\InvoiceSecured as InvoiceSecuredBlock;
 use Heidelpay\Gateway\Model\PaymentInformation;
 use Heidelpay\PhpPaymentApi\Exceptions\UndefinedTransactionModeException;
 use Heidelpay\PhpPaymentApi\PaymentMethods\InvoiceB2CSecuredPaymentMethod;
@@ -41,8 +41,8 @@ class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMetho
         $this->_canRefund               = true;
         $this->_canRefundInvoicePartial = true;
         $this->_usingBasket             = true;
-        $this->_formBlockType           = InvoiceSecured::class;
-        $this->_infoBlockType           = InvoiceSecured::class;
+        $this->_formBlockType           = InvoiceSecuredBlock::class;
+        $this->_infoBlockType           = InvoiceSecuredBlock::class;
         $this->useShippingAddressAsBillingAddress   = true;
     }
 
