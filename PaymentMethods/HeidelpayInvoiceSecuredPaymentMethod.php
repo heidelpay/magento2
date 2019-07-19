@@ -53,16 +53,7 @@ class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMetho
      */
     public function getHeidelpayUrl($quote, array $data = [])
     {
-        // create the collection factory
-        $paymentInfoCollection = $this->paymentInformationCollectionFactory->create();
-
-        // load the payment information by store id, customer email address and payment method
-        /** @var PaymentInformation $paymentInfo */
-        $paymentInfo = $paymentInfoCollection->loadByCustomerInformation(
-            $quote->getStoreId(),
-            $quote->getBillingAddress()->getEmail(),
-            $quote->getPayment()->getMethod()
-        );
+        $paymentInfo = $this->getPaymentInfo($quote);
 
         // set initial data for the request
         parent::getHeidelpayUrl($quote);

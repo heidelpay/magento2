@@ -103,18 +103,6 @@ class Index extends HgwAbstract
         /** @var HeidelpayAbstractPaymentMethod $payment */
         $payment = $quote->getPayment()->getMethodInstance();
 
-        if($payment->getUseShippingAddressAsBillingAddress()) {
-            try {
-                $payment->validateEqualAddress($quote);
-            } catch (CheckoutValidationException $exception) {
-                $this->messageManager->addErrorMessage($exception->getMessage());
-                return $this->_redirect('checkout/cart/', ['_secure' => true]);
-            } catch (\Exception $exception) {
-                $this->messageManager->addErrorMessage($errorMessage);
-                return $this->_redirect('checkout/cart/', ['_secure' => true]);
-            }
-        }
-
         // get the response object from the initial request.
         /** @var HeidelpayResponse $response */
         $response = $payment->getHeidelpayUrl($quote, $this->getRequest()->getParams());

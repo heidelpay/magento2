@@ -9,6 +9,7 @@ use Heidelpay\Gateway\Gateway\Config\HgwMainConfigInterface;
 use Heidelpay\Gateway\Helper\BasketHelper;
 use Heidelpay\Gateway\Helper\Payment as PaymentHelper;
 use Heidelpay\Gateway\Model\Config\Source\BookingMode;
+use Heidelpay\Gateway\Model\PaymentInformation;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
 use Heidelpay\Gateway\Model\ResourceModel\Transaction\Collection as TransactionCollection;
 use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
@@ -236,6 +237,28 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
         $this->_usingActiveRedirect     = true;
         $this->_formBlockType           = HgwAbstract::class;
         $this->useShippingAddressAsBillingAddress = false;
+    }
+
+    /**
+     * @return $this|HeidelpayAbstractPaymentMethod
+     * @throws CheckoutValidationException
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function validate()
+    {
+        parent::validate();
+        $paymentInfo = $this->getInfoInstance();
+        /** @var Quote $quote */
+        $quote = $paymentInfo->getQuote();
+
+        if($quote === null || $quote->isEmpty() || !($quote->getPayment()->getMethodInstance() instanceof HeidelpayAbstractPaymentMethod)) {
+            return $this;
+        }
+
+        if($this->useShippingAddressAsBillingAddress) {
+            $this->validateEqualAddress($quote);
+        }
+        return $this;
     }
 
     /**
@@ -840,5 +863,24 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
     public function getUseShippingAddressAsBillingAddress()
     {
         return $this->useShippingAddressAsBillingAddress;
+    }
+
+    /**
+     * @param $quote
+     * @return PaymentInformation
+     */
+    protected function getPaymentInfo($quote)
+    {
+        // create the collection factory
+        $paymentInfoCollection = $this->paymentInformationCollectionFactory->create();
+
+        // load the payment information by store id, customer email address and payment method
+        /** @var PaymentInformation $paymentInfo */
+        $paymentInfo = $paymentInfoCollection->loadByCustomerInformation(
+            $quote->getStoreId(),
+            $quote->getBillingAddress()->getEmail(),
+            $quote->getPayment()->getMethod()
+        );
+        return $paymentInfo;
     }
 }
