@@ -242,7 +242,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
     /**
      * @return $this|HeidelpayAbstractPaymentMethod
      * @throws CheckoutValidationException
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function validate()
     {
@@ -251,7 +251,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
         /** @var Quote $quote */
         $quote = $paymentInfo->getQuote();
 
-        if($quote === null || $quote->isEmpty() || !($quote->getPayment()->getMethodInstance() instanceof HeidelpayAbstractPaymentMethod)) {
+        if($quote === null || $quote->isEmpty()) {
             return $this;
         }
 
@@ -866,15 +866,15 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
     }
 
     /**
-     * @param $quote
+     * Load the payment information by store id, customer email address and payment method of the quote.
+     * @param Quote $quote
      * @return PaymentInformation
      */
-    protected function getPaymentInfo($quote)
+    protected function getPaymentInfo(Quote $quote)
     {
-        // create the collection factory
+        // create the collection
         $paymentInfoCollection = $this->paymentInformationCollectionFactory->create();
 
-        // load the payment information by store id, customer email address and payment method
         /** @var PaymentInformation $paymentInfo */
         $paymentInfo = $paymentInfoCollection->loadByCustomerInformation(
             $quote->getStoreId(),

@@ -10,7 +10,7 @@ define(
         'Magento_Checkout/js/action/select-billing-address',
         'moment'
     ],
-    function ($, Component, placeOrderAction, additionalValidators, selectPaymentMethodAction, checkoutData, quote, selectBillingAddress) {
+    function ($, Component, placeOrderAction, additionalValidators, selectPaymentMethodAction, checkoutData, quote, selectBillingAddress, moment) {
         'use strict';
 
         // add IBAN validator
@@ -23,6 +23,7 @@ define(
 
         $.validator.addMethod(
             'valid-date', function (date){
+                console.log(date);
                 return !(date == false);
             }, $.mage.__('Invalid date.')
         );
@@ -50,7 +51,11 @@ define(
 
             defaults: {
                 template: 'Heidelpay_Gateway/payment/heidelpay-form',
-                useShippingAddressAsBillingAddress: false
+                useShippingAddressAsBillingAddress: false,
+                hgwDobYear: '',
+                hgwDobMonth: '',
+                hgwDobDay: '',
+                hgwSalutation: ''
             },
 
             /**
@@ -76,7 +81,19 @@ define(
              *
              * This method needs to be overloaded by the payment renderer component, if needed.
              */
-            getBirthdate: function() {},
+            getBirthdate: function() {
+                var day = this.hgwDobDay();
+                var year = this.hgwDobYear();
+                var month = this.hgwDobMonth();
+
+                if (day === null || year === null || day === null) {return null;}
+                var date = new Date(year, month, day);
+
+                // checks whether created date is same as input and return null if not.
+                if(!(Boolean(+date) && date.getDate() == day)) {return null;}
+                console.log('date is valid.');
+                return moment(date).format('YYYY-MM-DD');
+            },
 
             /**
              * Function to receive the customer's full name.
