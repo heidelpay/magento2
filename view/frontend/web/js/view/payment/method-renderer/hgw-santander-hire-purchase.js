@@ -108,14 +108,15 @@ define(
             /**
              * Returns the birthdate in ISO 8601 format.
              *
-             * @returns {string}
+             * @returns {string|null}
              */
             getBirthdate: function () {
                 var day = this.hgwDobDay();
                 var date = new Date(this.hgwDobYear(), this.hgwDobMonth(), day);
 
                 // checks whether created date is same as input and return null if not.
-                return !(Boolean(+date) && date.getDate() == day) ? null : moment(date).format('YYYY-MM-DD');
+                if(!(Boolean(+date) && date.getDate() == day)) {return null;}
+                return moment(date).format('YYYY-MM-DD');
             },
 
             /**

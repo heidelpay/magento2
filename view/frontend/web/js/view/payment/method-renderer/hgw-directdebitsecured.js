@@ -128,7 +128,7 @@ define(
             /**
              * Returns the birthdate in ISO 8601 format.
              *
-             * @returns {string}
+             * @returns {string|null}
              */
             getBirthdate: function () {
                 var day = this.hgwDobDay();
