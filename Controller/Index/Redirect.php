@@ -109,8 +109,7 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
         $quoteId = $session->getQuoteId();
 
         if (empty($quoteId)) {
-            $this->_logger->warning('Heidelpay - Redirect: Called with empty quoteId');
-
+            $this->_logger->error('Heidelpay - Redirect: Called with empty quoteId');
             return $this->_redirect('checkout/cart/', ['_secure' => true]);
         }
 
