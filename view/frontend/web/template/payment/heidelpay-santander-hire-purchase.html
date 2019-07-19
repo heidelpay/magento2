@@ -136,7 +136,7 @@
                                         </label>
                                         <select name="payment[hgw_birthdate_year]" id="hgwsanhp_birthdate_year"
                                                 data-bind="attr: {title: $t('Year')}, value: hgwDobYear, options: years"
-                                                data-validate="{required: true}"
+                                                data-validate="{'required: true, valid-date': true, 'is-customer-18': true}"
                                         >
                                         </select>
                                     </div>

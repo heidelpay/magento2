@@ -8,7 +8,7 @@ define(
         'Magento_Checkout/js/model/payment/additional-validators',
         'Magento_Customer/js/model/customer',
         'Magento_Checkout/js/model/quote',
-        'moment',
+        'moment'
     ],
     function ($, Component, placeOrderAction, urlBuilder, storage, additionalValidators, customer, quote, moment) {
         'use strict';
@@ -111,9 +111,11 @@ define(
              * @returns {string}
              */
             getBirthdate: function () {
-                return moment(
-                    new Date(this.hgwDobYear(), this.hgwDobMonth(), this.hgwDobDay())
-                ).format('YYYY-MM-DD');
+                var day = this.hgwDobDay();
+                var date = new Date(this.hgwDobYear(), this.hgwDobMonth(), day);
+
+                // checks whether created date is same as input and return null if not.
+                return !(Boolean(+date) && date.getDate() == day) ? null : moment(date).format('YYYY-MM-DD');
             },
 
             /**
@@ -123,7 +125,6 @@ define(
              */
             validate: function() {
                 var form = $('#hgw-santander-hire-purchase');
-
 
                 return form.validation() && form.validation('isValid');
             }

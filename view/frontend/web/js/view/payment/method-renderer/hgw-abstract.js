@@ -21,6 +21,26 @@ define(
             }, $.mage.__('The given IBAN is invalid.')
         );
 
+        $.validator.addMethod(
+            'valid-date', function (date){
+                console.log(date);
+                return !(date == false);
+            }, $.mage.__('Invalid date.')
+        );
+        $.validator.addMethod(
+            'is-customer-18', function (date){
+                var inputDate = new Date(date);
+                var currentDate = new Date();
+                var is18 = new Date(currentDate-inputDate).getFullYear() - new Date(0).getFullYear() >= 18;
+
+                return is18;
+            }, $.mage.__('You have to be at least 18.')
+        );
+
+        $.validator.setDefaults({
+            ignore: ''
+        });
+
         return Component.extend({
 
             /**

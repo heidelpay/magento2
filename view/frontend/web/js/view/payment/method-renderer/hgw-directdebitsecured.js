@@ -131,9 +131,12 @@ define(
              * @returns {string}
              */
             getBirthdate: function () {
-                return moment(
-                    new Date(this.hgwDobYear(), this.hgwDobMonth(), this.hgwDobDay())
-                ).format('YYYY-MM-DD');
+                var day = this.hgwDobDay();
+                var date = new Date(this.hgwDobYear(), this.hgwDobMonth(), day);
+
+                // checks whether created date is same as input and return null if not.
+                if(!(Boolean(+date) && date.getDate() == day)) {return null;}
+                return moment(date).format('YYYY-MM-DD');
             },
 
             validate: function () {

@@ -59,6 +59,8 @@
 "Year","Jahr"
 
 "The given IBAN is invalid.","Die angegebene IBAN ist ungültig."
+"The given date is invalid.","Das angegebene Datum ist ungültig"
+"You have to be at least 18 years old.","Die Verwendung der Zahlart ist erst ab 18 Jahren möglich"
 
 "January","Januar"
 "February","Februar"
