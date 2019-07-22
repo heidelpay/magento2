@@ -59,6 +59,8 @@
 "Year","Year"
 
 "The given IBAN is invalid.","The given IBAN is invalid."
+"The given date is invalid.","The given date is invalid."
+"You have to be at least 18 years old.","You have to be at least 18 years old."
 
 "January","January"
 "February","February"

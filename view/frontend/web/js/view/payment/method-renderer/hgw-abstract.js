@@ -10,7 +10,7 @@ define(
         'Magento_Checkout/js/action/select-billing-address',
         'moment'
     ],
-    function ($, Component, placeOrderAction, additionalValidators, selectPaymentMethodAction, checkoutData, quote, selectBillingAddress) {
+    function ($, Component, placeOrderAction, additionalValidators, selectPaymentMethodAction, checkoutData, quote, selectBillingAddress, moment) {
         'use strict';
 
         // add IBAN validator
@@ -20,6 +20,25 @@ define(
                 return (pattern.test(value));
             }, $.mage.__('The given IBAN is invalid.')
         );
+
+        $.validator.addMethod(
+            'valid-date', function (date){
+                return (date);
+            }, $.mage.__('Invalid date.')
+        );
+        $.validator.addMethod(
+            'is-customer-18', function (date){
+                var inputDate = new Date(date);
+                var currentDate = new Date();
+                var is18 = new Date(currentDate-inputDate).getFullYear() - new Date(0).getFullYear() >= 18;
+
+                return is18;
+            }, $.mage.__('You have to be at least 18.')
+        );
+
+        $.validator.setDefaults({
+            ignore: ''
+        });
 
         return Component.extend({
 
@@ -31,7 +50,11 @@ define(
 
             defaults: {
                 template: 'Heidelpay_Gateway/payment/heidelpay-form',
-                useShippingAddressAsBillingAddress: false
+                useShippingAddressAsBillingAddress: false,
+                hgwDobYear: '',
+                hgwDobMonth: '',
+                hgwDobDay: '',
+                hgwSalutation: ''
             },
 
             /**
@@ -57,7 +80,14 @@ define(
              *
              * This method needs to be overloaded by the payment renderer component, if needed.
              */
-            getBirthdate: function() {},
+            getBirthdate: function() {
+                var day = this.hgwDobDay();
+                var date = new Date(this.hgwDobYear(), this.hgwDobMonth(), day);
+
+                // checks whether created date is same as input and return null if not.
+                if(!(Boolean(+date) && date.getDate() == day)) {return null;}
+                return moment(date).format('YYYY-MM-DD');
+            },
 
             /**
              * Function to receive the customer's full name.
