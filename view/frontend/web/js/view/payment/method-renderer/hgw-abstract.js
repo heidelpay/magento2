@@ -23,7 +23,7 @@ define(
 
         $.validator.addMethod(
             'valid-date', function (date){
-                return !(date == false);
+                return (date);
             }, $.mage.__('Invalid date.')
         );
         $.validator.addMethod(
