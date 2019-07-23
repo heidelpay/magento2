@@ -833,20 +833,28 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
         $shippingAddress = $quote->getShippingAddress();
         $billingAddress = $quote->getBillingAddress();
 
+        $billingCompany = $billingAddress->getCompany();
+        $shippingCompany = $shippingAddress->getCompany();
+
+        //Address should also be valid if both companies are empty
+        $equalCompany = ($billingCompany === $shippingCompany
+            || (empty($billingCompany)&& empty($shippingCompany))
+        );
+
         return ($billingAddress->getFirstname() === $shippingAddress->getFirstname()
             && $billingAddress->getLastname() === $shippingAddress->getLastname()
             && $billingAddress->getStreet() === $shippingAddress->getStreet()
             && $billingAddress->getPostcode() === $shippingAddress->getPostcode()
             && $billingAddress->getCity() === $shippingAddress->getCity()
             && $billingAddress->getCountryId() === $shippingAddress->getCountryId()
-            && $billingAddress->getCompany() === $shippingAddress->getCompany()
+            && $equalCompany
             && $billingAddress->getTelephone() === $shippingAddress->getTelephone()
         );
     }
 
     /**
      * @param Quote $quote
-     * @throws CheckoutValidationException
+     * @throws LocalizedException
      */
     public function validateEqualAddress($quote)
     {
@@ -854,7 +862,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
         $this->_logger->debug('isEqualAddress: ' . ($isEqualAddress ? 'Yes' : 'NO'));
 
         if (!$isEqualAddress) {
-            throw new CheckoutValidationException(
+            throw new LocalizedException(
                 __('Billing address should be same as shipping address.')
             );
         }
