@@ -3,15 +3,17 @@
 ## Versioning
 
 This project does not follow a versioning standard. Versions are crafted after the dates; for example, the version 17.7.25 was released on July, 25th in 2017
-## X.X.X
+## 19.7.29
 
 ### Added
 - Santander hire purchase payment method.
+- Check whether customer is already 18 if payment method requires it.
 
 ### Fixed
 - A problem where a transaction was processed a second time via push when using "sofort". That caused the paid amount to be displayed
 incorrectly.
 - A problem which led to a missing error message for the customer.
+- An issue with basket calculation when order has a discount.
 
 ### Changed 
 - Refactored paymentMethods. Simplify configuration and reduce duplicate code in payment methods.
