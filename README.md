@@ -22,6 +22,7 @@ Currently supported payment methods are:
 * Invoice (Secured) (B2C)
 * giropay
 * iDeal
+* Santander Hire Purchase
 
 For more information please visit -http://dev.heidelpay.com/magento2/
 

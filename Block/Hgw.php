@@ -1,9 +1,10 @@
 <?php
 namespace Heidelpay\Gateway\Block;
 
+use Magento\Framework\View\Element\Template;
+
 /**
  * Heidelpay Gateway Block
- *
  *
  * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
  * @copyright Copyright © 2016-present heidelpay GmbH. All rights reserved.
@@ -15,23 +16,10 @@ namespace Heidelpay\Gateway\Block;
  * @package  Heidelpay
  * @subpackage Magento2
  * @category Magento2
+ *
+ * @method setHgwUrl(string $url)
+ * @method getHgwUrl()
  */
-class Hgw extends \Magento\Framework\View\Element\Template
+class Hgw extends Template
 {
-    protected $_hgwUrl;
-    
-    public function _prepareLayout()
-    {
-        return parent::_prepareLayout();
-    }
-    
-    /*
-    protected function setHgwUrl($url) {
-        $this->_hgwUrl = $url;
-    }
-
-    protected function getHgwUrl() {
-        return $this->_hgwUrl;
-    }
-    */
 }

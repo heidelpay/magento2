@@ -132,6 +132,18 @@
                 <max_order_total>0</max_order_total>
                 <model>Heidelpay\Gateway\PaymentMethods\HeidelpayIDealPaymentMethod</model>
             </hgwidl>
+            <hgwsanhp>
+                <active>0</active>
+                <payment_action>authorize</payment_action>
+                <title><![CDATA[Santander Hire Purchase]]></title>
+                <channel>31HA07BC81302E8725994B52D85F062E</channel>
+                <allowspecific>1</allowspecific>
+                <recognition>never</recognition>
+                <specificcountry>DE</specificcountry>
+                <min_order_total>0</min_order_total>
+                <max_order_total>0</max_order_total>
+                <model>Heidelpay\Gateway\PaymentMethods\HeidelpaySantanderHirePurchasePaymentMethod</model>
+            </hgwsanhp>
         </payment>
     </default>
 </config>

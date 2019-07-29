@@ -7,9 +7,10 @@ define(
         'Magento_Checkout/js/action/select-payment-method',
         'Magento_Checkout/js/checkout-data',
         'Magento_Checkout/js/model/quote',
+        'Magento_Checkout/js/action/select-billing-address',
         'moment'
     ],
-    function ($, Component, placeOrderAction, additionalValidators, selectPaymentMethodAction, checkoutData, quote) {
+    function ($, Component, placeOrderAction, additionalValidators, selectPaymentMethodAction, checkoutData, quote, selectBillingAddress, moment) {
         'use strict';
 
         // add IBAN validator
@@ -20,6 +21,25 @@ define(
             }, $.mage.__('The given IBAN is invalid.')
         );
 
+        $.validator.addMethod(
+            'valid-date', function (date){
+                return (date);
+            }, $.mage.__('Invalid date.')
+        );
+        $.validator.addMethod(
+            'is-customer-18', function (date){
+                var inputDate = new Date(date);
+                var currentDate = new Date();
+                var is18 = new Date(currentDate-inputDate).getFullYear() - new Date(0).getFullYear() >= 18;
+
+                return is18;
+            }, $.mage.__('You have to be at least 18.')
+        );
+
+        $.validator.setDefaults({
+            ignore: ''
+        });
+
         return Component.extend({
 
             /**
@@ -29,11 +49,16 @@ define(
             savesAdditionalData: false,
 
             defaults: {
-                template: 'Heidelpay_Gateway/payment/heidelpay-form'
+                template: 'Heidelpay_Gateway/payment/heidelpay-form',
+                useShippingAddressAsBillingAddress: false,
+                hgwDobYear: '',
+                hgwDobMonth: '',
+                hgwDobDay: '',
+                hgwSalutation: ''
             },
 
             /**
-             * Indicates if the payment method is storing addtional
+             * Indicates if the payment method is storing additional
              * information for the payment.
              *
              * @returns {boolean}
@@ -55,27 +80,21 @@ define(
              *
              * This method needs to be overloaded by the payment renderer component, if needed.
              */
-            getBirthdate: function() {},
+            getBirthdate: function() {
+                var day = this.hgwDobDay();
+                var date = new Date(this.hgwDobYear(), this.hgwDobMonth(), day);
+
+                // checks whether created date is same as input and return null if not.
+                if(!(Boolean(+date) && date.getDate() == day)) {return null;}
+                return moment(date).format('YYYY-MM-DD');
+            },
 
             /**
              * Function to receive the customer's full name.
              */
             getFullName: function() {
-                var name = '', billingAddress = quote.billingAddress();
-
-                if (billingAddress !== null) {
-                    if (typeof billingAddress.firstname !== 'undefined' && billingAddress.firstname !== null) {
-                        name += billingAddress.firstname;
-                    }
-
-                    if (typeof billingAddress.middlename !== 'undefined' && billingAddress.middlename !== null) {
-                        name += ' ' + billingAddress.middlename;
-                    }
-
-                    if (typeof billingAddress.lastname !== 'undefined' && billingAddress.lastname !== null) {
-                        name += ' ' + billingAddress.lastname;
-                    }
-                }
+                var billingAddress = quote.billingAddress();
+                var name = this.getNameFromAddress(billingAddress);
 
                 // fallback, if name isn't set yet.
                 if (name === '') {
@@ -96,6 +115,25 @@ define(
                     }
                 }
 
+                return name;
+            },
+
+            getNameFromAddress: function(address) {
+                var name = '';
+
+                if (address !== null) {
+                    if (typeof address.firstname !== 'undefined' && address.firstname !== null) {
+                        name += address.firstname;
+                    }
+
+                    if (typeof address.middlename !== 'undefined' && address.middlename !== null) {
+                        name += ' ' + address.middlename;
+                    }
+
+                    if (typeof address.lastname !== 'undefined' && address.lastname !== null) {
+                        name += ' ' + address.lastname;
+                    }
+                }
                 return name;
             },
 
@@ -141,6 +179,10 @@ define(
 
                 selectPaymentMethodAction(this.getData());
                 checkoutData.setSelectedPaymentMethod(this.item.method);
+
+                if(this.useShippingAddressAsBillingAddress) {
+                    selectBillingAddress(quote.shippingAddress());
+                }
 
                 return true;
             }

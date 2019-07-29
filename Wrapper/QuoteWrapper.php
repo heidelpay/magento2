@@ -12,6 +12,7 @@
 namespace Heidelpay\Gateway\Wrapper;
 
 use Magento\Quote\Model\Quote;
+use Magento\Framework\App\ObjectManager;
 
 class QuoteWrapper extends BaseWrapper
 {
@@ -85,7 +86,9 @@ class QuoteWrapper extends BaseWrapper
     public function getSubtotalWithDiscountAndShipping()
     {
         // SubtotalWithDiscount already contains the ShippingDiscount but not the shipping itself.
-        return $this->getSubtotalWithDiscount() + $this->getShippingAmount();
+        return $this->getSubtotalWithDiscount()
+            + $this->getShippingAmount()
+            + $this->getDiscountTaxCompensationAmount();
     }
 
     /**
@@ -104,7 +107,18 @@ class QuoteWrapper extends BaseWrapper
      */
     public function getTotalDiscountAmount()
     {
-        return (int)round(bcmul($this->getTotalDiscountAmountRaw(), 100));
+        /** @var string $discountContainsTax */
+        $discountContainsTax = $this->quote->getStore()->getConfig('tax/calculation/discount_tax');
+        $totalDiscountTaxCompensation = 0;
+        if ($discountContainsTax === '0') {
+            foreach ($this->quote->getAllVisibleItems() as $item) {
+                /** @var ItemWrapper $itemTotals */
+                $itemTotals = ObjectManager::getInstance()->create(ItemWrapper::class, ['item' => $item]);
+                $totalDiscountTaxCompensation += $itemTotals->getDiscountTaxCompensationAmount();
+            }
+        }
+
+        return $this->normalizeValue($this->getTotalDiscountAmountRaw()) + $totalDiscountTaxCompensation;
     }
 
     /**
@@ -268,6 +282,14 @@ class QuoteWrapper extends BaseWrapper
         return $this->fetchNormalizeValue(self::FIELD_TAX_AMOUNT, true);
     }
 
+    /**
+     * @return int
+     */
+    public function getDiscountTaxCompensationAmount()
+    {
+        return $this->normalizeValue($this->quote->getShippingAddress()->getDiscountTaxCompensationAmount());
+    }
+
     //<editor-fold desc="Helpers">
 
     /**
@@ -280,7 +302,7 @@ class QuoteWrapper extends BaseWrapper
         $value = $this->totals[$field];
 
         if (!$raw) {
-            $value = (int)round(bcmul($value, 100));
+            $value = $this->normalizeValue($value);
         }
 
         return $value;

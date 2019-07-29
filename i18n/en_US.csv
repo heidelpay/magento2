@@ -11,11 +11,21 @@
 "HGWIV","<img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAMxJREFUeNpiZBXzZSAFMDGQCFhwSXBysAX6WPl7WhgbqMhKi3789E1MLRK7BiYmxvQEr5qSCFFh/rMX7qzbcuzOveePnrzCboOgAM+KuRWONnor1h1s6V1x685TfE4Cqt63sR3oAP/opu17zhDwA9AlQLOBqh18y69cf0jY00B3A10CNBuPakSwAsME6MuV6w/hcgm6BmAIAsOktXclsREHDO/zl+7euP2YWA3A2Dl0/AoJSQMYOPcfviBBAzDm7z98SYwGRpqnVoAAAwCge0cwGsIpTQAAAABJRU5ErkJggg==' style='margin-right: 5px'/>Invoice"
 "HGWIVS","<img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAMxJREFUeNpiZBXzZSAFMDGQCFhwSXBysAX6WPl7WhgbqMhKi3789E1MLRK7BiYmxvQEr5qSCFFh/rMX7qzbcuzOveePnrzCboOgAM+KuRWONnor1h1s6V1x685TfE4Cqt63sR3oAP/opu17zhDwA9AlQLOBqh18y69cf0jY00B3A10CNBuPakSwAsME6MuV6w/hcgm6BmAIAsOktXclsREHDO/zl+7euP2YWA3A2Dl0/AoJSQMYOPcfviBBAzDm7z98SYwGRpqnVoAAAwCge0cwGsIpTQAAAABJRU5ErkJggg==' style='margin-right: 5px'/>Invoice Secured (B2C)"
 "HGWIDL","<img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAMxJREFUeNpiZBXzZSAFMDGQCFhwSXBysAX6WPl7WhgbqMhKi3789E1MLRK7BiYmxvQEr5qSCFFh/rMX7qzbcuzOveePnrzCboOgAM+KuRWONnor1h1s6V1x685TfE4Cqt63sR3oAP/opu17zhDwA9AlQLOBqh18y69cf0jY00B3A10CNBuPakSwAsME6MuV6w/hcgm6BmAIAsOktXclsREHDO/zl+7euP2YWA3A2Dl0/AoJSQMYOPcfviBBAzDm7z98SYwGRpqnVoAAAwCge0cwGsIpTQAAAABJRU5ErkJggg==' style='margin-right: 5px'/>iDeal"
+"HGWSANHP","<img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAMxJREFUeNpiZBXzZSAFMDGQCFhwSXBysAX6WPl7WhgbqMhKi3789E1MLRK7BiYmxvQEr5qSCFFh/rMX7qzbcuzOveePnrzCboOgAM+KuRWONnor1h1s6V1x685TfE4Cqt63sR3oAP/opu17zhDwA9AlQLOBqh18y69cf0jY00B3A10CNBuPakSwAsME6MuV6w/hcgm6BmAIAsOktXclsREHDO/zl+7euP2YWA3A2Dl0/AoJSQMYOPcfviBBAzDm7z98SYwGRpqnVoAAAwCge0cwGsIpTQAAAABJRU5ErkJggg==' style='margin-right: 5px'/>Santander Hire Purchase"
 
 "HGW_ABOUT_US","heidelpay GmbH, shortly: heidelpay, is a leading payment institution for online payment methods authorized and regulated by BaFin, which offers the full range of services for an electronic payment processing from one single source: from processing of transactions and providing of acceptance contracts to monitoring and risk management.<br/><br/>For more information please visit <a href='https://www.heidelpay.de/inc/magento?lead=Magento2' target='_blank'>www.heidelpay.de</a>"
 
+"Security Sender","Sender-ID"
+"User Login","Login"
+"User Password","Password"
+"Sandbox Mode","Sandbox"
 "If this is enabled the heidelpay sandbox will be used. Otherwise the real payment system will be used.","If this is enabled the heidelpay sandbox will be used. Otherwise the real payment system will be used."
+"Enabled","Enabled"
+"Channel","Channel-ID"
+"Insert 0 to disable limit.","Insert 0 to disable limit."
+"If 'Debit' is enabled the card will be charged immediately. Otherwise the amount will first be authorised and charged at order creation.","If 'Debit' is enabled the card will be charged immediately. Otherwise the amount will first be authorised and charged at order creation."
 "An unexpected error occurred. Please contact us to get further information.","An unexpected error occurred. Please contact us to get further information."
+"Billing address should be same as shipping address.","Billing address should be same as shipping address."
 
 "Never","Never"
 "Same Shipping Address","Same Shipping Address"
@@ -33,6 +43,7 @@
 "Mangirkart","MangirKart"
 "MasterPass","MasterPass"
 "Sofort.","Sofort."
+"Santander Hire Purchase","Santander Hire Purchase"
 
 "IBAN","IBAN"
 "BIC","BIC"
@@ -48,6 +59,8 @@
 "Year","Year"
 
 "The given IBAN is invalid.","The given IBAN is invalid."
+"The given date is invalid.","The given date is invalid."
+"You have to be at least 18 years old.","You have to be at least 18 years old."
 
 "January","January"
 "February","February"
@@ -67,12 +80,17 @@
 
 "Please confirm your payment:","Please confirm your payment:"
 "pay now","pay now"
-"Place Order","Place Order"
+"Select installment plan","Select installment plan"
+"This is a required field.","This is a required field."
 "Payment information","Payment information"
 "Reference","Reference"
+"Place Order","Place Order"
 "Please transfer the amount of <strong>%1 %2</strong> to the following account<br /><br />Holder: %3<br/>IBAN: %4<br/>BIC: %5<br/><br/><i>Please use only this identification number as the descriptor :</i><br/><strong>%6</strong>","Please transfer the amount of <strong>%1 %2</strong> to the following account<br /><br />Holder: %3<br/>IBAN: %4<br/>BIC: %5<br/><br/><i>Please use only this identification number as the descriptor :</i><br/><strong>%6</strong>"
 "Please transfer the amount of <strong>%1 %2</strong> to the following account after your order has arrived:<br /><br />Holder: %3<br/>IBAN: %4<br/>BIC: %5<br/><br/><i>Please use only this identification number as the descriptor :</i><br/><strong>%6</strong>","Please transfer the amount of <strong>%1 %2</strong> to the following account after your order has arrived:<br /><br />Holder: %3<br/>IBAN: %4<br/>BIC: %5<br/><br/><i>Please use only this identification number as the descriptor :</i><br/><strong>%6</strong>"
 "The amount of <strong>%1 %2</strong> will be debited from this account within the next days:<br /><br />IBAN: %3<br /><br /><i>The booking contains the mandate reference ID: %4<br >and the creditor identifier: %5</i><br /><br />Please ensure that there will be sufficient funds on the corresponding account.", "The amount of <strong>%1 %2</strong> will be debited from this account within the next days:<br /><br />IBAN: %3<br /><br /><i>The booking contains the mandate reference ID: %4<br >and the creditor identifier: %5</i><br /><br />Please ensure that there will be sufficient funds on the corresponding account."
 
 "Heidelpay Error at sending Finalize Request. The Shipment was not created.","Heidelpay Error at sending Finalize Request. The Shipment was not created."
 "Shipping Notification has been sent to Heidelpay.","Shipping Notification has been sent to Heidelpay."
+
+"Hire Purchase Precontract","Precontract:"
+"Hire Purchase Precontract download","Download precontract here"

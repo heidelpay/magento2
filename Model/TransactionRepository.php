@@ -1,105 +1,173 @@
 <?php
-
-namespace Heidelpay\Gateway\Model;
-
-use Magento\Framework\Exception\InputException;
-use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Framework\Exception\StateException;
-use Magento\Framework\Exception\ValidatorException;
-use Magento\Framework\Exception\CouldNotSaveException;
-
 /**
- * Transaction Repository
+ * Handles transaction objects.
  *
  * @license Use of this software requires acceptance of the License Agreement. See LICENSE file.
- * @copyright Copyright © 2016-present heidelpay GmbH. All rights reserved.
+ * @copyright Copyright © 2019-present heidelpay GmbH. All rights reserved.
  *
  * @link http://dev.heidelpay.com/magento2
  *
- * @author Stephano Vogel
+ * @author Simon Gabriel
  *
- * @package heidelpay
- * @subpackage magento2
- * @category magento2
+ * @package heidelpay/magento2
  */
-class TransactionRepository
+namespace Heidelpay\Gateway\Model;
+
+use Exception;
+use Heidelpay\Gateway\Api\Data\TransactionSearchResultInterface;
+use Heidelpay\Gateway\Api\Data\TransactionSearchResultInterfaceFactory;
+use Heidelpay\Gateway\Api\TransactionRepositoryInterface;
+use Heidelpay\Gateway\Model\ResourceModel\Transaction as ResourceTransaction;
+use Magento\Framework\Api\SearchCriteriaInterface;
+use Magento\Framework\Api\SortOrder;
+use Magento\Framework\Exception\CouldNotDeleteException;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as TransactionCollectionFactory;
+use Heidelpay\Gateway\Model\ResourceModel\Transaction\Collection;
+
+class TransactionRepository implements TransactionRepositoryInterface
 {
-    /**
-     * @var Transaction[]
-     */
-    protected $instances = [];
+    /** @var TransactionFactory */
+    private $transactionFactory;
+
+    /** @var TransactionCollectionFactory */
+    private $transactionCollectionFactory;
+
+    /** @var TransactionSearchResultInterfaceFactory */
+    private $searchResultFactory;
+
+    /** @var ResourceTransaction */
+    private $resource;
 
     /**
-     * @var Transaction[]
+     * TransactionRepository constructor.
+     *
+     * @param TransactionFactory $transactionFactory
+     * @param TransactionCollectionFactory $transactionCollectionFactory
+     * @param TransactionSearchResultInterfaceFactory $transactionSearchResultInterfaceFactory
+     * @param ResourceTransaction $resource
      */
-    protected $instancesByQuoteId = [];
-
-    /**
-     * @var \Heidelpay\Gateway\Model\ResourceModel\Transaction
-     */
-    protected $resourceModel;
-
-    /**
-     * @var TransactionFactory
-     */
-    protected $transactionFactory;
-
-
     public function __construct(
         TransactionFactory $transactionFactory,
-        ResourceModel\Transaction $resourceModel
+        TransactionCollectionFactory $transactionCollectionFactory,
+        TransactionSearchResultInterfaceFactory $transactionSearchResultInterfaceFactory,
+        ResourceTransaction $resource
     ) {
-        $this->transactionFactory = $transactionFactory;
-        $this->resourceModel = $resourceModel;
+        $this->transactionFactory           = $transactionFactory;
+        $this->transactionCollectionFactory = $transactionCollectionFactory;
+        $this->searchResultFactory          = $transactionSearchResultInterfaceFactory;
+        $this->resource = $resource;
     }
 
-
-    public function get($id, $forceReload = false)
+    /**
+     * {@inheritDoc}
+     */
+    public function save(Transaction $transaction)
     {
-        $cacheKey = $this->getCacheKey([$id]);
-        if (!isset($this->instances[$id][$cacheKey]) || $forceReload) {
-            $transaction = $this->transactionFactory->create();
+        $this->resource->save($transaction);
+        return $transaction;
+    }
 
-            if (!$id) {
-                throw new NoSuchEntityException(__('Requested product doesn\'t exist'));
-            }
-
-            $transaction->load($id);
-            $this->instances[$id][$cacheKey] = $transaction;
-            $this->instancesByQuoteId[$transaction->getTransactionId()][$cacheKey] = $transaction;
+    /**
+     * {@inheritDoc}
+     */
+    public function getById($id)
+    {
+        /** @var Transaction $transaction */
+        $transaction = $this->transactionFactory->create();
+        $this->resource->load($transaction, $id);
+        if (! $transaction->getId()) {
+            throw new NoSuchEntityException(__('Unable to find transaction with ID "%1"', $id));
         }
-
-        return $this->instances[$id][$cacheKey];
+        return $transaction;
     }
 
-    public function getByQuoteId($quoteId, $forceReload = false)
+    /**
+     * {@inheritDoc}
+     */
+    public function delete(Transaction $transaction)
     {
-        $cacheKey = $this->getCacheKey([$quoteId]);
-        if (!isset($this->instancesByQuoteId[$quoteId][$cacheKey]) || $forceReload) {
-            $transaction = $this->transactionFactory->create();
-
-            $transactionId = $this->resourceModel;
+        try {
+            $this->resource->delete($transaction);
+        } catch (Exception $e) {
+            throw new CouldNotDeleteException(__('Could not delete the transaction: %1', $e->getMessage()));
         }
     }
 
     /**
-     * Get key for cache
-     *
-     * @param array $data
-     * @return string
+     * {@inheritDoc}
      */
-    private function getCacheKey($data)
+    public function getList(SearchCriteriaInterface $searchCriteria)
     {
-        $serializeData = [];
-        foreach ($data as $key => $value) {
-            if (is_object($value)) {
-                $serializeData[$key] = $value->getId();
-            } else {
-                $serializeData[$key] = $value;
-            }
-        }
+        $collection = $this->transactionCollectionFactory->create();
 
-        return md5(serialize($serializeData));
+        $this->addFiltersToCollection($searchCriteria, $collection);
+        $this->addSortOrdersToCollection($searchCriteria, $collection);
+        $this->addPagingToCollection($searchCriteria, $collection);
+
+        $collection->load();
+
+        return $this->buildSearchResult($searchCriteria, $collection);
     }
+
+    //<editor-fold desc="Helpers">
+
+    /**
+     * @param SearchCriteriaInterface $searchCriteria
+     * @param Collection $collection
+     */
+    private function addFiltersToCollection(SearchCriteriaInterface $searchCriteria, Collection $collection)
+    {
+        foreach ($searchCriteria->getFilterGroups() as $filterGroup) {
+            $conditions = [];
+            $fields     = [];
+            foreach ($filterGroup->getFilters() as $filter) {
+                $fields[] = $filter->getField();
+                $conditions[] = [$filter->getConditionType() => $filter->getValue()];
+            }
+            $collection->addFieldToFilter($fields, $conditions);
+        }
+    }
+
+    /**
+     * @param SearchCriteriaInterface $searchCriteria
+     * @param Collection $collection
+     */
+    private function addSortOrdersToCollection(SearchCriteriaInterface $searchCriteria, Collection $collection)
+    {
+        foreach ((array) $searchCriteria->getSortOrders() as $sortOrder) {
+            $direction = $sortOrder->getDirection() === SortOrder::SORT_ASC ? 'asc' : 'desc';
+            $collection->addOrder($sortOrder->getField(), $direction);
+        }
+    }
+
+    /**
+     * @param SearchCriteriaInterface $searchCriteria
+     * @param Collection $collection
+     */
+    private function addPagingToCollection(SearchCriteriaInterface $searchCriteria, Collection $collection)
+    {
+        $collection->setPageSize($searchCriteria->getPageSize());
+        $collection->setCurPage($searchCriteria->getCurrentPage());
+    }
+
+    /**
+     * @param SearchCriteriaInterface $searchCriteria
+     * @param Collection $collection
+     *
+     * @return TransactionSearchResultInterface
+     */
+    private function buildSearchResult(SearchCriteriaInterface $searchCriteria, Collection $collection)
+    {
+        /** @var TransactionSearchResultInterface $searchResults */
+        $searchResults = $this->searchResultFactory->create();
+
+        $searchResults->setSearchCriteria($searchCriteria);
+        $searchResults->setItems($collection->getItems());
+        $searchResults->setTotalCount($collection->getSize());
+
+        return $searchResults;
+    }
+
+    //</editor-fold>
 }

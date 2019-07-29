@@ -2,13 +2,31 @@
 
 namespace Heidelpay\Gateway\Controller\Index;
 
+use Exception;
+use Heidelpay\Gateway\Controller\HgwAbstract;
+use Heidelpay\Gateway\Block\Hgw;
 use Heidelpay\Gateway\Helper\Payment as HeidelpayHelper;
+use Heidelpay\Gateway\PaymentMethods\Exceptions\CheckoutValidationException;
 use Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod;
+use Heidelpay\PhpBasketApi\Exception\InvalidBasketitemPositionException;
+use Heidelpay\PhpPaymentApi\Response as HeidelpayResponse;
+use Magento\Checkout\Model\Session as CheckoutSession;
+use Magento\Customer\Model\Session;
+use Magento\Customer\Model\Url;
 use Magento\Framework\App\Action\Context;
+use Magento\Framework\Encryption\Encryptor;
 use Magento\Framework\Escaper;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Url\Helper\Data;
+use Magento\Framework\View\Result\PageFactory;
+use Magento\Quote\Api\CartManagementInterface;
+use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderCommentSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
+use Magento\Sales\Model\OrderFactory;
+use Psr\Log\LoggerInterface;
+use Magento\Framework\Controller\ResultFactory;
 
 /**
  * Customer redirect to heidelpay payment or used to display the payment frontend to the customer
@@ -20,27 +38,27 @@ use Magento\Sales\Model\Order\Email\Sender\OrderSender;
  *
  * @package heidelpay\magento2\controllers
  */
-class Index extends \Heidelpay\Gateway\Controller\HgwAbstract
+class Index extends HgwAbstract
 {
     /** @var Escaper */
     private $escaper;
 
     public function __construct(
         Context $context,
-        \Magento\Customer\Model\Session $customerSession,
-        \Magento\Checkout\Model\Session $checkoutSession,
-        \Magento\Sales\Model\OrderFactory $orderFactory,
-        \Magento\Framework\Url\Helper\Data $urlHelper,
-        \Psr\Log\LoggerInterface $logger,
-        \Magento\Quote\Api\CartManagementInterface $cartManagement,
-        \Magento\Quote\Api\CartRepositoryInterface $quoteObject,
-        \Magento\Framework\View\Result\PageFactory $resultPageFactory,
+        Session $customerSession,
+        CheckoutSession $checkoutSession,
+        OrderFactory $orderFactory,
+        Data $urlHelper,
+        LoggerInterface $logger,
+        CartManagementInterface $cartManagement,
+        CartRepositoryInterface $quoteObject,
+        PageFactory $resultPageFactory,
         HeidelpayHelper $paymentHelper,
         OrderSender $orderSender,
         InvoiceSender $invoiceSender,
         OrderCommentSender $orderCommentSender,
-        \Magento\Framework\Encryption\Encryptor $encryptor,
-        \Magento\Customer\Model\Url $customerUrl,
+        Encryptor $encryptor,
+        Url $customerUrl,
         Escaper $escaper
     ) {
         parent::__construct(
@@ -66,18 +84,18 @@ class Index extends \Heidelpay\Gateway\Controller\HgwAbstract
 
     /**
      * {@inheritDoc}
-     * @throws \Heidelpay\PhpBasketApi\Exception\InvalidBasketitemPositionException
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Exception
+     * @throws InvalidBasketitemPositionException
+     * @throws LocalizedException
+     * @throws Exception
      */
     public function execute()
     {
         $session = $this->getCheckout();
         $quote = $session->getQuote();
 
+        $errorMessage = __('An unexpected error occurred. Please contact us to get further information.');
         if (!$quote->getId()) {
-            $message = __('An unexpected error occurred. Please contact us to get further information.');
-            $this->messageManager->addErrorMessage($this->escaper->escapeHtml($message));
+            $this->messageManager->addErrorMessage($this->escaper->escapeHtml($errorMessage));
 
             return $this->_redirect('checkout/cart/', ['_secure' => true]);
         }
@@ -86,8 +104,8 @@ class Index extends \Heidelpay\Gateway\Controller\HgwAbstract
         $payment = $quote->getPayment()->getMethodInstance();
 
         // get the response object from the initial request.
-        /** @var \Heidelpay\PhpPaymentApi\Response $response */
-        $response = $payment->getHeidelpayUrl($quote);
+        /** @var HeidelpayResponse $response */
+        $response = $payment->getHeidelpayUrl($quote, $this->getRequest()->getParams());
 
         $this->_logger->debug('Heidelpay init response : ' . print_r($response, 1));
 
@@ -99,19 +117,19 @@ class Index extends \Heidelpay\Gateway\Controller\HgwAbstract
 
             $resultPage = $this->_resultPageFactory->create();
             $resultPage->getConfig()->getTitle()->prepend(__('Please confirm your payment:'));
-            $resultPage->getLayout()->getBlock('heidelpay_gateway')->setHgwUrl(
-                $response->getPaymentFormUrl()
-            );
-            $resultPage->getLayout()->getBlock('heidelpay_gateway')->setHgwCode($payment->getCode());
+
+            /** @var Hgw $hgwBlock */
+            $hgwBlock = $resultPage->getLayout()->getBlock('heidelpay_gateway');
+            $hgwBlock->setHgwUrl($response->getPaymentFormUrl());
 
             return $resultPage;
         }
 
-        $this->_logger->error('Heidelpay init error : ' . $response->getError()['message']);
-
-        // get an error message for the given error code, and add it to the message container.
-        $message = $this->_paymentHelper->handleError($response->getError()['code']);
-        $this->messageManager->addErrorMessage($this->escaper->escapeHtml($message));
+        // get an error errorMessage for the given error code, and add it to the errorMessage container.
+        $code = $response->getError()['code'];
+        $this->_logger->error('Heidelpay init error (' . $code . '): ' . $response->getError()['message']);
+        $errorMessage = $this->_paymentHelper->handleError($code);
+        $this->messageManager->addErrorMessage($this->escaper->escapeHtml($errorMessage));
 
         return $this->_redirect('checkout/cart/', ['_secure' => true]);
     }

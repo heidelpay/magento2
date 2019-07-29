@@ -77,7 +77,6 @@ class HgwBasePaymentConfig extends BaseConfig implements HgwBasePaymentConfigInt
         return explode(',', $this->getValue(self::KEY_SPECIFIC));
     }
 
-    /** todo-simon: is this int or float? */
     /**
      * Get the minimum amount the total has to be in order to make this payment method available.
      *
@@ -88,7 +87,6 @@ class HgwBasePaymentConfig extends BaseConfig implements HgwBasePaymentConfigInt
         return (int) $this->getValue(self::KEY_MIN_ORDER_TOTAL);
     }
 
-    /* todo-simon: is this int or float? */
     /**
      * Get the maximum amount the total has to be in order to make this payment method available.
      *

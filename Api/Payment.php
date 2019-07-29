@@ -1,13 +1,5 @@
 <?php
-
-namespace Heidelpay\Gateway\Api;
-
-use Heidelpay\Gateway\Model\Config\Source\Recognition;
-use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
-
 /**
- * Payment API Processor
- *
  * This is the controller where API REST requests to the heidelpay module are being processed.
  *
  * @license Use of this software requires acceptance of the License Agreement. See LICENSE file.
@@ -17,52 +9,70 @@ use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory a
  *
  * @author Stephano Vogel
  *
- * @package heidelpay
- * @subpackage magento2
- * @category magento2
+ * @package heidelpay/magento2
  */
+namespace Heidelpay\Gateway\Api;
+
+use Exception;
+use Heidelpay\Gateway\Api\Data\PaymentInformationInterface;
+use Heidelpay\Gateway\Model\Config\Source\Recognition;
+use Heidelpay\Gateway\Model\PaymentInformation;
+use Heidelpay\Gateway\Model\PaymentInformationFactory;
+use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
+use Klarna\Kp\Api\QuoteRepositoryInterface;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Quote\Model\QuoteIdMask;
+use Magento\Quote\Model\QuoteIdMaskFactory;
+use Magento\Quote\Model\QuoteRepository;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\Encryption\EncryptorInterface;
+use Magento\Quote\Api\Data\AddressInterface;
+use Magento\Quote\Model\Quote;
+use Magento\Store\Model\ScopeInterface;
+use Psr\Log\LoggerInterface;
+
 class Payment implements PaymentInterface
 {
-    /** @var \Magento\Framework\Encryption\EncryptorInterface */
+    /** @var EncryptorInterface */
     public $encryptor;
 
-    /** @var \Psr\Log\LoggerInterface */
+    /** @var LoggerInterface */
     public $logger;
 
-    /** @var \Magento\Framework\App\Config\ScopeConfigInterface */
+    /** @var ScopeConfigInterface */
     public $scopeConfig;
 
-    /** @var \Magento\Quote\Model\QuoteRepository */
+    /** @var QuoteRepositoryInterface */
     public $quoteRepository;
 
-    /** @var \Magento\Quote\Model\QuoteIdMaskFactory */
+    /** @var QuoteIdMaskFactory */
     public $quoteIdMaskFactory;
 
-    /** @var \Heidelpay\Gateway\Model\PaymentInformationFactory */
+    /** @var PaymentInformationFactory */
     public $paymentInformationFactory;
 
-    /** @var \Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory */
+    /** @var PaymentInformationCollectionFactory */
     public $paymentInformationCollectionFactory;
 
     /**
      * Payment Information API constructor.
      *
-     * @param \Magento\Quote\Model\QuoteRepository $quoteRepository
-     * @param \Magento\Quote\Model\QuoteIdMaskFactory $quoteIdMaskFactory
-     * @param \Heidelpay\Gateway\Model\PaymentInformationFactory $paymentInformationFactory
-     * @param \Magento\Framework\Encryption\EncryptorInterface $encryptor
+     * @param QuoteRepository $quoteRepository
+     * @param QuoteIdMaskFactory $quoteIdMaskFactory
+     * @param PaymentInformationFactory $paymentInformationFactory
+     * @param EncryptorInterface $encryptor
      * @param PaymentInformationCollectionFactory $paymentInformationCollectionFactory
-     * @param \Psr\Log\LoggerInterface $logger
-     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
+     * @param LoggerInterface $logger
+     * @param ScopeConfigInterface $scopeConfig
      */
     public function __construct(
-        \Magento\Quote\Model\QuoteRepository $quoteRepository,
-        \Magento\Quote\Model\QuoteIdMaskFactory $quoteIdMaskFactory,
-        \Heidelpay\Gateway\Model\PaymentInformationFactory $paymentInformationFactory,
-        \Magento\Framework\Encryption\EncryptorInterface $encryptor,
+        QuoteRepository $quoteRepository,
+        QuoteIdMaskFactory $quoteIdMaskFactory,
+        PaymentInformationFactory $paymentInformationFactory,
+        EncryptorInterface $encryptor,
         PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
-        \Psr\Log\LoggerInterface $logger,
-        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
+        LoggerInterface $logger,
+        ScopeConfigInterface $scopeConfig
     ) {
         $this->quoteRepository = $quoteRepository;
         $this->quoteIdMaskFactory = $quoteIdMaskFactory;
@@ -77,6 +87,8 @@ class Payment implements PaymentInterface
 
     /**
      * @inheritdoc
+
+     * @throws NoSuchEntityException
      */
     public function getAdditionalPaymentInformation($quoteId, $paymentMethod)
     {
@@ -88,18 +100,18 @@ class Payment implements PaymentInterface
         // get the recognition configuration for the given payment method and store id.
         $allowRecognition = $this->scopeConfig->getValue(
             'payment/' . $paymentMethod . '/recognition',
-            \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+            ScopeInterface::SCOPE_STORE,
             $quote->getStoreId()
         );
 
         // if recognition is set to 'never', we don't return any data.
-        if ($allowRecognition == Recognition::RECOGNITION_NEVER) {
+        if ($allowRecognition === Recognition::RECOGNITION_NEVER) {
             return json_encode(null);
         }
 
         // get the customer payment information by given data from the request.
         $paymentInfoCollection = $this->paymentInformationCollectionFactory->create();
-        /** @var \Heidelpay\Gateway\Model\PaymentInformation $paymentInfo */
+        /** @var PaymentInformation $paymentInfo */
         $paymentInfo = $paymentInfoCollection->loadByCustomerInformation(
             $quote->getStoreId(),
             $quote->getCustomerEmail(),
@@ -115,8 +127,8 @@ class Payment implements PaymentInterface
 
             // we only return additional payment data, if the shipping data is the same (to prevent fraud)
             if ($allowRecognition === Recognition::RECOGNITION_SAME_SHIPPING_ADDRESS) {
-                // if the shipping hashes are the same, we can safely return the addtional payment data.
-                if ($this->createShippingHash($quote->getShippingAddress()) == $paymentInfo->getShippingHash()) {
+                // if the shipping hashes are the same, we can safely return the additional payment data.
+                if ($this->createShippingHash($quote->getShippingAddress()) === $paymentInfo->getShippingHash()) {
                     $result = $paymentInfo->getAdditionalData();
                 }
             }
@@ -133,35 +145,44 @@ class Payment implements PaymentInterface
 
     /**
      * @inheritdoc
+     * @throws NoSuchEntityException*@throws Exception
+     * @throws Exception
      */
     public function saveAdditionalPaymentInfo($cartId, $method, $additionalData)
     {
+        $returnValue = true;
+
         // get the quote information by cart id
         $quote = $this->quoteRepository->get($cartId);
 
-        // if the quote is empty, there is no relation that
-        // we can work with... so we return false.
+        // if the quote is empty, there is no relation that we can work with... so we return false.
         if ($quote->isEmpty()) {
-            return json_encode(false);
+            $this->logger->warning('Heidelpay: Could not find quote with id ' . $cartId . '.');
+            $returnValue = false;
         }
 
         // save the information with the given quote and additional data.
         // if there is nothing stored, we'll return false...
-        if (!$this->savePaymentInformation($quote, $method, $quote->getCustomerEmail(), $additionalData)) {
-            return json_encode(false);
+        if ($returnValue && !$this->savePaymentInformation($quote, $method, $quote->getCustomerEmail(), $additionalData)) {
+            $this->logger->warning('Heidelpay: Could not save payment information for quote id ' . $cartId . '.');
+            $returnValue = false;
         }
 
         // ... if it was successful, we return true.
-        return json_encode(true);
+        return json_encode($returnValue);
     }
 
     /**
      * @inheritdoc
+     *
+     * @throws Exception
      */
     public function saveGuestAdditionalPaymentInfo($cartId, $method, $additionalData)
     {
+        $returnValue = true;
+
         // get the real quote id by guest cart id (masked random string serves as guest cart id)
-        /** @var \Magento\Quote\Model\QuoteIdMask $quoteIdMask */
+        /** @var QuoteIdMask $quoteIdMask */
         $quoteIdMask = $this->quoteIdMaskFactory->create()->load($cartId, 'masked_id');
         $quoteId = $quoteIdMask->getQuoteId();
 
@@ -171,27 +192,27 @@ class Payment implements PaymentInterface
         // if the quote is empty, there is no relation that
         // we can work with... so we return false.
         if ($quote->isEmpty()) {
-            return json_encode(false);
+            $returnValue = false;
         }
 
         // save the information with the given quote and additional data.
         // if there is nothing stored, we'll return false...
         // - since guest email is stored in the billing information, we have to pull it from there.
-        if (!$this->savePaymentInformation($quote, $method, $quote->getBillingAddress()->getEmail(), $additionalData)) {
-            return json_encode(false);
+        if ($returnValue && !$this->savePaymentInformation($quote, $method, $quote->getBillingAddress()->getEmail(), $additionalData)) {
+            $returnValue = false;
         }
 
         // ... if it was successful, we return true.
-        return json_encode(true);
+        return json_encode($returnValue);
     }
 
     /**
      * Create a shipping hash.
      *
-     * @param \Magento\Quote\Api\Data\AddressInterface $address
+     * @param AddressInterface $address
      * @return string
      */
-    private function createShippingHash(\Magento\Quote\Api\Data\AddressInterface $address)
+    private function createShippingHash(AddressInterface $address)
     {
         return $this->encryptor->hash(
             implode('', [
@@ -216,7 +237,7 @@ class Payment implements PaymentInterface
      * the Billing address.
      *
      * @param string $method
-     * @param \Magento\Quote\Model\Quote $quote
+     * @param Quote $quote
      * @return array|null
      */
     private function getAdditionalDataForPaymentMethod($method, $quote)
@@ -251,19 +272,22 @@ class Payment implements PaymentInterface
      * If a data set with the given information exists, it will just
      * be updated. Else, a new data set will be created.
      *
-     * @param \Magento\Quote\Model\Quote $quote
+     * @param Quote $quote
      * @param string $method
      * @param string $email
      * @param array $additionalData
      * @param string $paymentRef
-     * @return \Heidelpay\Gateway\Api\Data\PaymentInformationInterface
+     *
+     * @return PaymentInformationInterface
+     *
+     * @throws Exception
      */
     private function savePaymentInformation($quote, $method, $email, $additionalData, $paymentRef = null)
     {
-        // make some additional data changes, if neccessary
-        array_walk($additionalData, function (&$value, $key) {
-            // if somehow the country code in the IBAN is lowercase, convert it to uppercase.
-            if ($key == 'hgw_iban') {
+        // make some additional data changes, if necessary
+        array_walk($additionalData, static function (&$value, $key) {
+            // make sure the country code in the IBAN is uppercase.
+            if ($key === 'hgw_iban') {
                 $value = strtoupper($value);
             }
         });
@@ -272,7 +296,7 @@ class Payment implements PaymentInterface
         $paymentInfoCollection = $this->paymentInformationCollectionFactory->create();
 
         // load payment information by the customer's quote.
-        /** @var \Heidelpay\Gateway\Model\PaymentInformation $paymentInfo */
+        /** @var PaymentInformationInterface $paymentInfo */
         $paymentInformation = $paymentInfoCollection->loadByCustomerInformation(
             $quote->getStoreId(),
             $email,

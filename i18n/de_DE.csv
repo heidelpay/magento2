@@ -11,6 +11,7 @@
 "HGWIV","<img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAMxJREFUeNpiZBXzZSAFMDGQCFhwSXBysAX6WPl7WhgbqMhKi3789E1MLRK7BiYmxvQEr5qSCFFh/rMX7qzbcuzOveePnrzCboOgAM+KuRWONnor1h1s6V1x685TfE4Cqt63sR3oAP/opu17zhDwA9AlQLOBqh18y69cf0jY00B3A10CNBuPakSwAsME6MuV6w/hcgm6BmAIAsOktXclsREHDO/zl+7euP2YWA3A2Dl0/AoJSQMYOPcfviBBAzDm7z98SYwGRpqnVoAAAwCge0cwGsIpTQAAAABJRU5ErkJggg==' style='margin-right: 5px'/>Rechnungskauf"
 "HGWIVS","<img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAMxJREFUeNpiZBXzZSAFMDGQCFhwSXBysAX6WPl7WhgbqMhKi3789E1MLRK7BiYmxvQEr5qSCFFh/rMX7qzbcuzOveePnrzCboOgAM+KuRWONnor1h1s6V1x685TfE4Cqt63sR3oAP/opu17zhDwA9AlQLOBqh18y69cf0jY00B3A10CNBuPakSwAsME6MuV6w/hcgm6BmAIAsOktXclsREHDO/zl+7euP2YWA3A2Dl0/AoJSQMYOPcfviBBAzDm7z98SYwGRpqnVoAAAwCge0cwGsIpTQAAAABJRU5ErkJggg==' style='margin-right: 5px'/>Gesicherter Rechnungskauf (B2C)"
 "HGWIDL","<img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAMxJREFUeNpiZBXzZSAFMDGQCFhwSXBysAX6WPl7WhgbqMhKi3789E1MLRK7BiYmxvQEr5qSCFFh/rMX7qzbcuzOveePnrzCboOgAM+KuRWONnor1h1s6V1x685TfE4Cqt63sR3oAP/opu17zhDwA9AlQLOBqh18y69cf0jY00B3A10CNBuPakSwAsME6MuV6w/hcgm6BmAIAsOktXclsREHDO/zl+7euP2YWA3A2Dl0/AoJSQMYOPcfviBBAzDm7z98SYwGRpqnVoAAAwCge0cwGsIpTQAAAABJRU5ErkJggg==' style='margin-right: 5px'/>iDeal"
+"HGWSANHP","<img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAMxJREFUeNpiZBXzZSAFMDGQCFhwSXBysAX6WPl7WhgbqMhKi3789E1MLRK7BiYmxvQEr5qSCFFh/rMX7qzbcuzOveePnrzCboOgAM+KuRWONnor1h1s6V1x685TfE4Cqt63sR3oAP/opu17zhDwA9AlQLOBqh18y69cf0jY00B3A10CNBuPakSwAsME6MuV6w/hcgm6BmAIAsOktXclsREHDO/zl+7euP2YWA3A2Dl0/AoJSQMYOPcfviBBAzDm7z98SYwGRpqnVoAAAwCge0cwGsIpTQAAAABJRU5ErkJggg==' style='margin-right: 5px'/>Ratenkauf von Santander"
 
 "HGW_ABOUT_US","Die heidelpay GmbH, kurz: heidelpay, ist ein führendes, von der BaFin zugelassenes und beaufsichtigtes Zahlungsinstitut für Online-Paymentverfahren, welches das komplette Leistungsspektrum in Sachen elektronische Zahlungsabwicklung abdeckt: vom Processing der Transaktionen über die Vergabe der Akzeptanzstellenverträge bis hin zum Monitoring und Risk Management.<br/><br/>Mehr Informationen finden Sie auf <a href='https://www.heidelpay.de/inc/magento?lead=Magento2' target='_blank'>www.heidelpay.de</a>"
 
@@ -24,13 +25,11 @@
 "Insert 0 to disable limit.","Tragen Sie 0 ein um das Limit zu deaktivieren."
 "If 'Debit' is enabled the card will be charged immediately. Otherwise the amount will first be authorised and charged at order creation.","Wenn diese Einstellung auf Ja steht, wird die Karte sofort belastet. Ansonsten wird der Betrag nur reserviert und bei erstellter Bestellung abgebucht."
 "An unexpected error occurred. Please contact us to get further information.","Es ist ein Fehler aufgetreten. Bitte kontaktieren Sie uns für weitere Informationen."
+"Billing address should be same as shipping address.","Bitte wählen Sie die selbe Rechnungsadresse wie Lieferadresse."
 
 "Never","Nie"
 "Same Shipping Address","Selbe Lieferadresse"
 "Always","Immer"
-
-"Please confirm your payment:","Bitte führen Sie nun die Zahlung durch:"
-"pay now","Jetzt bezahlen"
 
 "Credit Card","Kreditkarte"
 "Debit Card","Debitkarte"
@@ -44,6 +43,7 @@
 "Mangirkart","MangirKart"
 "MasterPass","MasterPass"
 "Sofort.","Sofort."
+"Santander Hire Purchase","Ratenkauf von Santander"
 
 "IBAN", "IBAN"
 "BIC","BIC"
@@ -59,6 +59,8 @@
 "Year","Jahr"
 
 "The given IBAN is invalid.","Die angegebene IBAN ist ungültig."
+"The given date is invalid.","Das angegebene Datum ist ungültig"
+"You have to be at least 18 years old.","Die Verwendung der Zahlart ist erst ab 18 Jahren möglich"
 
 "January","Januar"
 "February","Februar"
@@ -73,15 +75,22 @@
 "November","November"
 "December","Dezember"
 
-"This is a required field.","Dieses Feld ist erforderlich."
-
 "ShortId : %1","ShortId : %1"
-"Amount or currency missmatch : %1","Abweichender Betrag oder Währung : %1" 
+"Amount or currency missmatch : %1","Abweichender Betrag oder Währung : %1"
+
+"Please confirm your payment:","Bitte führen Sie nun die Zahlung durch:"
+"pay now","Jetzt bezahlen"
+"Select installment plan","Ratenplan auswählen"
+"This is a required field.","Dieses Feld ist erforderlich."
 "Payment information","Zahlungsinformationen"
 "Reference","Verwendungszweck"
+"Place Order","Bestellung anlegen"
 "Please transfer the amount of <strong>%1 %2</strong> to the following account<br /><br />Holder: %3<br/>IBAN: %4<br/>BIC: %5<br/><br/><i>Please use only this identification number as the descriptor :</i><br/><strong>%6</strong>","Bitte überweisen Sie uns den Betrag von <strong>%1 %2</strong> auf folgendes Konto:<br/><br/>Inhaber: %3<br/>IBAN: %4<br/>BIC: %5<br/><br/><i>Geben Sie als Verwendungszweck bitte ausschlie&szlig;lich diese Identifikationsnummer an:</i><br/><strong>%6</strong>"
 "Please transfer the amount of <strong>%1 %2</strong> to the following account after your order has arrived:<br /><br />Holder: %3<br/>IBAN: %4<br/>BIC: %5<br/><br/><i>Please use only this identification number as the descriptor :</i><br/><strong>%6</strong>","Bitte überweisen Sie uns den Betrag von <strong>%1 %2</strong> nach Erhalt der Ware auf folgendes Konto:<br/><br/>Inhaber: %3<br/>IBAN: %4<br/>BIC: %5<br/><br/><i>Geben Sie als Verwendungszweck bitte ausschlie&szlig;lich diese Identifikationsnummer an:</i><br/><strong>%6</strong>"
 "The amount of <strong>%1 %2</strong> will be debited from this account within the next days:<br /><br />IBAN: %3<br /><br /><i>The booking contains the mandate reference ID: %4<br >and the creditor identifier: %5</i><br /><br />Please ensure that there will be sufficient funds on the corresponding account.","Der Betrag von <strong>%1 %2</strong> wird in den nächsten Tagen von folgendem Konto abgebucht:<br /><br />IBAN: %3<br /><br /><i>Die Abbuchung enthält die Mandatsreferenz-ID: %4<br />und die Gläubiger ID: %5</i><br /><br />Bitte sorgen Sie für ausreichende Deckung auf dem entsprechenden Konto."
 
 "Heidelpay Error at sending Finalize Request. The Shipment was not created.","Heidelpay Fehler beim Senden des Finalize Requests. Der Versand wurde nicht erstellt."
 "Shipping Notification has been sent to Heidelpay.","Versandbenachrichtigung wurde an Heidelpay gesendet."
+
+"Hire Purchase Precontract","Vorvertragliche Informationen:"
+"Hire Purchase Precontract download","Vorvertragliche Informationen zum Ratenkauf hier abrufen"

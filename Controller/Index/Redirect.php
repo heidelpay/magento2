@@ -109,8 +109,7 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
         $quoteId = $session->getQuoteId();
 
         if (empty($quoteId)) {
-            $this->_logger->warning('Heidelpay - Redirect: Called with empty quoteId');
-
+            $this->_logger->error('Heidelpay - Redirect: Called with empty quoteId');
             return $this->_redirect('checkout/cart/', ['_secure' => true]);
         }
 
@@ -144,9 +143,6 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
 
         // set Parameters for success page
         if ($this->heidelpayResponse->isSuccess()) {
-            // lock the quote
-            $session->getQuote()->setIsActive(false)->save();
-
             /** @var Order $order */
             $order = null;
             try {
@@ -156,7 +152,6 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
                     'Heidelpay - Redirect: Cannot receive order.' . $e->getMessage()
                 );
             }
-
             $session->clearHelperData();
 
             // set QuoteIds
@@ -173,41 +168,10 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
                 ->additionalPaymentInformation($data);
 
             $this->_checkoutSession->setHeidelpayInfo($additionalPaymentInformation);
-
             $this->_logger->debug('Heidelpay - Redirect: Redirecting customer to success page.');
 
-            // set response
-            $response = $this->_redirect('checkout/onepage/success', ['_secure' => true]);
-
-            try {
-                // send order confirmation to the customer
-                if ($order && $order->getId()) {
-                    $this->_orderSender->send($order);
-                }
-            } catch (\Exception $e) {
-                $this->_logger->error(
-                    'Heidelpay - Redirect: Cannot send order confirmation E-Mail. ' . $e->getMessage()
-                );
-            }
-
-            // Check send Invoice Mail enabled
-            if ($this->salesHelper->canSendNewInvoiceEmail($session->getQuote()->getStore()->getId())) {
-                // send invoice(s) to the customer
-                if (!$order->canInvoice()) {
-                    $invoices = $order->getInvoiceCollection();
-
-                    foreach ($invoices as $invoice) {
-                        $this->_invoiceSender->send($invoice);
-                    }
-                }
-            }
-
-            // return response
-            return $response;
+            return $this->_redirect('checkout/onepage/success', ['_secure' => true]);
         }
-
-        // unlock the quote in case of error
-        $session->getQuote()->setIsActive(true)->save();
 
         $this->_logger->error(
             'Heidelpay - Redirect: Redirect with error to cart: ' . $this->heidelpayResponse->getError()['message']

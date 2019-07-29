@@ -6,7 +6,7 @@ namespace Heidelpay\Gateway\Api;
  * API implementation for the heidelpay Payment functionality
  *
  * To work with additional data, the module stored customer payment information
- * in a seperate data set to avoid mixing up Magento 2 and heidelpay data.
+ * in a separate data set to avoid mixing up Magento 2 and heidelpay data.
  *
  * @license Use of this software requires acceptance of the License Agreement. See LICENSE file.
  * @copyright Copyright © 2016-present heidelpay GmbH. All rights reserved.

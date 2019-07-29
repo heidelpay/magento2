@@ -1,16 +1,5 @@
 <?php
-
-namespace Heidelpay\Gateway\PaymentMethods;
-
-use Heidelpay\Gateway\Gateway\Config\HgwIDealPaymentConfigInterface;
-use Heidelpay\Gateway\Gateway\Config\HgwMainConfigInterface;
-use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
-use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
-use Heidelpay\PhpPaymentApi\Response;
-
 /**
- * Heidelpay iDeal payment method
- *
  * This is the payment class for heidelpay iDeal
  *
  * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
@@ -22,71 +11,29 @@ use Heidelpay\PhpPaymentApi\Response;
  * @subpackage magento2
  * @category magento2
  */
+namespace Heidelpay\Gateway\PaymentMethods;
+
+use Heidelpay\Gateway\Model\PaymentInformation;
+use Heidelpay\PhpPaymentApi\Exceptions\UndefinedTransactionModeException;
+use Heidelpay\PhpPaymentApi\PaymentMethods\IDealPaymentMethod;
+use Heidelpay\PhpPaymentApi\Response;
+
+/** @noinspection LongInheritanceChainInspection */
+/**
+ * @property IDealPaymentMethod $_heidelpayPaymentMethod
+ */
 class HeidelpayIDealPaymentMethod extends HeidelpayAbstractPaymentMethod
 {
+    /** @var string PaymentCode */
     const CODE = 'hgwidl';
 
-    protected $_code = self::CODE;
-
-    protected $_canAuthorize = true;
-
-    protected $_isGateway = true;
-
-
-    public function __construct(
-        \Magento\Framework\Model\Context $context,
-        \Magento\Framework\Registry $registry,
-        \Magento\Framework\Api\ExtensionAttributesFactory $extensionFactory,
-        \Magento\Framework\Api\AttributeValueFactory $customAttributeFactory,
-        \Magento\Payment\Helper\Data $paymentData,
-        HgwMainConfigInterface $mainConfig,
-        \Magento\Framework\App\RequestInterface $request,
-        \Magento\Framework\UrlInterface $urlinterface,
-        \Magento\Framework\Encryption\Encryptor $encryptor,
-        \Magento\Payment\Model\Method\Logger $logger,
-        \Magento\Framework\Locale\ResolverInterface $localeResolver,
-        \Magento\Framework\App\ProductMetadataInterface $productMetadata,
-        \Magento\Framework\Module\ResourceInterface $moduleResource,
-        HgwIDealPaymentConfigInterface $paymentConfig,
-        \Heidelpay\Gateway\Helper\Payment $paymentHelper,
-        \Heidelpay\Gateway\Helper\BasketHelper $basketHelper,
-        \Magento\Sales\Helper\Data $salesHelper,
-        PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
-        \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory,
-        HeidelpayTransactionCollectionFactory $transactionCollectionFactory,
-        \Heidelpay\PhpPaymentApi\PaymentMethods\IDealPaymentMethod $iDealPaymentMethod,
-        \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
-        \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
-        array $data = []
-    )
+    /**
+     * {@inheritDoc}
+     */
+    protected function setup()
     {
-        parent::__construct(
-            $context,
-            $registry,
-            $extensionFactory,
-            $customAttributeFactory,
-            $paymentData,
-            $mainConfig,
-            $request,
-            $urlinterface,
-            $encryptor,
-            $logger,
-            $localeResolver,
-            $productMetadata,
-            $moduleResource,
-            $paymentHelper,
-            $basketHelper,
-            $salesHelper,
-            $paymentInformationCollectionFactory,
-            $transactionFactory,
-            $transactionCollectionFactory,
-            $resource,
-            $resourceCollection,
-            $paymentConfig,
-            $data
-        );
-
-        $this->_heidelpayPaymentMethod = $iDealPaymentMethod;
+        parent::setup();
+        $this->_canAuthorize = true;
     }
 
     /**
@@ -116,13 +63,17 @@ class HeidelpayIDealPaymentMethod extends HeidelpayAbstractPaymentMethod
         return $bankList;
     }
 
-    public function getHeidelpayUrl($quote)
+    /**
+     * {@inheritDoc}
+     * @throws UndefinedTransactionModeException
+     */
+    public function getHeidelpayUrl($quote, array $data = [])
     {
         // create the collection factory
         $paymentInfoCollection = $this->paymentInformationCollectionFactory->create();
 
         // load the payment information by store id, customer email address and payment method
-        /** @var \Heidelpay\Gateway\Model\PaymentInformation $paymentInfo */
+        /** @var PaymentInformation $paymentInfo */
         $paymentInfo = $paymentInfoCollection->loadByCustomerInformation(
             $quote->getStoreId(),
             $quote->getBillingAddress()->getEmail(),
@@ -153,13 +104,12 @@ class HeidelpayIDealPaymentMethod extends HeidelpayAbstractPaymentMethod
         return $this->_heidelpayPaymentMethod->getResponse();
     }
 
-    public function activeRedirect()
-    {
-        return true;
-    }
-
-    /*
+    /**
      * Send an authorize request to get a response which contains list of available banks.
+     *
+     * @return Response
+     *
+     * @throws UndefinedTransactionModeException
      */
     public function initMethod()
     {

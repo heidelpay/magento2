@@ -1,15 +1,5 @@
 <?php
-
-namespace Heidelpay\Gateway\PaymentMethods;
-
-use Heidelpay\Gateway\Gateway\Config\HgwInvoicePaymentConfigInterface;
-use Heidelpay\Gateway\Gateway\Config\HgwMainConfigInterface;
-use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
-use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as HeidelpayTransactionCollectionFactory;
-
 /**
- * Heidelpay prepayment payment method
- *
  * This is the payment class for heidelpay prepayment
  *
  * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
@@ -21,137 +11,45 @@ use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory as Heide
  * @subpackage magento2
  * @category magento2
  */
+namespace Heidelpay\Gateway\PaymentMethods;
+
+use Exception;
+use Heidelpay\Gateway\Block\Info\Invoice as InvoiceBlock;
+use Heidelpay\PhpPaymentApi\Exceptions\UndefinedTransactionModeException;
+use Heidelpay\PhpPaymentApi\PaymentMethods\InvoicePaymentMethod;
+use Magento\Sales\Model\Order;
+use Magento\Sales\Model\Order\Invoice;
+use Magento\Sales\Model\Order\Payment\Transaction;
+
+/** @noinspection LongInheritanceChainInspection */
+/**
+ * @property InvoicePaymentMethod $_heidelpayPaymentMethod
+ */
 class HeidelpayInvoicePaymentMethod extends HeidelpayAbstractPaymentMethod
 {
-    /**
-     * Payment Code
-     * @var string
-     */
+    /** @var string Payment Code */
     const CODE = 'hgwiv';
 
     /**
-     * Payment Code
-     * @var string
+     * {@inheritDoc}
      */
-    protected $_code = self::CODE;
-
-    /**
-     * Info Block Class (used for Order/Invoice details)
-     * @var string
-     */
-    protected $_infoBlockType = 'Heidelpay\Gateway\Block\Info\Invoice';
-
-    /**
-     * isGateway
-     * @var boolean
-     */
-    protected $_isGateway = true;
-
-    /**
-     * canAuthorize
-     * @var boolean
-     */
-    protected $_canAuthorize = true;
-
-    /**
-     * @var boolean
-     */
-    protected $_canRefund = true;
-
-    /**
-     * @var boolean
-     */
-    protected $_canRefundInvoicePartial = true;
-
-    /**
-     * HeidelpayPrepaymentPaymentMethod constructor.
-     *
-     * @param \Magento\Framework\Model\Context $context
-     * @param \Magento\Framework\Registry $registry
-     * @param \Magento\Framework\Api\ExtensionAttributesFactory $extensionFactory
-     * @param \Magento\Framework\Api\AttributeValueFactory $customAttributeFactory
-     * @param \Magento\Payment\Helper\Data $paymentData
-     * @param HgwMainConfigInterface $mainConfig
-     * @param \Magento\Framework\App\RequestInterface $request
-     * @param \Magento\Framework\UrlInterface $urlinterface
-     * @param \Magento\Framework\Encryption\Encryptor $encryptor
-     * @param \Magento\Payment\Model\Method\Logger $logger
-     * @param \Magento\Framework\Locale\ResolverInterface $localeResolver
-     * @param \Magento\Framework\App\ProductMetadataInterface $productMetadata
-     * @param \Magento\Framework\Module\ResourceInterface $moduleResource
-     * @param HgwInvoicePaymentConfigInterface $paymentConfig
-     * @param \Heidelpay\Gateway\Helper\Payment $paymentHelper
-     * @param \Heidelpay\Gateway\Helper\BasketHelper $basketHelper
-     * @param \Magento\Sales\Helper\Data $salesHelper
-     * @param PaymentInformationCollectionFactory $paymentInformationCollectionFactory
-     * @param \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory
-     * @param HeidelpayTransactionCollectionFactory $transactionCollectionFactory
-     * @param \Heidelpay\PhpPaymentApi\PaymentMethods\InvoicePaymentMethod $invoicePaymentMethod
-     * @param \Magento\Framework\Model\ResourceModel\AbstractResource|null $resource
-     * @param \Magento\Framework\Data\Collection\AbstractDb|null $resourceCollection
-     * @param array $data
-     */
-    public function __construct(
-        \Magento\Framework\Model\Context $context,
-        \Magento\Framework\Registry $registry,
-        \Magento\Framework\Api\ExtensionAttributesFactory $extensionFactory,
-        \Magento\Framework\Api\AttributeValueFactory $customAttributeFactory,
-        \Magento\Payment\Helper\Data $paymentData,
-        HgwMainConfigInterface $mainConfig,
-        \Magento\Framework\App\RequestInterface $request,
-        \Magento\Framework\UrlInterface $urlinterface,
-        \Magento\Framework\Encryption\Encryptor $encryptor,
-        \Magento\Payment\Model\Method\Logger $logger,
-        \Magento\Framework\Locale\ResolverInterface $localeResolver,
-        \Magento\Framework\App\ProductMetadataInterface $productMetadata,
-        \Magento\Framework\Module\ResourceInterface $moduleResource,
-        HgwInvoicePaymentConfigInterface $paymentConfig,
-        \Heidelpay\Gateway\Helper\Payment $paymentHelper,
-        \Heidelpay\Gateway\Helper\BasketHelper $basketHelper,
-        \Magento\Sales\Helper\Data $salesHelper,
-        PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
-        \Heidelpay\Gateway\Model\TransactionFactory $transactionFactory,
-        HeidelpayTransactionCollectionFactory $transactionCollectionFactory,
-        \Heidelpay\PhpPaymentApi\PaymentMethods\InvoicePaymentMethod $invoicePaymentMethod,
-        \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
-        \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
-        array $data = []
-    ) {
-        parent::__construct(
-            $context,
-            $registry,
-            $extensionFactory,
-            $customAttributeFactory,
-            $paymentData,
-            $mainConfig,
-            $request,
-            $urlinterface,
-            $encryptor,
-            $logger,
-            $localeResolver,
-            $productMetadata,
-            $moduleResource,
-            $paymentHelper,
-            $basketHelper,
-            $salesHelper,
-            $paymentInformationCollectionFactory,
-            $transactionFactory,
-            $transactionCollectionFactory,
-            $resource,
-            $resourceCollection,
-            $paymentConfig,
-            $data
-        );
-
-        $this->_heidelpayPaymentMethod = $invoicePaymentMethod;
+    protected function setup()
+    {
+        parent::setup();
+        $this->_canAuthorize = true;
+        $this->_canRefund = true;
+        $this->_canRefundInvoicePartial = true;
+        $this->_formBlockType = InvoiceBlock::class;
+        $this->_infoBlockType = InvoiceBlock::class;
     }
 
     /**
      * Initial Request to heidelpay payment server to get the form / iframe url
      * {@inheritDoc}
+     * @throws UndefinedTransactionModeException
      * @see \Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod::getHeidelpayUrl()
      */
-    public function getHeidelpayUrl($quote)
+    public function getHeidelpayUrl($quote, array $data = [])
     {
         // set initial data for the request
         parent::getHeidelpayUrl($quote);
@@ -183,15 +81,17 @@ class HeidelpayInvoicePaymentMethod extends HeidelpayAbstractPaymentMethod
 
     /**
      * @inheritdoc
+     * @throws Exception
      */
     public function pendingTransactionProcessing($data, &$order, $message = null)
     {
-        $order->getPayment()->setTransactionId($data['IDENTIFICATION_UNIQUEID']);
-        $order->getPayment()->setIsTransactionClosed(false);
-        $order->getPayment()->addTransaction(\Magento\Sales\Model\Order\Payment\Transaction::TYPE_AUTH, null, true);
+        $payment = $order->getPayment();
+        $payment->setTransactionId($data['IDENTIFICATION_UNIQUEID']);
+        $payment->setIsTransactionClosed(false);
+        $payment->addTransaction(Transaction::TYPE_AUTH, null, true);
 
-        $order->setState(\Magento\Sales\Model\Order::STATE_PROCESSING)
-            ->addStatusHistoryComment($message, \Magento\Sales\Model\Order::STATE_PROCESSING)
+        $order->setState(Order::STATE_PROCESSING)
+            ->addStatusHistoryComment($message, Order::STATE_PROCESSING)
             ->setIsCustomerNotified(true);
 
         // payment is pending at the beginning, so we set the total paid sum to 0.
@@ -200,7 +100,7 @@ class HeidelpayInvoicePaymentMethod extends HeidelpayAbstractPaymentMethod
         // if the order can be invoiced, create one and save it into a transaction.
         if ($order->canInvoice()) {
             $invoice = $order->prepareInvoice();
-            $invoice->setRequestedCaptureCase(\Magento\Sales\Model\Order\Invoice::CAPTURE_ONLINE)
+            $invoice->setRequestedCaptureCase(Invoice::CAPTURE_ONLINE)
                 ->setTransactionId($data['IDENTIFICATION_UNIQUEID'])
                 ->setIsPaid(false)
                 ->register();
