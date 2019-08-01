@@ -25,7 +25,7 @@
 "Insert 0 to disable limit.","Tragen Sie 0 ein um das Limit zu deaktivieren."
 "If 'Debit' is enabled the card will be charged immediately. Otherwise the amount will first be authorised and charged at order creation.","Wenn diese Einstellung auf Ja steht, wird die Karte sofort belastet. Ansonsten wird der Betrag nur reserviert und bei erstellter Bestellung abgebucht."
 "An unexpected error occurred. Please contact us to get further information.","Es ist ein Fehler aufgetreten. Bitte kontaktieren Sie uns für weitere Informationen."
-"Billing address should be same as shipping address.","Bitte wählen Sie die selbe Rechnungsadresse wie Lieferadresse"
+"Billing address should be same as shipping address.","Bitte wählen Sie die selbe Rechnungsadresse wie Lieferadresse."
 
 "Never","Nie"
 "Same Shipping Address","Selbe Lieferadresse"
@@ -59,6 +59,8 @@
 "Year","Jahr"
 
 "The given IBAN is invalid.","Die angegebene IBAN ist ungültig."
+"The given date is invalid.","Das angegebene Datum ist ungültig"
+"You have to be at least 18 years old.","Die Verwendung der Zahlart ist erst ab 18 Jahren möglich"
 
 "January","Januar"
 "February","Februar"

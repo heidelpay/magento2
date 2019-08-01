@@ -23,10 +23,6 @@ define(
 
             defaults: {
                 template: 'Heidelpay_Gateway/payment/heidelpay-invoice-secured-form',
-                hgwDobYear: '',
-                hgwDobMonth: '',
-                hgwDobDay: '',
-                hgwSalutation: '',
                 years: [null],
                 useShippingAddressAsBillingAddress: true
             },
@@ -105,17 +101,6 @@ define(
                         'hgw_salutation': this.hgwSalutation()
                     }
                 };
-            },
-
-            /**
-             * Returns the birthdate in ISO 8601 format.
-             *
-             * @returns {string}
-             */
-            getBirthdate: function () {
-                return moment(
-                    new Date(this.hgwDobYear(), this.hgwDobMonth(), this.hgwDobDay())
-                ).format('YYYY-MM-DD');
             },
 
             validate: function() {

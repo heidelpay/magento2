@@ -8,7 +8,7 @@ define(
         'Magento_Checkout/js/model/payment/additional-validators',
         'Magento_Customer/js/model/customer',
         'Magento_Checkout/js/model/quote',
-        'moment',
+        'moment'
     ],
     function ($, Component, placeOrderAction, urlBuilder, storage, additionalValidators, customer, quote, moment) {
         'use strict';
@@ -23,10 +23,6 @@ define(
 
             defaults: {
                 template: 'Heidelpay_Gateway/payment/heidelpay-santander-hire-purchase',
-                hgwDobYear: '',
-                hgwDobMonth: '',
-                hgwDobDay: '',
-                hgwSalutation: '',
                 years: [null],
                 useShippingAddressAsBillingAddress: true
             },
@@ -106,24 +102,12 @@ define(
             },
 
             /**
-             * Returns the birthdate in ISO 8601 format.
-             *
-             * @returns {string}
-             */
-            getBirthdate: function () {
-                return moment(
-                    new Date(this.hgwDobYear(), this.hgwDobMonth(), this.hgwDobDay())
-                ).format('YYYY-MM-DD');
-            },
-
-            /**
              * Returns true if validation succeeded
              *
              * @returns {*}
              */
             validate: function() {
                 var form = $('#hgw-santander-hire-purchase');
-
 
                 return form.validation() && form.validation('isValid');
             }

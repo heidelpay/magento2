@@ -14,7 +14,7 @@
 namespace Heidelpay\Gateway\PaymentMethods;
 
 use Exception;
-use Heidelpay\Gateway\Block\Info\Prepayment;
+use Heidelpay\Gateway\Block\Info\Prepayment as PrepaymentBlock;
 use Heidelpay\PhpPaymentApi\Exceptions\UndefinedTransactionModeException;
 use Heidelpay\PhpPaymentApi\PaymentMethods\PrepaymentPaymentMethod;
 use Magento\Sales\Model\Order;
@@ -39,7 +39,8 @@ class HeidelpayPrepaymentPaymentMethod extends HeidelpayAbstractPaymentMethod
         $this->_canAuthorize = true;
         $this->_canRefund = true;
         $this->_canRefundInvoicePartial = true;
-        $this->_formBlockType = Prepayment::class;
+        $this->_formBlockType = PrepaymentBlock::class;
+        $this->_infoBlockType = PrepaymentBlock::class;
     }
 
     /**

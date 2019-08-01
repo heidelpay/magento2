@@ -26,6 +26,7 @@ use Magento\Sales\Model\Order\Email\Sender\OrderCommentSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\OrderFactory;
 use Psr\Log\LoggerInterface;
+use Magento\Framework\Controller\ResultFactory;
 
 /**
  * Customer redirect to heidelpay payment or used to display the payment frontend to the customer
@@ -102,19 +103,6 @@ class Index extends HgwAbstract
         /** @var HeidelpayAbstractPaymentMethod $payment */
         $payment = $quote->getPayment()->getMethodInstance();
 
-        if($payment->getUseShippingAddressAsBillingAddress()) {
-            try {
-                $payment->validateEqualAddress($quote);
-            } catch (CheckoutValidationException $exception) {
-                $this->messageManager->addErrorMessage($exception->getMessage());
-                return $this->_redirect('checkout/cart/', ['_secure' => true]);
-            } catch (\Exception $exception) {
-                $this->messageManager->addErrorMessage($errorMessage);
-                return $this->_redirect('checkout/cart/', ['_secure' => true]);
-            }
-        }
-
-
         // get the response object from the initial request.
         /** @var HeidelpayResponse $response */
         $response = $payment->getHeidelpayUrl($quote, $this->getRequest()->getParams());
@@ -139,7 +127,7 @@ class Index extends HgwAbstract
 
         // get an error errorMessage for the given error code, and add it to the errorMessage container.
         $code = $response->getError()['code'];
-        $this->_logger->error('Heidelpay init error (' . $code . '): ' . $response->getError()['errorMessage']);
+        $this->_logger->error('Heidelpay init error (' . $code . '): ' . $response->getError()['message']);
         $errorMessage = $this->_paymentHelper->handleError($code);
         $this->messageManager->addErrorMessage($this->escaper->escapeHtml($errorMessage));
 

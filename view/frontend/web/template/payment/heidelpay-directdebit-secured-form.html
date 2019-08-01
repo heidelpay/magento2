@@ -166,7 +166,8 @@
 
                         <input type="hidden" name="payment[hgw_birthdate]"
                                id="hgwdds_birthdate"
-                               data-bind="value: getBirthdate"
+                               data-bind="value: getBirthdate()"
+                               data-validate="{'valid-date':true, 'is-customer-18': true}"
                         />
                     </div>
                 </div>

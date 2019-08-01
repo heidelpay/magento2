@@ -13,7 +13,7 @@
  */
 namespace Heidelpay\Gateway\PaymentMethods;
 
-use Heidelpay\Gateway\Block\Info\InvoiceSecured;
+use Heidelpay\Gateway\Block\Info\InvoiceSecured as InvoiceSecuredBlock;
 use Heidelpay\Gateway\Model\PaymentInformation;
 use Heidelpay\PhpPaymentApi\Exceptions\UndefinedTransactionModeException;
 use Heidelpay\PhpPaymentApi\PaymentMethods\InvoiceB2CSecuredPaymentMethod;
@@ -41,7 +41,8 @@ class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMetho
         $this->_canRefund               = true;
         $this->_canRefundInvoicePartial = true;
         $this->_usingBasket             = true;
-        $this->_formBlockType           = InvoiceSecured::class;
+        $this->_formBlockType           = InvoiceSecuredBlock::class;
+        $this->_infoBlockType           = InvoiceSecuredBlock::class;
         $this->useShippingAddressAsBillingAddress   = true;
     }
 
@@ -52,16 +53,7 @@ class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMetho
      */
     public function getHeidelpayUrl($quote, array $data = [])
     {
-        // create the collection factory
-        $paymentInfoCollection = $this->paymentInformationCollectionFactory->create();
-
-        // load the payment information by store id, customer email address and payment method
-        /** @var PaymentInformation $paymentInfo */
-        $paymentInfo = $paymentInfoCollection->loadByCustomerInformation(
-            $quote->getStoreId(),
-            $quote->getBillingAddress()->getEmail(),
-            $quote->getPayment()->getMethod()
-        );
+        $paymentInfo = $this->getPaymentInfo($quote);
 
         // set initial data for the request
         parent::getHeidelpayUrl($quote);
