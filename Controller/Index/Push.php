@@ -2,9 +2,26 @@
 
 namespace Heidelpay\Gateway\Controller\Index;
 
+use Heidelpay\Gateway\Controller\HgwAbstract;
+use Heidelpay\Gateway\Helper\Order as orderHelper;
 use Heidelpay\Gateway\Helper\Payment as PaymentHelper;
 use Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod;
+use Heidelpay\PhpPaymentApi\Exceptions\XmlResponseParserException;
+use Magento\Checkout\Model\Session as CheckoutSession;
+use Magento\Customer\Model\Session;
+use Magento\Customer\Model\Session as CustomerSession;
+use Magento\Customer\Model\Url;
 use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Framework\App\Action\Context;
+use Magento\Framework\App\Request\Http;
+use Magento\Framework\App\ResponseInterface;
+use Magento\Framework\Controller\ResultInterface;
+use Magento\Framework\Encryption\Encryptor;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\Url\Helper\Data;
+use Magento\Framework\View\Result\PageFactory;
+use Magento\Quote\Api\CartManagementInterface;
+use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Model\QuoteRepository;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
@@ -12,8 +29,9 @@ use Magento\Sales\Model\Order\Email\Sender\OrderCommentSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Order\Payment\Transaction;
+use Magento\Sales\Model\OrderFactory;
 use Magento\Sales\Model\OrderRepository;
-use Magento\Sales\Model\ResourceModel\Order\Collection;
+use Psr\Log\LoggerInterface;
 
 /**
  * heidelpay Push Controller
@@ -28,7 +46,7 @@ use Magento\Sales\Model\ResourceModel\Order\Collection;
  *
  * @package heidelpay\magento2\controllers
  */
-class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
+class Push extends HgwAbstract
 {
     /** @var OrderRepository $orderRepository */
     private $orderRepository;
@@ -38,51 +56,51 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
 
     /** @var QuoteRepository */
     private $quoteRepository;
-    /** @var \Heidelpay\Gateway\Helper\Order */
+    /** @var orderHelper */
     private $orderHelper;
 
     /**
-     * @param \Magento\Framework\App\Action\Context $context
-     * @param \Magento\Customer\Model\Session $customerSession
-     * @param \Magento\Checkout\Model\Session $checkoutSession
-     * @param \Magento\Sales\Model\OrderFactory $orderFactory
-     * @param \Magento\Framework\Url\Helper\Data $urlHelper
-     * @param \Psr\Log\LoggerInterface $logger
-     * @param \Magento\Quote\Api\CartManagementInterface $cartManagement
-     * @param \Magento\Quote\Api\CartRepositoryInterface $quoteObject
-     * @param \Magento\Framework\View\Result\PageFactory $resultPageFactory
+     * @param Context $context
+     * @param CustomerSession $customerSession
+     * @param CheckoutSession $checkoutSession
+     * @param OrderFactory $orderFactory
+     * @param Data $urlHelper
+     * @param LoggerInterface $logger
+     * @param CartManagementInterface $cartManagement
+     * @param CartRepositoryInterface $quoteObject
+     * @param PageFactory $resultPageFactory
      * @param PaymentHelper $paymentHelper
      * @param OrderSender $orderSender
      * @param InvoiceSender $invoiceSender
      * @param OrderCommentSender $orderCommentSender
-     * @param \Magento\Framework\Encryption\Encryptor $encryptor
-     * @param \Magento\Customer\Model\Url $customerUrl
+     * @param Encryptor $encryptor
+     * @param Url $customerUrl
      * @param OrderRepository $orderRepository
      * @param \Heidelpay\PhpPaymentApi\Push $heidelpayPush
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
      * @param QuoteRepository $quoteRepository
-     * @param \Heidelpay\Gateway\Helper\Order $orderHelper
+     * @param orderHelper $orderHelper
      */
     public function __construct(
-        \Magento\Framework\App\Action\Context $context,
-        \Magento\Customer\Model\Session $customerSession,
-        \Magento\Checkout\Model\Session $checkoutSession,
-        \Magento\Sales\Model\OrderFactory $orderFactory,
-        \Magento\Framework\Url\Helper\Data $urlHelper,
-        \Psr\Log\LoggerInterface $logger,
-        \Magento\Quote\Api\CartManagementInterface $cartManagement,
-        \Magento\Quote\Api\CartRepositoryInterface $quoteObject,
-        \Magento\Framework\View\Result\PageFactory $resultPageFactory,
+        Context $context,
+        CustomerSession $customerSession,
+        CheckoutSession $checkoutSession,
+        OrderFactory $orderFactory,
+        Data $urlHelper,
+        LoggerInterface $logger,
+        CartManagementInterface $cartManagement,
+        CartRepositoryInterface $quoteObject,
+        PageFactory $resultPageFactory,
         PaymentHelper $paymentHelper,
         OrderSender $orderSender,
         InvoiceSender $invoiceSender,
         OrderCommentSender $orderCommentSender,
-        \Magento\Framework\Encryption\Encryptor $encryptor,
-        \Magento\Customer\Model\Url $customerUrl,
+        Encryptor $encryptor,
+        Url $customerUrl,
         OrderRepository $orderRepository,
         \Heidelpay\PhpPaymentApi\Push $heidelpayPush,
         QuoteRepository $quoteRepository,
-        \Heidelpay\Gateway\Helper\Order $orderHelper
+        orderHelper $orderHelper
     ) {
         parent::__construct(
             $context,
@@ -109,12 +127,13 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
     }
 
     /**
-     * @return \Magento\Framework\App\ResponseInterface|\Magento\Framework\Controller\ResultInterface|void
-     * @throws \Heidelpay\PhpPaymentApi\Exceptions\XmlResponseParserException
+     * @return ResponseInterface|ResultInterface|void
+     * @throws XmlResponseParserException
+     * @throws NoSuchEntityException
      */
     public function execute()
     {
-        /** @var \Magento\Framework\App\Request\Http $request */
+        /** @var Http $request */
         $request = $this->getRequest();
 
         if (!$request->isPost()) {
@@ -169,7 +188,7 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
                         $this->_logger->error('Heidelpay - Response: Cannot submit the Quote. ' . $e->getMessage());
                         return;
                     }
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     $this->_logger->error('Heidelpay - Response: Cannot submit the Quote. ' . $e->getMessage());
                     return;
                 }
@@ -218,7 +237,7 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
 
                 // set the invoice states to 'paid', if no due is left.
                 if ($dueLeft <= 0.00) {
-                    /** @var \Magento\Sales\Model\Order\Invoice $invoice */
+                    /** @var Invoice $invoice */
                     foreach ($order->getInvoiceCollection() as $invoice) {
                         $invoice->setState(Invoice::STATE_PAID)->save();
                     }
