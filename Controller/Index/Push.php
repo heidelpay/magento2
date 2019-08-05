@@ -2,6 +2,7 @@
 
 namespace Heidelpay\Gateway\Controller\Index;
 
+use Heidelpay\Gateway\Helper\Response as ResponseHelper;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderCommentSender;
@@ -37,6 +38,9 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
     /** @var SearchCriteriaBuilder */
     private $searchCriteriaBuilder;
 
+    /** @var ResponseHelper */
+    private $repsonseHelper;
+
     /**
      * @param \Magento\Framework\App\Action\Context $context
      * @param \Magento\Customer\Model\Session $customerSession
@@ -56,6 +60,7 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
      * @param OrderRepository $orderRepository
      * @param \Heidelpay\PhpPaymentApi\Push $heidelpayPush
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param ResponseHelper $repsonseHelper
      */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
@@ -75,7 +80,8 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
         \Magento\Customer\Model\Url $customerUrl,
         OrderRepository $orderRepository,
         \Heidelpay\PhpPaymentApi\Push $heidelpayPush,
-        SearchCriteriaBuilder $searchCriteriaBuilder
+        SearchCriteriaBuilder $searchCriteriaBuilder,
+        ResponseHelper $repsonseHelper
     ) {
         parent::__construct(
             $context,
@@ -98,6 +104,7 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
         $this->orderRepository = $orderRepository;
         $this->heidelpayPush = $heidelpayPush;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->repsonseHelper = $repsonseHelper;
     }
 
     /**
@@ -135,6 +142,12 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
 
         $pushResponse = $this->heidelpayPush->getResponse();
         $this->_logger->debug('Push Response: ' . print_r($pushResponse, true));
+
+        // Stop processing if hash validation fails.
+        $remoteAddress = $this->getRequest()->getServer('REMOTE_ADDR');
+        if(!$this->repsonseHelper->validateSecurityHash($pushResponse, $remoteAddress)) {
+            return;
+        }
 
         list($paymentMethod, $paymentType) = $this->_paymentHelper->splitPaymentCode(
             $pushResponse->getPayment()->getCode()
