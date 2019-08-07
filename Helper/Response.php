@@ -12,7 +12,7 @@ use Magento\Framework\HTTP\ZendClientFactory;
 use Magento\Framework\Encryption\Encryptor;
 
 /**
- * Heidelpay payment helper
+ * Heidelpay response helper
  *
  * The payment helper is a collection of function to prepare an send
  *
