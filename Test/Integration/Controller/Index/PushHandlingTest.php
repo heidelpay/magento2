@@ -108,8 +108,6 @@ class PushHandlingTest extends IntegrationTestAbstract
 
         // Check Transaction
         $collection = $this->transactionFactory->create();
-
-        // Check Transaction
         /** @var \Heidelpay\Gateway\Model\Transaction $heidelpayTransaction */
         $heidelpayTransaction = $collection->loadByTransactionId($xml->Transaction->Identification->UniqueID);
         $this->assertNotNull($heidelpayTransaction);

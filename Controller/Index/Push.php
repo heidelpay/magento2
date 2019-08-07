@@ -8,7 +8,6 @@ use Heidelpay\Gateway\Helper\Payment as PaymentHelper;
 use Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod;
 use Heidelpay\PhpPaymentApi\Exceptions\XmlResponseParserException;
 use Magento\Checkout\Model\Session as CheckoutSession;
-use Magento\Customer\Model\Session;
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Customer\Model\Url;
 use Heidelpay\Gateway\Helper\Response as ResponseHelper;
@@ -105,7 +104,7 @@ class Push extends HgwAbstract
         OrderRepository $orderRepository,
         \Heidelpay\PhpPaymentApi\Push $heidelpayPush,
         QuoteRepository $quoteRepository,
-        orderHelper $orderHelper
+        orderHelper $orderHelper,
         SearchCriteriaBuilder $searchCriteriaBuilder,
         ResponseHelper $repsonseHelper
     ) {
