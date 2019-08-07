@@ -5,6 +5,7 @@ namespace Heidelpay\Gateway\Controller\Index;
 use Exception;
 use Heidelpay\Gateway\Controller\HgwAbstract;
 use Heidelpay\Gateway\Helper\Payment as HeidelpayHelper;
+use Heidelpay\Gateway\Helper\Response as ResponseHelper;
 use Heidelpay\Gateway\Model\PaymentInformation;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
@@ -70,6 +71,9 @@ class Response extends HgwAbstract
     /** @var OrderRepository */
     private $orderRepository;
 
+    /** @var ResponseHelper */
+    private $repsonseHelper;
+
     /**
      * heidelpay Response constructor.
      *
@@ -93,6 +97,7 @@ class Response extends HgwAbstract
      * @param PaymentInformationCollectionFactory $paymentInformationCollectionFactory ,
      * @param SalesHelper $salesHelper
      * @param OrderRepository $orderRepository
+     * @param ResponseHelper $repsonseHelper
      */
     public function __construct(
         Context $context,
@@ -114,7 +119,8 @@ class Response extends HgwAbstract
         QuoteRepository $quoteRepository,
         PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
         SalesHelper $salesHelper,
-        OrderRepository $orderRepository
+        OrderRepository $orderRepository,
+        ResponseHelper $repsonseHelper
     ) {
         parent::__construct(
             $context,
@@ -139,6 +145,7 @@ class Response extends HgwAbstract
         $this->paymentInformationCollectionFactory = $paymentInformationCollectionFactory;
         $this->salesHelper = $salesHelper;
         $this->orderRepository = $orderRepository;
+        $this->repsonseHelper = $repsonseHelper;
     }
 
     /**
@@ -189,7 +196,8 @@ class Response extends HgwAbstract
             return $result;
         }
 
-        if(!$this->validateSecurityHash($this->heidelpayResponse)) {
+        $remoteAddress = $this->getRequest()->getServer('REMOTE_ADDR');
+        if(!$this->repsonseHelper->validateSecurityHash($this->heidelpayResponse, $remoteAddress)) {
             return $result;
         }
 
@@ -279,7 +287,7 @@ class Response extends HgwAbstract
     {
         try {
             if ($order && $order->getId()) {
-                $this->_logger->debug('heidelpay Response - sending mail for order' . $order->getIncrementId());
+                $this->_logger->debug('heidelpay Response - sending mail for order ' . $order->getIncrementId());
                 $this->_orderSender->send($order);
             }
         } catch (Exception $e) {
@@ -305,35 +313,29 @@ class Response extends HgwAbstract
     }
 
     /**
-     * Validate Hash to prevent manipulation
-     * @param HeidelpayResponse $response
-     * @return bool
+     * If the customer is a guest, we'll delete the additional payment information, which
+     * is only used for customer recognition.
+     * @param Quote $quote
+     * @throws Exception
      */
-    protected function validateSecurityHash($response)
+    protected function handleAdditionalPaymentInformation($quote)
     {
-        $secret = $this->_encryptor->exportKeys();
-        $identificationTransactionId = $response->getIdentification()->getTransactionId();
+        if ($quote !== null && $quote->getCustomerIsGuest()) {
+            // create a new instance for the payment information collection.
+            $paymentInfoCollection = $this->paymentInformationCollectionFactory->create();
 
-        $this->_logger->debug('Heidelpay secret: ' . $secret);
-        $this->_logger->debug('Heidelpay identificationTransactionId: ' . $identificationTransactionId);
+            // load the payment information and delete it.
+            /** @var PaymentInformation $paymentInfo */
+            $paymentInfo = $paymentInfoCollection->loadByCustomerInformation(
+                $quote->getStoreId(),
+                $quote->getBillingAddress()->getEmail(),
+                $quote->getPayment()->getMethod()
+            );
 
-        try {
-            $response->verifySecurityHash($secret, $identificationTransactionId);
-            return true;
-        } catch (HashVerificationException $e) {
-            $this->_logger->critical('Heidelpay Response - HashVerification Exception: ' . $e->getMessage());
-            $this->_logger->critical(
-                'Heidelpay Response - Received request form server '
-                . $this->getRequest()->getServer('REMOTE_ADDR')
-                . ' with an invalid hash. This could be some kind of manipulation.'
-            );
-            $this->_logger->critical(
-                'Heidelpay Response - Reference secret hash: '
-                . $response->getCriterion()->getSecretHash()
-            );
-            return false;
+            if (!$paymentInfo->isEmpty()) {
+                $paymentInfo->delete();
+            }
         }
     }
-
     //</editor-fold>
 }
