@@ -3,6 +3,7 @@
 namespace Heidelpay\Gateway\Controller\Index;
 
 use Exception;
+use Heidelpay\Gateway\Controller\HgwAbstract;
 use Heidelpay\Gateway\Helper\Payment as HeidelpayHelper;
 use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory;
 use Heidelpay\Gateway\Model\Transaction as HeidelpayTransaction;
@@ -19,7 +20,6 @@ use Magento\Framework\Url\Helper\Data as UrlHelper;
 use Magento\Framework\View\Result\PageFactory;
 use Magento\Quote\Api\CartManagementInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
-use Magento\Sales\Helper\Data;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderCommentSender;
@@ -42,16 +42,13 @@ use Psr\Log\LoggerInterface;
  *
  * @package heidelpay\magento2\controllers
  */
-class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
+class Redirect extends HgwAbstract
 {
     /** @var Response The heidelpay response class */
     private $heidelpayResponse;
 
     /** @var CollectionFactory */
     private $transactionCollectionFactory;
-
-    /** @var Data */
-    private $salesHelper;
 
     /**
      * heidelpay Redirect constructor.
@@ -66,7 +63,6 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
      * @param CartRepositoryInterface $quoteObject
      * @param PageFactory $resultPageFactory
      * @param HeidelpayHelper $paymentHelper
-     * @param Data $salesHelper
      * @param OrderSender $orderSender
      * @param InvoiceSender $invoiceSender
      * @param OrderCommentSender $orderCommentSender
@@ -194,13 +190,15 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
             $this->_paymentHelper->handleError($this->heidelpayResponse->getError()['code'])
         );
 
-        return $this->_redirect('checkout/cart/', ['_secure' => true]);
+        return $redirect;
     }
 
-    /** Update session Information.
-     * @param $quoteId
+    /** Update customer's session Information.
+     * @param int $quoteId
      * @param Order $order
      * @param array $data
+     *
+     * @return void
      */
     protected function updateSessionData($quoteId, Order $order, array $data)
     {
