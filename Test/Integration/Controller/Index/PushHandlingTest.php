@@ -9,10 +9,12 @@
 namespace Heidelpay\Gateway\Test\Integration\Controller\Index;
 
 
+use Heidelpay\Gateway\Helper\Response as ResponseHelper;
 use Heidelpay\Gateway\Model\ResourceModel\Transaction\Collection;
 use Heidelpay\Gateway\Model\Transaction;
 use Heidelpay\Gateway\Test\Integration\IntegrationTestAbstract;
 use Heidelpay\Gateway\Test\Integration\data\provider\PushResponse;
+use Heidelpay\Gateway\Test\Mocks\Helper\Response as ResponseHelperMock;
 use Magento\Customer\Api\CustomerManagementInterface;
 use Magento\Customer\Model\Customer;
 use Magento\Framework\Exception\CouldNotSaveException;
@@ -282,6 +284,10 @@ class PushHandlingTest extends IntegrationTestAbstract
      */
     protected function prepareRequest($paymentCode, $paymentMethod)
     {
+        $this->getObjectManager()->configure(
+            ['preferences' => [ResponseHelper::class => ResponseHelperMock::class]]
+        );
+
         /** Step 1 - Prepare data. Quote, Customer, XML */
         list($customer, $quote) = $this->generateQuote($paymentMethod);
 
