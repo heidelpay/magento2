@@ -166,7 +166,7 @@ class Redirect extends HgwAbstract
             // Check whether order was loaded correctly
             if($order === null || $order->isEmpty()) {
                 $this->_logger->error(
-                    'Heidelpay - Redirect: Cannot receive order.'
+                    'Heidelpay - Redirect: Cannot receive order. Order creation might have failed.'
                 );
                 $this->messageManager->addErrorMessage(
                     __('An unexpected error occurred. Please contact us to get further information.')
