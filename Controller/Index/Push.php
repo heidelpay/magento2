@@ -7,6 +7,7 @@ use Heidelpay\Gateway\Helper\Order as orderHelper;
 use Heidelpay\Gateway\Helper\Payment as PaymentHelper;
 use Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod;
 use Heidelpay\PhpPaymentApi\Exceptions\XmlResponseParserException;
+use Heidelpay\PhpPaymentApi\Push as heidelpayPush;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Customer\Model\Url;
@@ -51,7 +52,7 @@ class Push extends HgwAbstract
     /** @var OrderRepository $orderRepository */
     private $orderRepository;
 
-    /** @var \Heidelpay\PhpPaymentApi\Push */
+    /** @var heidelpayPush */
     private $heidelpayPush;
 
     /** @var QuoteRepository */
@@ -79,7 +80,7 @@ class Push extends HgwAbstract
      * @param Encryptor $encryptor
      * @param Url $customerUrl
      * @param OrderRepository $orderRepository
-     * @param \Heidelpay\PhpPaymentApi\Push $heidelpayPush
+     * @param heidelpayPush $heidelpayPush
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
      * @param QuoteRepository $quoteRepository
      * @param orderHelper $orderHelper
@@ -102,7 +103,7 @@ class Push extends HgwAbstract
         Encryptor $encryptor,
         Url $customerUrl,
         OrderRepository $orderRepository,
-        \Heidelpay\PhpPaymentApi\Push $heidelpayPush,
+        heidelpayPush $heidelpayPush,
         QuoteRepository $quoteRepository,
         orderHelper $orderHelper,
         SearchCriteriaBuilder $searchCriteriaBuilder,

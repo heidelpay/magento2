@@ -9,10 +9,15 @@
 namespace Heidelpay\Gateway\Test\Integration\Controller\Index;
 
 
+use Heidelpay\Gateway\Model\ResourceModel\Transaction\Collection;
+use Heidelpay\Gateway\Model\Transaction;
 use Heidelpay\Gateway\Test\Integration\IntegrationTestAbstract;
 use Heidelpay\Gateway\Test\Integration\data\provider\PushResponse;
 use Magento\Customer\Api\CustomerManagementInterface;
 use Magento\Customer\Model\Customer;
+use Magento\Framework\Exception\CouldNotSaveException;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\Quote\Payment;
 use Magento\Sales\Model\Order;
@@ -86,9 +91,9 @@ class PushHandlingTest extends IntegrationTestAbstract
      * @magentoConfigFixture default_store currency/options/allow EUR
      * @param string $paymentCode
      * @param $paymentMethod
-     * @throws \Magento\Framework\Exception\CouldNotSaveException
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws CouldNotSaveException
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
      */
     public function testPushCreatesNewTransaction($paymentCode, $paymentMethod)
     {
@@ -102,16 +107,17 @@ class PushHandlingTest extends IntegrationTestAbstract
         $fetchedOrder = $this->orderHelper->fetchOrder($quote->getId());
 
         $this->assertNotNull($fetchedQuote);
-        $this->assertEquals('0', $fetchedQuote->getIsActive());
 
         $this->assertFalse($fetchedOrder->isEmpty(), 'Order creation failed: Order is empty');
 
         // Check Transaction
         $collection = $this->transactionFactory->create();
-        /** @var \Heidelpay\Gateway\Model\Transaction $heidelpayTransaction */
+        /** @var Transaction $heidelpayTransaction */
         $heidelpayTransaction = $collection->loadByTransactionId($xml->Transaction->Identification->UniqueID);
         $this->assertNotNull($heidelpayTransaction);
         $this->assertFalse($heidelpayTransaction->isEmpty());
+
+        $this->assertEquals('0', $fetchedQuote->getIsActive());
 
         $isPreAuthorization = 'PA' ===$this->paymentHelper->splitPaymentCode($paymentCode)[1];
          // Check Amounts
@@ -166,16 +172,16 @@ class PushHandlingTest extends IntegrationTestAbstract
      * @magentoConfigFixture default_store currency/options/allow EUR
      * @param string $paymentCode
      * @param $paymentMethod
-     * @throws \Magento\Framework\Exception\CouldNotSaveException
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws CouldNotSaveException
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
      */
     public function testCreateNoOrderFromInvalidTransactionTypes($paymentCode, $paymentMethod)
     {
         list($quote, $xml) = $this->prepareRequest($paymentCode, $paymentMethod);
         $this->dispatch(self::CONTROLLER_PATH);
 
-        /** Step 4 - Evaluate end results (heidelpay)Transaction, Quotes, Orders */
+        /** Evaluate end results (heidelpay)Transaction, Quotes, Orders */
         $fetchedQuote = $this->quoteRepository->get($quote->getId());
 
         /** @var Order $order */
@@ -187,6 +193,7 @@ class PushHandlingTest extends IntegrationTestAbstract
         $this->assertTrue($fetchedOrder->isEmpty(), 'no Order should be created here');
 
         // Check Transaction
+        /** @var Collection $collection */
         $collection = $this->transactionFactory->create();
 
         // Check Transaction
@@ -202,10 +209,10 @@ class PushHandlingTest extends IntegrationTestAbstract
 
     /**
      * @return array
-     * @throws \Magento\Framework\Exception\CouldNotSaveException
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
-     * @throws \Magento\Framework\Exception\CouldNotSaveException
+     * @throws CouldNotSaveException
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
+     * @throws CouldNotSaveException
      */
     protected function generateQuote($paymentMethod)
     {
@@ -269,9 +276,9 @@ class PushHandlingTest extends IntegrationTestAbstract
      * @param $paymentCode
      * @param $paymentMethod
      * @return array
-     * @throws \Magento\Framework\Exception\CouldNotSaveException
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws CouldNotSaveException
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
      */
     protected function prepareRequest($paymentCode, $paymentMethod)
     {
