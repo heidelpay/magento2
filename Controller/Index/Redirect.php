@@ -2,14 +2,30 @@
 
 namespace Heidelpay\Gateway\Controller\Index;
 
+use Exception;
+use Heidelpay\Gateway\Controller\HgwAbstract;
 use Heidelpay\Gateway\Helper\Payment as HeidelpayHelper;
 use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory;
+use Heidelpay\Gateway\Model\Transaction as HeidelpayTransaction;
+use Heidelpay\MessageCodeMapper\Exceptions\MissingLocaleFileException;
 use Heidelpay\PhpPaymentApi\Response;
-use Magento\Sales\Helper\Data;
+use Magento\Checkout\Model\Session as CheckoutSession;
+use Magento\Customer\Model\Session as CustomerSession;
+use Magento\Customer\Model\Url;
+use Magento\Framework\App\Action\Context;
+use Magento\Framework\App\ResponseInterface;
+use Magento\Framework\Controller\ResultInterface;
+use Magento\Framework\Encryption\Encryptor;
+use Magento\Framework\Url\Helper\Data as UrlHelper;
+use Magento\Framework\View\Result\PageFactory;
+use Magento\Quote\Api\CartManagementInterface;
+use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderCommentSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
+use Magento\Sales\Model\OrderFactory;
+use Psr\Log\LoggerInterface;
 
 /**
  * Redirect customer back to shops success or error page
@@ -26,7 +42,7 @@ use Magento\Sales\Model\Order\Email\Sender\OrderSender;
  *
  * @package heidelpay\magento2\controllers
  */
-class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
+class Redirect extends HgwAbstract
 {
     /** @var Response The heidelpay response class */
     private $heidelpayResponse;
@@ -34,47 +50,42 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
     /** @var CollectionFactory */
     private $transactionCollectionFactory;
 
-    /** @var Data */
-    private $salesHelper;
-
     /**
      * heidelpay Redirect constructor.
      *
-     * @param \Magento\Framework\App\Action\Context $context
-     * @param \Magento\Customer\Model\Session $customerSession
-     * @param \Magento\Checkout\Model\Session $checkoutSession
-     * @param \Magento\Sales\Model\OrderFactory $orderFactory
-     * @param \Magento\Framework\Url\Helper\Data $urlHelper
-     * @param \Psr\Log\LoggerInterface $logger
-     * @param \Magento\Quote\Api\CartManagementInterface $cartManagement
-     * @param \Magento\Quote\Api\CartRepositoryInterface $quoteObject
-     * @param \Magento\Framework\View\Result\PageFactory $resultPageFactory
+     * @param Context $context
+     * @param CustomerSession $customerSession
+     * @param CheckoutSession $checkoutSession
+     * @param OrderFactory $orderFactory
+     * @param UrlHelper $urlHelper
+     * @param LoggerInterface $logger
+     * @param CartManagementInterface $cartManagement
+     * @param CartRepositoryInterface $quoteObject
+     * @param PageFactory $resultPageFactory
      * @param HeidelpayHelper $paymentHelper
-     * @param Data $salesHelper
      * @param OrderSender $orderSender
      * @param InvoiceSender $invoiceSender
      * @param OrderCommentSender $orderCommentSender
-     * @param \Magento\Framework\Encryption\Encryptor $encryptor
-     * @param \Magento\Customer\Model\Url $customerUrl
+     * @param Encryptor $encryptor
+     * @param Url $customerUrl
      * @param CollectionFactory $transactionCollectionFactory
      */
     public function __construct(
-        \Magento\Framework\App\Action\Context $context,
-        \Magento\Customer\Model\Session $customerSession,
-        \Magento\Checkout\Model\Session $checkoutSession,
-        \Magento\Sales\Model\OrderFactory $orderFactory,
-        \Magento\Framework\Url\Helper\Data $urlHelper,
-        \Psr\Log\LoggerInterface $logger,
-        \Magento\Quote\Api\CartManagementInterface $cartManagement,
-        \Magento\Quote\Api\CartRepositoryInterface $quoteObject,
-        \Magento\Framework\View\Result\PageFactory $resultPageFactory,
+        Context $context,
+        CustomerSession $customerSession,
+        CheckoutSession $checkoutSession,
+        OrderFactory $orderFactory,
+        UrlHelper $urlHelper,
+        LoggerInterface $logger,
+        CartManagementInterface $cartManagement,
+        CartRepositoryInterface $quoteObject,
+        PageFactory $resultPageFactory,
         HeidelpayHelper $paymentHelper,
-        Data $salesHelper,
         OrderSender $orderSender,
         InvoiceSender $invoiceSender,
         OrderCommentSender $orderCommentSender,
-        \Magento\Framework\Encryption\Encryptor $encryptor,
-        \Magento\Customer\Model\Url $customerUrl,
+        Encryptor $encryptor,
+        Url $customerUrl,
         CollectionFactory $transactionCollectionFactory
     ) {
         parent::__construct(
@@ -96,36 +107,35 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
         );
 
         $this->transactionCollectionFactory = $transactionCollectionFactory;
-        $this->salesHelper = $salesHelper;
     }
 
     /**
-     * @return \Magento\Framework\App\ResponseInterface|\Magento\Framework\Controller\ResultInterface
-     * @throws \Heidelpay\MessageCodeMapper\Exceptions\MissingLocaleFileException
+     * @return ResponseInterface|ResultInterface
+     * @throws MissingLocaleFileException
      */
     public function execute()
     {
-        $session = $this->getCheckout();
-        $quoteId = $session->getQuoteId();
+        $quoteId = $this->getCheckout()->getQuoteId();
+        $redirect = $this->_redirect('checkout/cart/', ['_secure' => true]);
 
         if (empty($quoteId)) {
             $this->_logger->error('Heidelpay - Redirect: Called with empty quoteId');
-            return $this->_redirect('checkout/cart/', ['_secure' => true]);
+            return $redirect;
         }
 
-        $data = null;
+        $transactionData = null;
 
         try {
-            /** @var \Heidelpay\Gateway\Model\Transaction $transaction */
+            /** @var HeidelpayTransaction $transaction */
             $transaction = $this->transactionCollectionFactory->create()->loadByQuoteId($quoteId);
-            $data = $transaction->getJsonResponse();
-        } catch (\Exception $e) {
+            $transactionData = $transaction->getJsonResponse();
+        } catch (Exception $e) {
             $this->_logger->error('Heidelpay - Redirect: Load transaction fail. ' . $e->getMessage());
         }
 
         // if our data is still null, we got no transaction data - so nothing to work with.
         // - redirect the user back to the checkout cart.
-        if ($data === null) {
+        if ($transactionData === null) {
             $this->_logger->error(
                 'Heidelpay - Redirect: Empty transaction data->jsonResponse. (no data was stored in Response?)'
             );
@@ -135,11 +145,11 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
                 __('An unexpected error occurred. Please contact us to get further information.')
             );
 
-            return $this->_redirect('checkout/cart/', ['_secure' => true]);
+            return $redirect;
         }
 
         // initialize the Response object with data from the transaction.
-        $this->heidelpayResponse = Response::fromPost($data);
+        $this->heidelpayResponse = Response::fromPost($transactionData);
 
         // set Parameters for success page
         if ($this->heidelpayResponse->isSuccess()) {
@@ -147,27 +157,25 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
             $order = null;
             try {
                 $order = $this->_orderFactory->create()->loadByAttribute('quote_id', $quoteId);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->_logger->error(
                     'Heidelpay - Redirect: Cannot receive order.' . $e->getMessage()
                 );
             }
-            $session->clearHelperData();
 
-            // set QuoteIds
-            $session->setLastQuoteId($quoteId)
-                ->setLastSuccessQuoteId($quoteId);
+            // Check whether order was loaded correctly
+            if($order === null || $order->isEmpty()) {
+                $this->_logger->error(
+                    'Heidelpay - Redirect: Cannot receive order. Order creation might have failed.'
+                );
+                $this->messageManager->addErrorMessage(
+                    __('An unexpected error occurred. Please contact us to get further information.')
+                );
 
-            // set OrderIds
-            $session->setLastOrderId($order->getId())
-                ->setLastRealOrderId($order->getIncrementId())
-                ->setLastOrderStatus($order->getStatus());
+                return $redirect;
+            }
 
-            $additionalPaymentInformation = $order->getPayment()
-                ->getMethodInstance()
-                ->additionalPaymentInformation($data);
-
-            $this->_checkoutSession->setHeidelpayInfo($additionalPaymentInformation);
+            $this->updateSessionData($quoteId, $order, $transactionData);
             $this->_logger->debug('Heidelpay - Redirect: Redirecting customer to success page.');
 
             return $this->_redirect('checkout/onepage/success', ['_secure' => true]);
@@ -182,6 +190,34 @@ class Redirect extends \Heidelpay\Gateway\Controller\HgwAbstract
             $this->_paymentHelper->handleError($this->heidelpayResponse->getError()['code'])
         );
 
-        return $this->_redirect('checkout/cart/', ['_secure' => true]);
+        return $redirect;
+    }
+
+    /** Update customer's session Information.
+     * @param int $quoteId
+     * @param Order $order
+     * @param array $data
+     *
+     * @return void
+     */
+    protected function updateSessionData($quoteId, Order $order, array $data)
+    {
+        $checkoutSession = $this->getCheckout();
+        $checkoutSession->clearHelperData();
+
+        // set QuoteIds
+        $checkoutSession->setLastQuoteId($quoteId)
+            ->setLastSuccessQuoteId($quoteId);
+
+        // set OrderIds
+        $checkoutSession->setLastOrderId($order->getId())
+            ->setLastRealOrderId($order->getIncrementId())
+            ->setLastOrderStatus($order->getStatus());
+
+        $additionalPaymentInformation = $order->getPayment()
+            ->getMethodInstance()
+            ->additionalPaymentInformation($data);
+
+        $checkoutSession->setHeidelpayInfo($additionalPaymentInformation);
     }
 }

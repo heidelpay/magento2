@@ -7,6 +7,9 @@ This project does not follow a versioning standard. Versions are crafted after t
 ### Added
 - Hash validation to push requests.
 
+### Changed
+- Redirect controller: redirect to cart if oder could not be loaded correctly.
+
 ## 19.7.29
 
 ### Added
