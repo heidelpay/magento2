@@ -170,7 +170,7 @@ class Push extends HgwAbstract
         }
 
         $pushResponse = $this->heidelpayPush->getResponse();
-        $data = $this->_paymentHelper->getDataFromResponse($pushResponse);
+        $transactionData = $this->_paymentHelper->getDataFromResponse($pushResponse);
         $this->_logger->debug('Push Response: ' . print_r($pushResponse, true));
 
         // Stop processing if hash validation fails.
@@ -183,7 +183,7 @@ class Push extends HgwAbstract
             $pushResponse->getPayment()->getCode()
         );
 
-                // in case of receipts, we process the push message for receipts.
+        // Only process transactions that my potentially create new order, this includes receipts receipts.
         if ($pushResponse->isSuccess() && $this->_paymentHelper->isNewOrderType($paymentType)) {
 
             $transactionId = $pushResponse->getIdentification()->getTransactionId();
@@ -192,7 +192,7 @@ class Push extends HgwAbstract
 
             // create order if it doesn't exists already.
             if ($order === null || $order->isEmpty()) {
-                $this->_paymentHelper->saveHeidelpayTransaction($pushResponse, $data, 'PUSH');
+                $this->_paymentHelper->saveHeidelpayTransaction($pushResponse, $transactionData, 'PUSH');
                 $this->_logger->debug('heidelpay Push - Order does not exist for transaction. heidelpay transaction id: '
                     . $transactionId);
 
@@ -208,7 +208,7 @@ class Push extends HgwAbstract
                     return;
                 }
 
-                $this->_paymentHelper->mapStatus($data, $order);
+                $this->_paymentHelper->mapStatus($transactionData, $order);
                 $this->_logger->debug('order status: ' . $order->getStatus());
                 $this->orderHelper->handleOrderMail($order);
                 $this->orderHelper->handleInvoiceMails($order);

@@ -260,6 +260,7 @@ class PushHandlingTest extends IntegrationTestAbstract
      */
     protected function preparePushNotification($paymentCode, $quote, $customer)
     {
+        /** @var PushResponse $pushProvider */
         $pushProvider = $this->createObject(PushResponse::class);
 
         $pushSpecification = [
@@ -284,11 +285,12 @@ class PushHandlingTest extends IntegrationTestAbstract
      */
     protected function prepareRequest($paymentCode, $paymentMethod)
     {
+        /** Disable hash validation */
         $this->getObjectManager()->configure(
             ['preferences' => [ResponseHelper::class => ResponseHelperMock::class]]
         );
 
-        /** Step 1 - Prepare data. Quote, Customer, XML */
+        /** Prepare data. Quote, Customer, XML */
         list($customer, $quote) = $this->generateQuote($paymentMethod);
 
         /** @var PushResponse $pushProvider */
