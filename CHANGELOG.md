@@ -7,6 +7,9 @@ This project does not follow a versioning standard. Versions are crafted after t
 ### Added
 - Hash validation to push requests.
 
+### Fixed
+- Use the correct store config now for orders made in sub stores.
+
 ### Changed
 - Redirect controller: redirect to cart if oder could not be loaded correctly.
 

@@ -308,7 +308,8 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
         }
 
         // skip the bottom part, if the booking mode is not authorization.
-        if ($this->getBookingMode() !== BookingMode::AUTHORIZATION) {
+        $storeId = $payment->getOrder()->getStoreId();
+        if ($this->getBookingMode($storeId) !== BookingMode::AUTHORIZATION) {
             return $this;
         }
 
@@ -331,7 +332,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
         }
 
         // set authentication data
-        $this->performAuthentication();
+        $this->performAuthentication($storeId);
 
         // set basket data
         $this->_heidelpayPaymentMethod->getRequest()->basketData(
@@ -411,7 +412,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
         }
 
         // set authentication data
-        $this->performAuthentication();
+        $this->performAuthentication($payment->getOrder()->getStoreId());
 
         // set basket data
         $this->_heidelpayPaymentMethod->getRequest()->basketData(
@@ -744,15 +745,20 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
 
     /**
      * Set request authentication
+     * @param int|null $storeId
      */
-    private function performAuthentication()
+    private function performAuthentication($storeId = null)
     {
         $this->_heidelpayPaymentMethod->getRequest()->authentification(
-            $this->mainConfig->getSecuritySender(),
-            $this->mainConfig->getUserLogin(),
-            $this->mainConfig->getUserPasswd(),
-            $this->paymentConfig->getChannel(),
-            $this->mainConfig->isSandboxModeActive()
+            $this->mainConfig->getSecuritySender($storeId),
+            $this->mainConfig->getUserLogin($storeId),
+            $this->mainConfig->getUserPasswd($storeId),
+            $this->paymentConfig->getChannel($storeId),
+            $this->mainConfig->isSandboxModeActive($storeId)
+        );
+
+        $this->_logger->debug(
+            'heidelpay - Authentication with Channel: ' . print_r($this->paymentConfig->getChannel($storeId), 1)
         );
     }
 

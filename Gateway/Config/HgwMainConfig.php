@@ -68,11 +68,12 @@ class HgwMainConfig implements HgwMainConfigInterface
     /**
      * Returns true if the sandbox mode is enabled.
      *
+     * @param int|null $storeId
      * @return bool
      */
-    public function isSandboxModeActive()
+    public function isSandboxModeActive($storeId = null)
     {
-        return $this->isSetFlag(HgwMainConfigInterface::FLAG_SANDBOXMODE);
+        return $this->isSetFlag(HgwMainConfigInterface::FLAG_SANDBOXMODE, $storeId);
     }
 
     /**
@@ -88,31 +89,34 @@ class HgwMainConfig implements HgwMainConfigInterface
     /**
      * Returns the security sender property from config.
      *
+     * @param int|null $storeId
      * @return mixed
      */
-    public function getSecuritySender()
+    public function getSecuritySender($storeId = null)
     {
-        return $this->getValue(HgwMainConfigInterface::CONFIG_SECURITY_SENDER);
+        return $this->getValue(HgwMainConfigInterface::CONFIG_SECURITY_SENDER, $storeId);
     }
 
     /**
      * Returns the user login property from config.
      *
+     * @param int|null $storeId
      * @return mixed
      */
-    public function getUserLogin()
+    public function getUserLogin($storeId = null)
     {
-        return $this->getValue(HgwMainConfigInterface::CONFIG_USER_LOGIN);
+        return $this->getValue(HgwMainConfigInterface::CONFIG_USER_LOGIN, $storeId);
     }
 
     /**
      * Returns the user password property from config.
      *
+     * @param int|null $storeId
      * @return mixed
      */
-    public function getUserPasswd()
+    public function getUserPasswd($storeId = null)
     {
-        return $this->getValue(HgwMainConfigInterface::CONFIG_USER_PASSWD);
+        return $this->getValue(HgwMainConfigInterface::CONFIG_USER_PASSWD, $storeId);
     }
 
     /**
