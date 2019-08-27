@@ -6,6 +6,7 @@ This project does not follow a versioning standard. Versions are crafted after t
 ## xx.xx.xx
 ### Added
 - Hash validation to push requests.
+- Compatibility with Magento 2.3
 
 ### Changed
 - Redirect controller: redirect to cart if oder could not be loaded correctly.
