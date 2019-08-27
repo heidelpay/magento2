@@ -8,6 +8,9 @@ This project does not follow a versioning standard. Versions are crafted after t
 - Hash validation to push requests.
 - Compatibility with Magento 2.3
 
+### Fixed
+- Use the correct store config now for orders made in sub stores.
+
 ### Changed
 - Redirect controller: redirect to cart if oder could not be loaded correctly.
 

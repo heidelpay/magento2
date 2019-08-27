@@ -95,6 +95,7 @@ class Save extends \Magento\Shipping\Controller\Adminhtml\Order\Shipment\Save
         // get the payment method instance and the heidelpay method instance
         /** @var HeidelpayAbstractPaymentMethod $method */
         $method = $order->getPayment()->getMethodInstance();
+        $storeId = $order->getStoreId();
 
         // only fire the shipping when a heidelpay payment method is used.
         if ($method instanceof HeidelpayAbstractPaymentMethod) {
@@ -108,13 +109,12 @@ class Save extends \Magento\Shipping\Controller\Adminhtml\Order\Shipment\Save
 
                 /** @var HgwBasePaymentConfigInterface $methodConfig */
                 $methodConfig = $method->getConfig();
-
                 $heidelpayMethod->getRequest()->authentification(
-                    $mainConfig->getSecuritySender(),
-                    $mainConfig->getUserLogin(),
-                    $mainConfig->getUserPasswd(),
-                    $methodConfig->getChannel(),
-                    $mainConfig->isSandboxModeActive()
+                    $mainConfig->getSecuritySender($storeId),
+                    $mainConfig->getUserLogin($storeId),
+                    $mainConfig->getUserPasswd($storeId),
+                    $methodConfig->getChannel($storeId),
+                    $mainConfig->isSandboxModeActive($storeId)
                 );
 
                 // set the basket data (for amount and currency and a secret hash for fraud checking)
