@@ -52,18 +52,25 @@ class HgwMainConfig implements HgwMainConfigInterface
      */
     private function getValue($parameter, $storeId = null)
     {
-        return $this->scopeConfig->getValue($this->pathPattern . $parameter, ScopeInterface::SCOPE_STORE, $storeId);
+        return $this->scopeConfig->getValue(
+            $this->pathPattern . $parameter,
+            ScopeInterface::SCOPE_STORE,
+            $storeId);
     }
 
     /**
      * Retrieve config flag by path and scope
      *
      * @param $parameter
+     * @param int|null $storeId
      * @return bool
      */
-    private function isSetFlag($parameter)
+    private function isSetFlag($parameter, $storeId = null)
     {
-        return (bool) $this->scopeConfig->isSetFlag($this->pathPattern . $parameter, ScopeInterface::SCOPE_STORE);
+        return (bool) $this->scopeConfig->isSetFlag(
+            $this->pathPattern . $parameter,
+            ScopeInterface::SCOPE_STORE,
+            $storeId);
     }
 
     /**
