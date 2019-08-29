@@ -47,11 +47,12 @@ class HgwMainConfig implements HgwMainConfigInterface
      * Retrieve config value by path and scope.
      *
      * @param $parameter
+     * @param $storeId
      * @return mixed
      */
-    private function getValue($parameter)
+    private function getValue($parameter, $storeId = null)
     {
-        return $this->scopeConfig->getValue($this->pathPattern . $parameter, ScopeInterface::SCOPE_STORE);
+        return $this->scopeConfig->getValue($this->pathPattern . $parameter, ScopeInterface::SCOPE_STORE, $storeId);
     }
 
     /**
