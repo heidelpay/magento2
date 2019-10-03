@@ -28,7 +28,7 @@ For more information please visit -http://dev.heidelpay.com/magento2/
 
 ## SYSTEM REQUIREMENTS
 
-This extension requires PHP 5.6 or PHP 7.0. 
+This extension requires PHP 5.6, PHP 7.0 or PHP 7.1. 
 It also depends on the Heidelpay php-payment-api library, which will be installed along with the plugin.  
 
 ## LICENSE
