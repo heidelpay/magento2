@@ -3,6 +3,7 @@
 [![PHP 5.6](https://img.shields.io/badge/php-5.6-blue.svg)](http://www.php.net)
 [![PHP 7.0](https://img.shields.io/badge/php-7.0-blue.svg)](http://www.php.net)
 [![PHP 7.1](https://img.shields.io/badge/php-7.1-blue.svg)](http://www.php.net)
+[![PHP 7.2](https://img.shields.io/badge/php-7.2-blue.svg)](http://www.php.net)
 
 ![Logo](http://dev.heidelpay.com/devHeidelpay_400_180.jpg)
 
@@ -28,7 +29,7 @@ For more information please visit -http://dev.heidelpay.com/magento2/
 
 ## SYSTEM REQUIREMENTS
 
-This extension requires PHP 5.6 or PHP 7.0. 
+This extension requires PHP 5.6, PHP 7.0, PHP 7.1 or PHP 7.2. 
 It also depends on the Heidelpay php-payment-api library, which will be installed along with the plugin.  
 
 ## LICENSE
