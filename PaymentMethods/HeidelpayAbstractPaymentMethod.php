@@ -340,7 +340,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
         }
 
         // set authentication data
-        $this->performAuthentication($storeId);
+        $this->setAuthentication($storeId);
 
         // set basket data
         $this->_heidelpayPaymentMethod->getRequest()->basketData(
@@ -405,7 +405,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
 
         $captureArray = $this->getTransactionsToRefund($payment);
         $capture = reset($captureArray);
-        // set authentication data
+
         /** @var Transaction $transactionInfo */
         $transactionInfo = $collection->loadByTransactionId($capture->getTxnId());
 
@@ -422,7 +422,8 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
             );
         }
 
-        $this->performAuthentication($payment->getOrder()->getStoreId());
+        // set authentication data
+        $this->setAuthentication($payment->getOrder()->getStoreId());
 
         // set basket data
         $this->_heidelpayPaymentMethod->getRequest()->basketData(
@@ -757,7 +758,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
      * Set request authentication
      * @param int|null $storeId
      */
-    private function performAuthentication($storeId = null)
+    private function setAuthentication($storeId = null)
     {
         $this->_heidelpayPaymentMethod->getRequest()->authentification(
             $this->mainConfig->getSecuritySender($storeId),
@@ -788,7 +789,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
      */
     public function setupInitialRequest()
     {
-        $this->performAuthentication();
+        $this->setAuthentication();
         $this->setAsync();
     }
 
