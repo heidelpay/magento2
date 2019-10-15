@@ -949,7 +949,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
         $this->_logger->debug('heidelpay - refund  child transactions: ' . print_r($this->debug($childTransactions), 1));
 
         $children = [];
-        foreach ($childTransactions as $transactionId => $child) {
+        foreach ($childTransactions as $child) {
             if (empty($transactionType) || in_array($child->getTxnType(), $transactionType, true)) {
                 $children[] = $child;
             }
