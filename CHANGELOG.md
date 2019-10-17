@@ -3,7 +3,7 @@
 ## Versioning
 
 This project does not follow a versioning standard. Versions are crafted after the dates; for example, the version 17.7.25 was released on July, 25th in 2017
-## xx.xx.xx
+## 19.10.17
 ### Added
 - Hash validation to push requests.
 - Compatibility with Magento 2.3
