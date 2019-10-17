@@ -31,9 +31,10 @@ interface HgwMainConfigInterface
     /**
      * Returns true if the sandbox mode is enabled.
      *
+     * @param null $storeId
      * @return bool
      */
-    public function isSandboxModeActive();
+    public function isSandboxModeActive($storeId = null);
 
     /**
      * Returns true if the payment plugin is enabled.
@@ -45,23 +46,26 @@ interface HgwMainConfigInterface
     /**
      * Returns the security sender property from config.
      *
+     * @param null $storeId
      * @return mixed
      */
-    public function getSecuritySender();
+    public function getSecuritySender($storeId = null);
 
     /**
      * Returns the user login property from config.
      *
+     * @param null $storeId
      * @return mixed
      */
-    public function getUserLogin();
+    public function getUserLogin($storeId = null);
 
     /**
      * Returns the user password property from config.
      *
+     * @param null $storeId
      * @return mixed
      */
-    public function getUserPasswd();
+    public function getUserPasswd($storeId = null);
 
     /**
      * Returns the default css path property from config.

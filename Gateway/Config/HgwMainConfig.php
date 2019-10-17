@@ -47,32 +47,41 @@ class HgwMainConfig implements HgwMainConfigInterface
      * Retrieve config value by path and scope.
      *
      * @param $parameter
+     * @param $storeId
      * @return mixed
      */
-    private function getValue($parameter)
+    private function getValue($parameter, $storeId = null)
     {
-        return $this->scopeConfig->getValue($this->pathPattern . $parameter, ScopeInterface::SCOPE_STORE);
+        return $this->scopeConfig->getValue(
+            $this->pathPattern . $parameter,
+            ScopeInterface::SCOPE_STORE,
+            $storeId);
     }
 
     /**
      * Retrieve config flag by path and scope
      *
      * @param $parameter
+     * @param int|null $storeId
      * @return bool
      */
-    private function isSetFlag($parameter)
+    private function isSetFlag($parameter, $storeId = null)
     {
-        return (bool) $this->scopeConfig->isSetFlag($this->pathPattern . $parameter, ScopeInterface::SCOPE_STORE);
+        return (bool) $this->scopeConfig->isSetFlag(
+            $this->pathPattern . $parameter,
+            ScopeInterface::SCOPE_STORE,
+            $storeId);
     }
 
     /**
      * Returns true if the sandbox mode is enabled.
      *
+     * @param int|null $storeId
      * @return bool
      */
-    public function isSandboxModeActive()
+    public function isSandboxModeActive($storeId = null)
     {
-        return $this->isSetFlag(HgwMainConfigInterface::FLAG_SANDBOXMODE);
+        return $this->isSetFlag(HgwMainConfigInterface::FLAG_SANDBOXMODE, $storeId);
     }
 
     /**
@@ -88,31 +97,34 @@ class HgwMainConfig implements HgwMainConfigInterface
     /**
      * Returns the security sender property from config.
      *
+     * @param int|null $storeId
      * @return mixed
      */
-    public function getSecuritySender()
+    public function getSecuritySender($storeId = null)
     {
-        return $this->getValue(HgwMainConfigInterface::CONFIG_SECURITY_SENDER);
+        return $this->getValue(HgwMainConfigInterface::CONFIG_SECURITY_SENDER, $storeId);
     }
 
     /**
      * Returns the user login property from config.
      *
+     * @param int|null $storeId
      * @return mixed
      */
-    public function getUserLogin()
+    public function getUserLogin($storeId = null)
     {
-        return $this->getValue(HgwMainConfigInterface::CONFIG_USER_LOGIN);
+        return $this->getValue(HgwMainConfigInterface::CONFIG_USER_LOGIN, $storeId);
     }
 
     /**
      * Returns the user password property from config.
      *
+     * @param int|null $storeId
      * @return mixed
      */
-    public function getUserPasswd()
+    public function getUserPasswd($storeId = null)
     {
-        return $this->getValue(HgwMainConfigInterface::CONFIG_USER_PASSWD);
+        return $this->getValue(HgwMainConfigInterface::CONFIG_USER_PASSWD, $storeId);
     }
 
     /**

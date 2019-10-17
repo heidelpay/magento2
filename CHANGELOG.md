@@ -3,6 +3,18 @@
 ## Versioning
 
 This project does not follow a versioning standard. Versions are crafted after the dates; for example, the version 17.7.25 was released on July, 25th in 2017
+## 19.10.17
+### Added
+- Hash validation to push requests.
+- Compatibility with Magento 2.3
+
+### Fixed
+- Use the correct store config now for orders made in sub stores.
+- online refund failed with orders via invoice payment methods.
+
+### Changed
+- Redirect controller: redirect to cart if oder could not be loaded correctly.
+
 ## 19.7.29
 
 ### Added
