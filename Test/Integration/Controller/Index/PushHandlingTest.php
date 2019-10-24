@@ -65,16 +65,13 @@ class PushHandlingTest extends IntegrationTestAbstract
         include __DIR__ . '/../../_files/customer.php';
     }
 
-    public function testTrue()
-    {
-        $this->assertTrue(true);
-    }
-
     /**
+     * @test
+     *
      * @magentoDbIsolation enabled
      * @magentoAppIsolation enabled
      */
-    public function testEmptyRequest()
+    public function EmptyRequest()
     {
         $request = $this->getRequest();
         $request->setMethod($request::METHOD_GET);
@@ -87,6 +84,8 @@ class PushHandlingTest extends IntegrationTestAbstract
 
     /**
      * Test creation of new order via push if no order exists already.
+     *
+     * @test
      *
      * @dataProvider dataProviderPushCreatesNewTransactionDP
      * @magentoDbIsolation enabled
@@ -101,12 +100,12 @@ class PushHandlingTest extends IntegrationTestAbstract
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    public function testPushCreatesNewTransaction($paymentCode, $paymentMethod)
+    public function PushCreatesNewTransaction($paymentCode, $paymentMethod)
     {
         list($quote, $xml) = $this->prepareRequest($paymentCode, $paymentMethod);
         $this->dispatch(self::CONTROLLER_PATH);
 
-        /** Step 4 - Evaluate end results (heidelpay)Transaction, Quotes, Orders */
+        /** Evaluate end results (heidelpay)Transaction, Quotes, Orders */
         $fetchedQuote = $this->quoteRepository->get($quote->getId());
 
         /** @var Order $order */
@@ -169,6 +168,7 @@ class PushHandlingTest extends IntegrationTestAbstract
     /**
      * No order should be created for transaction types other then defined.
      *
+     * @test
      * @dataProvider CreateNoOrderFromInvalidTransactionTypesDP
      * @magentoDbIsolation enabled
      *
@@ -182,7 +182,7 @@ class PushHandlingTest extends IntegrationTestAbstract
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    public function testCreateNoOrderFromInvalidTransactionTypes($paymentCode, $paymentMethod)
+    public function CreateNoOrderFromInvalidTransactionTypes($paymentCode, $paymentMethod)
     {
         list($quote, $xml) = $this->prepareRequest($paymentCode, $paymentMethod);
         $this->dispatch(self::CONTROLLER_PATH);
@@ -229,7 +229,7 @@ class PushHandlingTest extends IntegrationTestAbstract
         /** @var Customer $customer */
         $customer = $customerRepository->get('l.h@mail.com');
 
-        /** Step 1 - Create a cart | Sometimes also create an order for that cart.*/
+        /** Create a cart | Sometimes also create an order for that cart.*/
         /** @var Quote $quote */
         $quote = $this->quoteRepository->get($quoteId);
 
@@ -300,13 +300,13 @@ class PushHandlingTest extends IntegrationTestAbstract
         /** @var PushResponse $pushProvider */
         $xml = $this->preparePushNotification($paymentCode, $quote, $customer);
 
-        /** Step 2 Assertions before push controller is called */
+        /** Assertions before push controller is called */
         /** @var Order $fetchedOrder */
         $fetchedOrder = $this->orderHelper->fetchOrder($quote->getId());
         $this->assertTrue($fetchedOrder->isEmpty());
         $this->assertNotNull($quote);
 
-        /** Step 3 - Perform the actual test request on controller */
+        /** Perform the actual test request on controller */
         $this->getRequest()->setContent($xml->saveXML());
         return array($quote, $xml);
     }
