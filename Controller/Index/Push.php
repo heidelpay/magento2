@@ -183,7 +183,7 @@ class Push extends HgwAbstract
             $pushResponse->getPayment()->getCode()
         );
 
-        // Only process transactions that my potentially create new order, this includes receipts receipts.
+        // Only process transactions that might potentially create new order, this includes receipts.
         if ($pushResponse->isSuccess() && $this->_paymentHelper->isNewOrderType($paymentType)) {
 
             $transactionId = $pushResponse->getIdentification()->getTransactionId();
