@@ -88,9 +88,7 @@ class Order extends AbstractHelper
             'canInvoice' => $order->canInvoice(),
             'canSendNewInvoiceEmail' => $this->salesHelper->canSendNewInvoiceEmail($order->getStore()->getId())
             ];
-        $this->_logger->debug('handling invoices... ' . print_r(
-            $debugArray, 1
-            )
+        $this->_logger->debug('heidelpay - handling invoices' . print_r($debugArray, 1)
         );
 
         if (!$order->canInvoice() && $this->salesHelper->canSendNewInvoiceEmail($order->getStore()->getId())) {
@@ -114,9 +112,7 @@ class Order extends AbstractHelper
                 $this->orderSender->send($order);
             }
         } catch (\Exception $e) {
-            $this->_logger->error(
-                'Heidelpay - Response: Cannot send order confirmation E-Mail. ' . $e->getMessage()
-            );
+            $this->_logger->error('heidelpay - Response: Cannot send order confirmation E-Mail. ' . $e->getMessage());
         }
     }
 
@@ -126,11 +122,7 @@ class Order extends AbstractHelper
      */
     public function fetchOrder($transactionId)
     {
-        $criteria = $this->searchCriteriaBuilder
-            ->addFilter(
-                'quote_id',
-                $transactionId
-            )->create();
+        $criteria = $this->searchCriteriaBuilder->addFilter('quote_id', $transactionId)->create();
 
         /** @var Collection $orderList */
         $orderList = $this->orderRepository->getList($criteria);

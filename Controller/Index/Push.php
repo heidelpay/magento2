@@ -170,7 +170,6 @@ class Push extends HgwAbstract
         }
 
         $pushResponse = $this->heidelpayPush->getResponse();
-        $transactionData = $this->_paymentHelper->getDataFromResponse($pushResponse);
         $this->_logger->debug('Push Response: ' . print_r($pushResponse, true));
 
         // Stop processing if hash validation fails.
@@ -192,6 +191,7 @@ class Push extends HgwAbstract
 
             // create order if it doesn't exists already.
             if ($order === null || $order->isEmpty()) {
+                $transactionData = $this->_paymentHelper->getDataFromResponse($pushResponse);
                 $this->_paymentHelper->saveHeidelpayTransaction($pushResponse, $transactionData, 'PUSH');
                 $this->_logger->debug('heidelpay Push - Order does not exist for transaction. heidelpay transaction id: '
                     . $transactionId);
