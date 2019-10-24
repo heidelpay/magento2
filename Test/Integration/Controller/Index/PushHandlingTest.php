@@ -1,9 +1,13 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: David.Owusu
- * Date: 12.06.2019
- * Time: 11:53
+ * This test class provides tests for the push controller.
+ *
+ * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
+ * @copyright Copyright © 2016-present heidelpay GmbH. All rights reserved.
+ *
+ * @author  David Owusu <development@heidelpay.com>
+ *
+ * @package  heidelpay/magento2
  */
 
 namespace Heidelpay\Gateway\Test\Integration\Controller\Index;
