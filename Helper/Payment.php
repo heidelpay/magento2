@@ -134,7 +134,7 @@ class Payment extends AbstractHelper
 
         /** @var HeidelpayAbstractPaymentMethod $paymentMethod */
         $paymentMethod = $order->getPayment()->getMethodInstance();
-        if ($data['PROCESSING_RESULT'] == 'NOK') {
+        if ($data['PROCESSING_RESULT'] === ProcessingResult::NOK) {
             $paymentMethod->cancelledTransactionProcessing($order, $message);
         } elseif ($this->isProcessing($paymentCode[1], $data)) {
             $paymentMethod->processingTransactionProcessing($data, $order);
