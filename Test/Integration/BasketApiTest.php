@@ -113,19 +113,7 @@ class BasketApiTest extends AbstractController
         $this->paymentHelper = $this->getObject(Payment::class);
     }
 
-    /**
-     * @return array
-     */
-    public function verifyBasketHasSameValueAsApiCallDP()
-    {
-        return [
-            'No coupon' => [null],
-            'fixed cart 20 EUR coupon' => ['COUPON_FIXED_CART_20_EUR'],
-            '20 percent coupon /wo shipping' => ['COUPON_20_PERC_WO_SHIPPING']
-            // Test deaktiviert, weil Magento bei Rabatt auf Shipping die MwSt nicht richtig berechnet.
-            // '20 percent coupon /w shipping' => ['COUPON_20_PERC_W_SHIPPING']
-        ];
-    }
+    //<editor-fold desc="Tests">
 
     /**
      * @dataProvider verifyBasketHasSameValueAsApiCallDP
@@ -251,6 +239,8 @@ class BasketApiTest extends AbstractController
 
         return array($quote, $basket);
     }
+
+    //</editor-fold>
 
     //<editor-fold desc="Helper">
 
@@ -468,5 +458,21 @@ class BasketApiTest extends AbstractController
         $this->assertLessThanOrEqual(1, $difference, 'Basket and Payment value difference is greater than 1(ct).');
     }
 
+    //</editor-fold>
+
+    //<editor-fold desc="Data Provider">
+    /**
+     * @return array
+     */
+    public function verifyBasketHasSameValueAsApiCallDP()
+    {
+        return [
+            'No coupon' => [null],
+            'fixed cart 20 EUR coupon' => ['COUPON_FIXED_CART_20_EUR'],
+            '20 percent coupon /wo shipping' => ['COUPON_20_PERC_WO_SHIPPING']
+            // Test deaktiviert, weil Magento bei Rabatt auf Shipping die MwSt nicht richtig berechnet.
+            // '20 percent coupon /w shipping' => ['COUPON_20_PERC_W_SHIPPING']
+        ];
+    }
     //</editor-fold>
 }
