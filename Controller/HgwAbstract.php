@@ -3,10 +3,13 @@
 namespace Heidelpay\Gateway\Controller;
 
 use Heidelpay\Gateway\Helper\Payment as HeidelpayHelper;
+use Magento\Framework\App\RequestInterface;
+use Magento\Framework\Controller\ResultInterface;
 use Magento\Quote\Model\QuoteManagement;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderCommentSender;
 use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
+use Netresearch\Compatibility\Controller\CsrfAware\Action as CsrfAwareAction;
 
 /**
  * Abstract controller class
@@ -18,7 +21,7 @@ use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
  * @subpackage Magento2
  * @category Magento2
  */
-abstract class HgwAbstract extends \Magento\Framework\App\Action\Action
+abstract class HgwAbstract extends CsrfAwareAction
 {
     protected $resultPageFactory;
     protected $logger;
@@ -58,10 +61,6 @@ abstract class HgwAbstract extends \Magento\Framework\App\Action\Action
      * @var \Magento\Sales\Model\Order\Email\Sender\OrderCommentSender;
      */
     protected $_orderCommentSender;
-
-    /*
-     *
-     */
 
     protected $_invoiceSender;
 
@@ -144,4 +143,15 @@ abstract class HgwAbstract extends \Magento\Framework\App\Action\Action
         }
         return $this->_quote;
     }
+
+    protected function getCsrfExceptionResponse(RequestInterface $request)
+    {
+    }
+
+    protected function proxyValidateForCsrf(RequestInterface $request)
+    {
+        return true;
+    }
+
+
 }

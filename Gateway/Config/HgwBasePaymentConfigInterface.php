@@ -25,9 +25,10 @@ interface HgwBasePaymentConfigInterface
     /**
      * Get payment channel id.
      *
+     * @param int|null $storeId
      * @return string
      */
-    public function getChannel();
+    public function getChannel($storeId = null);
 
     /**
      * Get allow specific flag

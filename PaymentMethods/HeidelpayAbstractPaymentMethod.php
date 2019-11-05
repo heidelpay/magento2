@@ -47,8 +47,10 @@ use Magento\Sales\Helper\Data;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Order\Payment;
+use Magento\Sales\Model\Order\Payment\Transaction as ShopTransaction;
 use Magento\Store\Model\ScopeInterface;
 use RuntimeException;
+use Magento\Sales\Model\Order\Payment\Repository as PaymentRepository;
 
 /**
  * All Heidelpay payment methods will extend this abstract payment method
@@ -132,6 +134,10 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
 
     /** @var HgwBasePaymentConfigInterface */
     private $paymentConfig;
+    /**
+     * @var PaymentRepository
+     */
+    private $_paymentRepository;
 
     /**
      * @param Context $context
@@ -179,6 +185,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
         PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
         TransactionFactory $transactionFactory,
         HeidelpayTransactionCollectionFactory $transactionCollectionFactory,
+        PaymentRepository $paymentRepository,
         AbstractResource $resource = null,
         AbstractDb $resourceCollection = null,
         HgwBasePaymentConfigInterface $paymentConfig = null,
@@ -216,6 +223,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
         $this->paymentConfig = $paymentConfig;
 
         $this->_heidelpayPaymentMethod = $paymentMethod;
+        $this->_paymentRepository = $paymentRepository;
         $this->setup();
     }
 
@@ -308,7 +316,8 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
         }
 
         // skip the bottom part, if the booking mode is not authorization.
-        if ($this->getBookingMode() !== BookingMode::AUTHORIZATION) {
+        $storeId = $payment->getOrder()->getStoreId();
+        if ($this->getBookingMode($storeId) !== BookingMode::AUTHORIZATION) {
             return $this;
         }
 
@@ -331,7 +340,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
         }
 
         // set authentication data
-        $this->performAuthentication();
+        $this->setAuthentication($storeId);
 
         // set basket data
         $this->_heidelpayPaymentMethod->getRequest()->basketData(
@@ -394,8 +403,11 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
         // create the transaction collection to get the parent authorization.
         $collection = $this->transactionCollectionFactory->create();
 
+        $captureArray = $this->getTransactionsToRefund($payment);
+        $capture = reset($captureArray);
+
         /** @var Transaction $transactionInfo */
-        $transactionInfo = $collection->loadByTransactionId($payment->getParentTransactionId());
+        $transactionInfo = $collection->loadByTransactionId($capture->getTxnId());
 
         // if there is no heidelpay transaction, something went wrong.
         if ($transactionInfo === null || $transactionInfo->isEmpty()) {
@@ -411,7 +423,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
         }
 
         // set authentication data
-        $this->performAuthentication();
+        $this->setAuthentication($payment->getOrder()->getStoreId());
 
         // set basket data
         $this->_heidelpayPaymentMethod->getRequest()->basketData(
@@ -449,14 +461,14 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
         );
 
         // create a child transaction.
-        $payment->setTransactionId($this->_heidelpayPaymentMethod->getResponse()->getPaymentReferenceId());
-        $payment->setParentTransactionId($transactionInfo->getUniqueId());
-        $payment->setIsTransactionClosed(true);
-        $payment->addTransaction(TransactionInterface::TYPE_REFUND, null, true);
+        $payment->setTransactionId($this->_heidelpayPaymentMethod->getResponse()->getPaymentReferenceId())
+        ->setParentTransactionId($transactionInfo->getUniqueId())
+        ->setIsTransactionClosed(true)
+        ->addTransaction(TransactionInterface::TYPE_REFUND, null, true);
 
         // set the last transaction id to the Pre-Authorization.
         $payment->setLastTransId($this->_heidelpayPaymentMethod->getResponse()->getPaymentReferenceId());
-        $payment->save();
+        $this->_paymentRepository->save($payment);
 
         return $this;
     }
@@ -744,15 +756,20 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
 
     /**
      * Set request authentication
+     * @param int|null $storeId
      */
-    private function performAuthentication()
+    private function setAuthentication($storeId = null)
     {
         $this->_heidelpayPaymentMethod->getRequest()->authentification(
-            $this->mainConfig->getSecuritySender(),
-            $this->mainConfig->getUserLogin(),
-            $this->mainConfig->getUserPasswd(),
-            $this->paymentConfig->getChannel(),
-            $this->mainConfig->isSandboxModeActive()
+            $this->mainConfig->getSecuritySender($storeId),
+            $this->mainConfig->getUserLogin($storeId),
+            $this->mainConfig->getUserPasswd($storeId),
+            $this->paymentConfig->getChannel($storeId),
+            $this->mainConfig->isSandboxModeActive($storeId)
+        );
+
+        $this->_logger->debug(
+            'heidelpay - Authentication with Channel: ' . print_r($this->paymentConfig->getChannel($storeId), 1)
         );
     }
 
@@ -772,7 +789,7 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
      */
     public function setupInitialRequest()
     {
-        $this->performAuthentication();
+        $this->setAuthentication();
         $this->setAsync();
     }
 
@@ -874,7 +891,8 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
     }
 
     /**
-     * Load the payment information by store id, customer email address and payment method of the quote.
+     * Load the payment information by store id, customer email address and payment method of the quote
+     *
      * @param Quote $quote
      * @return PaymentInformation
      */
@@ -890,5 +908,53 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
             $quote->getPayment()->getMethod()
         );
         return $paymentInfo;
+    }
+
+    /**
+     * Get the child captures of the payment authorization
+     *
+     * @param Payment $payment
+     * @return ShopTransaction[] If the authorization transaction is already a capture it will be
+     * returned as the only element in the array.
+     * @throws LocalizedException
+     */
+    private function getTransactionsToRefund(Payment $payment)
+    {
+        $authorization = $payment->getAuthorizationTransaction();
+        $this->_logger->debug('heidelpay - refund authorization transaction: '
+            . print_r($this->debug($authorization), 1));
+
+        if ($authorization->getTxnType() === TransactionInterface::TYPE_CAPTURE) {
+            return [$authorization];
+        }
+
+        /** @var ShopTransaction[] $childCaptures */
+        $childCaptures = $this->getChildTransactions($authorization, [TransactionInterface::TYPE_CAPTURE]);
+        if (!empty($childCaptures)) {
+            return $childCaptures;
+        }
+        throw new LocalizedException(__('heidelpay - No transaction found to refund.'));
+    }
+
+    /**
+     * Get children of a transaction
+     *
+     * @param ShopTransaction $transaction
+     * @param array $transactionType filter for specific type(s)
+     * @return array
+     */
+    private function getChildTransactions(ShopTransaction $transaction, array $transactionType = [])
+    {
+        /** @var ShopTransaction[] $childTransactions */
+        $childTransactions = $transaction->getChildTransactions();
+        $this->_logger->debug('heidelpay - refund  child transactions: ' . print_r($this->debug($childTransactions), 1));
+
+        $children = [];
+        foreach ($childTransactions as $child) {
+            if (empty($transactionType) || in_array($child->getTxnType(), $transactionType, true)) {
+                $children[] = $child;
+            }
+        }
+        return $children;
     }
 }
