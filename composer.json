@@ -23,8 +23,7 @@
     "magento/marketplace-eqp": "~1.0.5",
     "heidelpay/phpdocumentor": "2.9.1",
     "friendsofphp/php-cs-fixer": "2.1.0",
-    "allure-framework/allure-phpunit": "~1.2.0",
-    "zendframework/zend-http": "^2"
+    "allure-framework/allure-phpunit": "~1.2.0"
   },
   "suggest": {
     "magento/module-checkout-agreements": "^100.0.0 | ^101.0.0 | ^102.0.0"
