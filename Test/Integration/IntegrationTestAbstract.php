@@ -1,5 +1,14 @@
 <?php
-
+/**
+ * Abstract class for integration tests
+ *
+ * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
+ * @copyright Copyright © 2016-present heidelpay GmbH. All rights reserved.
+ *
+ * @author  David Owusu <development@heidelpay.com>
+ *
+ * @package  heidelpay/magento2
+ */
 namespace Heidelpay\Gateway\Test\Integration;
 
 use Heidelpay\Gateway\Helper\BasketHelper;

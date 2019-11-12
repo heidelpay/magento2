@@ -1,9 +1,13 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: David.Owusu
- * Date: 19.06.2019
- * Time: 15:35
+ * Class to provide test xml responses for push.
+ *
+ * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
+ * @copyright Copyright © 2016-present heidelpay GmbH. All rights reserved.
+ *
+ * @author  David Owusu <development@heidelpay.com>
+ *
+ * @package  heidelpay/magento2
  */
 
 namespace Heidelpay\Gateway\Test\Integration\data\provider;

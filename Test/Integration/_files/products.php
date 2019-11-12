@@ -1,4 +1,15 @@
 <?php
+/**
+ * Creates a products for testing
+ *
+ * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
+ * @copyright Copyright © 2016-present heidelpay GmbH. All rights reserved.
+ *
+ * @author  David Owusu <development@heidelpay.com>
+ *
+ * @package  heidelpay/magento2
+ */
+
 $yesterday = new DateTime();
 $yesterday->sub(new \DateInterval('P1D'));
 $tomorrow= new DateTime();
