@@ -16,11 +16,15 @@ namespace Heidelpay\Gateway\Test\Integration\Controller\Index;
 use Heidelpay\Gateway\Helper\Response as ResponseHelper;
 use Heidelpay\Gateway\Model\ResourceModel\Transaction\Collection;
 use Heidelpay\Gateway\Model\Transaction;
-use Heidelpay\Gateway\Test\Integration\IntegrationTestAbstract;
 use Heidelpay\Gateway\Test\Integration\data\provider\PushResponse;
+use Heidelpay\Gateway\Test\Integration\IntegrationTestAbstract;
 use Heidelpay\Gateway\Test\Mocks\Helper\Response as ResponseHelperMock;
+use Heidelpay\PhpPaymentApi\Constants\TransactionType;
 use Magento\Customer\Api\CustomerManagementInterface;
+use Magento\Customer\Api\CustomerRepositoryInterface;
+use Magento\Customer\Api\Data\CustomerInterface;
 use Magento\Customer\Model\Customer;
+use Magento\Framework\App\Request\Http;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
@@ -34,9 +38,9 @@ use Zend\Http\Headers;
 /**
  * @inheritDoc
  *
- * @property \Magento\Framework\App\Request\Http $_request
+ * @property Http $_request
  *
- * @method  \Magento\Framework\App\Request\Http getResponse()
+ * @method  Http getResponse()
  *
  */
 class PushHandlingTest extends IntegrationTestAbstract
@@ -49,7 +53,7 @@ class PushHandlingTest extends IntegrationTestAbstract
     {
         parent::setUp();
 
-        /** @var \Magento\Framework\App\Request\Http $request */
+        /** @var Http $request */
         $request = $this->getRequest();
 
         /** Set Request type */
@@ -103,36 +107,28 @@ class PushHandlingTest extends IntegrationTestAbstract
     public function PushCreatesNewTransaction($paymentCode, $paymentMethod)
     {
         list($quote, $xml) = $this->prepareRequest($paymentCode, $paymentMethod);
-        $this->dispatch(self::CONTROLLER_PATH);
+        $this->assertQuoteHasNoOrder($quote);
+        $this->dispatch(self::CONTROLLER_PATH); // Call push controller.
 
-        /** Evaluate end results (heidelpay)Transaction, Quotes, Orders */
-        $fetchedQuote = $this->quoteRepository->get($quote->getId());
+        /** Evaluate end results. Quote, Order, Transaction */
+        $this->assertQuoteStatus($quote->getId());
 
         /** @var Order $order */
         $fetchedOrder = $this->orderHelper->fetchOrder($quote->getId());
-
-        $this->assertNotNull($fetchedQuote);
-
         $this->assertFalse($fetchedOrder->isEmpty(), 'Order creation failed: Order is empty');
 
-        // Check Transaction
-        $collection = $this->transactionFactory->create();
-        /** @var Transaction $heidelpayTransaction */
-        $heidelpayTransaction = $collection->loadByTransactionId($xml->Transaction->Identification->UniqueID);
-        $this->assertNotNull($heidelpayTransaction);
-        $this->assertFalse($heidelpayTransaction->isEmpty());
+        $uniqueId = $xml->Transaction->Identification->UniqueID;
+        $this->AssertMagentoTransactionExists($uniqueId);
 
-        $this->assertEquals('0', $fetchedQuote->getIsActive());
+        // Check Amounts
+        $this->assertEquals(
+            $xml->Transaction->Payment->Clearing->Amount,
+            $fetchedOrder->getGrandTotal(),
+            'Grand total amount doesn\'t match');
 
-        $isPreAuthorization = 'PA' ===$this->paymentHelper->splitPaymentCode($paymentCode)[1];
-         // Check Amounts
-            $this->assertEquals(
-                $fetchedOrder->getGrandTotal(),
-                $xml->Transaction->Payment->Clearing->Amount,
-                'grand total amount doesn\'t match');
 
-        if (!$isPreAuthorization)
-        {
+        $shouldBeMarkedAsPaid = TransactionType::RESERVATION !== $this->paymentHelper->splitPaymentCode($paymentCode)[1];
+        if ($shouldBeMarkedAsPaid) {
             $this->assertEquals(
                 (float)$xml->Transaction->Payment->Clearing->Amount,
                 (float)$fetchedOrder->getTotalPaid(),
@@ -143,25 +139,30 @@ class PushHandlingTest extends IntegrationTestAbstract
 
     }
 
+    /** Data provider for transaction types that should create new order.
+     * @return array
+     */
     public function dataProviderPushCreatesNewTransactionDP()
     {
         return [
-            'Create from IV.RC' => ['IV.RC', 'hgwivs'],
-            'Create from CC.DB' => ['CC.DB', 'hgwcc'],
-            'Create from DD.DB' => ['DD.DB', 'hgwdd'],
-            'Create from OT.RC' => ['OT.RC', 'hgwsue'],
-            'Create from OT.PA' => ['OT.PA', 'hgwsue'],
-            'Create from PP.RC' => ['PP.RC', 'hgwpp'],
+            'Create order from invoice receipt ' => ['IV.RC', 'hgwivs'],
+            'Create order from credit card debit' => ['CC.DB', 'hgwcc'],
+            'Create order from sofort receipt' => ['OT.RC', 'hgwsue'],
+            'Create order from sofort reservation' => ['OT.PA', 'hgwsue'],
+            'Create order from prepayment receipt' => ['PP.RC', 'hgwpp'],
         ];
     }
 
+    /** Data provider for transaction types that should NOT create new order.
+     * @return array
+     */
     public function CreateNoOrderFromInvalidTransactionTypesDP()
     {
         return [
-            'create no order from IV.RV' => ['IV.RV', 'hgwivs'],
-            'create no order from CC.RF' => ['CC.RF', 'hgwcc'],
-            'create no order from IV.IN' => ['IV.IN', 'hgwivs'],
-            'create no order from IV.FI' => ['IV.FI', 'hgwivs'],
+            'Create no order from invoice reversal' => ['IV.RV', 'hgwivs'],
+            'Create no order from credit card refund' => ['CC.RF', 'hgwcc'],
+            'Create no order from invoice init' => ['IV.IN', 'hgwivs'],
+            'Create no order from invoice finalize' => ['IV.FI', 'hgwivs'],
         ];
     }
 
@@ -185,48 +186,40 @@ class PushHandlingTest extends IntegrationTestAbstract
     public function CreateNoOrderFromInvalidTransactionTypes($paymentCode, $paymentMethod)
     {
         list($quote, $xml) = $this->prepareRequest($paymentCode, $paymentMethod);
+        $this->assertQuoteHasNoOrder($quote);
         $this->dispatch(self::CONTROLLER_PATH);
 
         /** Evaluate end results (heidelpay)Transaction, Quotes, Orders */
-        $fetchedQuote = $this->quoteRepository->get($quote->getId());
+        $this->assertQuoteStatus($quote->getId(), '1');
 
         /** @var Order $order */
         $fetchedOrder = $this->orderHelper->fetchOrder($quote->getId());
-
-        $this->assertNotNull($fetchedQuote);
-        $this->assertEquals('1', $fetchedQuote->getIsActive());
-
-        $this->assertTrue($fetchedOrder->isEmpty(), 'no Order should be created here');
+        $this->assertTrue($fetchedOrder->isEmpty(), 'No Order should be created here');
 
         // Check Transaction
         /** @var Collection $collection */
         $collection = $this->transactionFactory->create();
 
-        // Check Transaction
-        /** @var \Heidelpay\Gateway\Model\Transaction $heidelpayTransaction */
+        /** @var Transaction $heidelpayTransaction */
         $heidelpayTransaction = $collection->loadByTransactionId($xml->Transaction->Identification->UniqueID);
         $this->assertNotNull($heidelpayTransaction);
         $this->assertTrue($heidelpayTransaction->isEmpty());
-
-        // Check amount of history entries.
-        $histories = $fetchedOrder->getAllStatusHistory();
-        $this->assertCount(0, $histories);
     }
 
     /**
+     * @param $paymentMethod
      * @return array
      * @throws CouldNotSaveException
      * @throws LocalizedException
      * @throws NoSuchEntityException
-     * @throws CouldNotSaveException
      */
     protected function generateQuote($paymentMethod)
     {
         $quoteId = $this->cartManagement->createEmptyCart();
         /** @var CustomerManagementInterface $customerRepository */
-        $customerRepository = $this->createObject(\Magento\Customer\Api\CustomerRepositoryInterface::class);
+        $customerRepository = $this->createObject(CustomerRepositoryInterface::class);
 
-        /** @var Customer $customer */
+        /** @var Customer|CustomerInterface $customer */
         $customer = $customerRepository->get('l.h@mail.com');
 
         /** Create a cart | Sometimes also create an order for that cart.*/
@@ -250,19 +243,17 @@ class PushHandlingTest extends IntegrationTestAbstract
             ->setShippingMethod('flatrate_flatrate')
             ->setPaymentMethod('hgwcc');
 
-        $quote->collectTotals();
-        $quote->save();
+        $quote->collectTotals()->save();
         return array($customer, $quote);
     }
 
     /**
-     * @param array $pushSpecification
      * @param $paymentCode
-     * @param $quote
-     * @param $customer
+     * @param Quote $quote
+     * @param Customer $customer
      * @return SimpleXMLElement
      */
-    protected function preparePushNotification($paymentCode, $quote, $customer)
+    protected function preparePushNotification($paymentCode, Quote $quote, $customer)
     {
         /** @var PushResponse $pushProvider */
         $pushProvider = $this->createObject(PushResponse::class);
@@ -270,7 +261,7 @@ class PushHandlingTest extends IntegrationTestAbstract
         $pushSpecification = [
             'TransactionID' => $quote->getId(),
             'Amount' => $quote->getGrandTotal(),
-            'ShopperID' => $customer->getId($customer->getId())
+            'ShopperID' => $customer->getId()
         ];
 
         /** @var SimpleXMLElement $xml */
@@ -300,15 +291,53 @@ class PushHandlingTest extends IntegrationTestAbstract
         /** @var PushResponse $pushProvider */
         $xml = $this->preparePushNotification($paymentCode, $quote, $customer);
 
-        /** Assertions before push controller is called */
-        /** @var Order $fetchedOrder */
-        $fetchedOrder = $this->orderHelper->fetchOrder($quote->getId());
-        $this->assertTrue($fetchedOrder->isEmpty());
-        $this->assertNotNull($quote);
-
         /** Perform the actual test request on controller */
         $this->getRequest()->setContent($xml->saveXML());
         return array($quote, $xml);
     }
 
+    /** Assert that magento transaction with given unique id exists.
+     * @param $uniqueId
+     */
+    private function AssertMagentoTransactionExists($uniqueId)
+    {
+        $collection = $this->transactionFactory->create();
+        /** @var Transaction $heidelpayTransaction */
+        $heidelpayTransaction = $collection->loadByTransactionId($uniqueId);
+        $this->assertNotNull($heidelpayTransaction);
+        $this->assertFalse($heidelpayTransaction->isEmpty());
+    }
+
+    /** Assertions that Quote should exists but order doesn't.
+     * @param $quote
+     * @return void
+     */
+    private function assertQuoteHasNoOrder(Quote $quote)
+    {
+        /** @var Order $fetchedOrder */
+        $fetchedOrder = $this->orderHelper->fetchOrder($quote->getId());
+        $this->assertTrue($fetchedOrder->isEmpty());
+        $this->assertNotNull($quote);
+    }
+
+    /** Assert that quote status is set as expected.
+     * @param $quoteId
+     * @param string $expectedStatus
+     * @throws NoSuchEntityException
+     */
+    private function assertQuoteStatus($quoteId, $expectedStatus = '0')
+    {
+        $fetchedQuote = $this->quoteRepository->get($quoteId);
+        $this->assertNotNull($fetchedQuote);
+
+        $message = 'New order was created - Quote should NOT be active anymore!';
+        if ($expectedStatus !== '0') {
+            $message = 'No order was created - Quote should still be active!';
+        }
+
+        $this->assertEquals(
+            $expectedStatus,
+            $fetchedQuote->getIsActive(),
+            $message);
+    }
 }

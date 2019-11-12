@@ -18,7 +18,7 @@ $tomorrow->add(new \DateInterval('P1D'));
 $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
 
 /** @var $product \Magento\Catalog\Model\Product */
-$customerFactory = $objectManager->create('Magento\Customer\Api\Data\CustomerInterface');
+$customerFactory = $objectManager->create(Magento\Customer\Api\Data\CustomerInterface::class);
 
 /** @var \Magento\Tax\Model\ClassModel $customerTaxClass */
 $customerTaxClass = $objectManager->create(Magento\Tax\Model\ClassModel::class);
