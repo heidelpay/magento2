@@ -111,7 +111,7 @@ class PushHandlingTest extends IntegrationTestAbstract
         $this->dispatch(self::CONTROLLER_PATH); // Call push controller.
 
         /** Evaluate end results. Quote, Order, Transaction */
-        $this->assertQuoteIsActive($quote->getId(), false);
+        $this->assertQuoteActive($quote->getId(), false);
 
         /** @var Order $order */
         $fetchedOrder = $this->orderHelper->fetchOrder($quote->getId());
@@ -190,7 +190,7 @@ class PushHandlingTest extends IntegrationTestAbstract
         $this->dispatch(self::CONTROLLER_PATH);
 
         /** Evaluate end results (heidelpay)Transaction, Quotes, Orders */
-        $this->assertQuoteIsActive($quote->getId(), true);
+        $this->assertQuoteActive($quote->getId(), true);
 
         /** @var Order $order */
         $fetchedOrder = $this->orderHelper->fetchOrder($quote->getId());
@@ -325,7 +325,7 @@ class PushHandlingTest extends IntegrationTestAbstract
      * @param bool $expectIsActive
      * @throws NoSuchEntityException
      */
-    private function assertQuoteIsActive($quoteId, $expectIsActive)
+    private function assertQuoteActive($quoteId, $expectIsActive)
     {
         $fetchedQuote = $this->quoteRepository->get($quoteId);
         $this->assertNotNull($fetchedQuote);
