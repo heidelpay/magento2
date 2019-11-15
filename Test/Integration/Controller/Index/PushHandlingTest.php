@@ -111,14 +111,14 @@ class PushHandlingTest extends IntegrationTestAbstract
         $this->dispatch(self::CONTROLLER_PATH); // Call push controller.
 
         /** Evaluate end results. Quote, Order, Transaction */
-        $this->assertQuoteStatus($quote->getId());
+        $this->assertQuoteIsActive($quote->getId(), false);
 
         /** @var Order $order */
         $fetchedOrder = $this->orderHelper->fetchOrder($quote->getId());
         $this->assertFalse($fetchedOrder->isEmpty(), 'Order creation failed: Order is empty');
 
         $uniqueId = $xml->Transaction->Identification->UniqueID;
-        $this->AssertMagentoTransactionExists($uniqueId);
+        $this->assertMagentoTransactionExists($uniqueId);
 
         // Check Amounts
         $this->assertEquals(
@@ -190,7 +190,7 @@ class PushHandlingTest extends IntegrationTestAbstract
         $this->dispatch(self::CONTROLLER_PATH);
 
         /** Evaluate end results (heidelpay)Transaction, Quotes, Orders */
-        $this->assertQuoteStatus($quote->getId(), '1');
+        $this->assertQuoteIsActive($quote->getId(), true);
 
         /** @var Order $order */
         $fetchedOrder = $this->orderHelper->fetchOrder($quote->getId());
@@ -299,7 +299,7 @@ class PushHandlingTest extends IntegrationTestAbstract
     /** Assert that magento transaction with given unique id exists.
      * @param $uniqueId
      */
-    private function AssertMagentoTransactionExists($uniqueId)
+    private function assertMagentoTransactionExists($uniqueId)
     {
         $collection = $this->transactionFactory->create();
         /** @var Transaction $heidelpayTransaction */
@@ -320,24 +320,26 @@ class PushHandlingTest extends IntegrationTestAbstract
         $this->assertNotNull($quote);
     }
 
-    /** Assert that quote status is set as expected.
+    /** Assertion whether quote should be active or not.
      * @param $quoteId
-     * @param string $expectedStatus
+     * @param bool $expectIsActive
      * @throws NoSuchEntityException
      */
-    private function assertQuoteStatus($quoteId, $expectedStatus = '0')
+    private function assertQuoteIsActive($quoteId, $expectIsActive)
     {
         $fetchedQuote = $this->quoteRepository->get($quoteId);
         $this->assertNotNull($fetchedQuote);
 
         $message = 'New order was created - Quote should NOT be active anymore!';
-        if ($expectedStatus !== '0') {
+        if ($expectIsActive === true) {
             $message = 'No order was created - Quote should still be active!';
         }
 
+        $isActive = $fetchedQuote->getIsActive() === '1';
+
         $this->assertEquals(
-            $expectedStatus,
-            $fetchedQuote->getIsActive(),
+            $expectIsActive,
+            $isActive,
             $message);
     }
 }
