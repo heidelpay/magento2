@@ -270,7 +270,7 @@ class Response extends HgwAbstract
             $this->orderRepository->save($order);
         }
 
-        $this->handleAdditionalPaymentInformation($quote);
+        $this->_paymentHelper->handleAdditionalPaymentInformation($quote);
         $this->_logger->debug('Heidelpay - Response: redirectUrl is ' . $redirectUrl);
 
         // return the heidelpay response url as raw response instead of echoing it out.
@@ -281,12 +281,13 @@ class Response extends HgwAbstract
 
     /**
      * Send order confirmation to the customer
-     * @param $order
+     * @param Order $order
      */
     protected function handleOrderMail($order)
     {
         try {
             if ($order && $order->getId()) {
+                $this->_logger->debug('heidelpay Response - sending mail for order ' . $order->getIncrementId());
                 $this->_orderSender->send($order);
             }
         } catch (Exception $e) {

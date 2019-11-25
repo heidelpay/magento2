@@ -3,7 +3,7 @@
  * This trait enables to dump all simple getter return values into an array extracting the keys from the getter names.
  *
  * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
- * @copyright Copyright © 2016-present Heidelberger Payment GmbH. All rights reserved.
+ * @copyright Copyright © 2016-present heidelpay GmbH. All rights reserved.
  *
  * @author  Simon Gabriel <development@heidelpay.com>
  *
