@@ -34,6 +34,8 @@ class HeidelpayIDealPaymentMethod extends HeidelpayAbstractPaymentMethod
     {
         parent::setup();
         $this->_canAuthorize = true;
+        $this->_canRefund = true;
+        $this->_canRefundInvoicePartial = true;
     }
 
     /**
