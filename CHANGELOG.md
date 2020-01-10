@@ -5,6 +5,9 @@
 This project does not follow a versioning standard. Versions are crafted after the dates; for example, the version 17.7.25 was released on July, 25th in 2017
 
 ## X.X.X
+### Added
+-   Refund to iDeal payment method. 
+
 ### Fixed
 -   Made sure the reserved value matches the gross value of the order to avoid problems finalizing.
 
