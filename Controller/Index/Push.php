@@ -2,17 +2,37 @@
 
 namespace Heidelpay\Gateway\Controller\Index;
 
+use Heidelpay\Gateway\Controller\HgwAbstract;
+use Heidelpay\Gateway\Helper\Order as orderHelper;
+use Heidelpay\Gateway\Helper\Payment as PaymentHelper;
+use Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod;
+use Heidelpay\PhpPaymentApi\Exceptions\XmlResponseParserException;
+use Heidelpay\PhpPaymentApi\Push as heidelpayPush;
+use Magento\Checkout\Model\Session as CheckoutSession;
+use Magento\Customer\Model\Session as CustomerSession;
+use Magento\Customer\Model\Url;
 use Heidelpay\Gateway\Helper\Response as ResponseHelper;
 use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Framework\App\Action\Context;
+use Magento\Framework\App\Request\Http;
+use Magento\Framework\App\ResponseInterface;
+use Magento\Framework\Controller\ResultInterface;
+use Magento\Framework\Encryption\Encryptor;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\Url\Helper\Data;
+use Magento\Framework\View\Result\PageFactory;
+use Magento\Quote\Api\CartManagementInterface;
+use Magento\Quote\Api\CartRepositoryInterface;
+use Magento\Quote\Model\QuoteRepository;
+use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderCommentSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
-use Magento\Sales\Model\Order\Payment\Transaction;
 use Magento\Sales\Model\Order\Invoice;
+use Magento\Sales\Model\Order\Payment\Transaction;
+use Magento\Sales\Model\OrderFactory;
 use Magento\Sales\Model\OrderRepository;
-use Magento\Sales\Model\Order;
-use Magento\Sales\Model\ResourceModel\Order\Collection;
-use Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod;
+use Psr\Log\LoggerInterface;
 
 /**
  * heidelpay Push Controller
@@ -27,59 +47,65 @@ use Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod;
  *
  * @package heidelpay\magento2\controllers
  */
-class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
+class Push extends HgwAbstract
 {
     /** @var OrderRepository $orderRepository */
     private $orderRepository;
 
-    /** @var \Heidelpay\PhpPaymentApi\Push */
+    /** @var heidelpayPush */
     private $heidelpayPush;
 
-    /** @var SearchCriteriaBuilder */
-    private $searchCriteriaBuilder;
+    /** @var QuoteRepository */
+    private $quoteRepository;
+    /** @var orderHelper */
+    private $orderHelper;
 
     /** @var ResponseHelper */
     private $repsonseHelper;
 
     /**
-     * @param \Magento\Framework\App\Action\Context $context
-     * @param \Magento\Customer\Model\Session $customerSession
-     * @param \Magento\Checkout\Model\Session $checkoutSession
-     * @param \Magento\Sales\Model\OrderFactory $orderFactory
-     * @param \Magento\Framework\Url\Helper\Data $urlHelper
-     * @param \Psr\Log\LoggerInterface $logger
-     * @param \Magento\Quote\Api\CartManagementInterface $cartManagement
-     * @param \Magento\Quote\Api\CartRepositoryInterface $quoteObject
-     * @param \Magento\Framework\View\Result\PageFactory $resultPageFactory
-     * @param \Heidelpay\Gateway\Helper\Payment $paymentHelper
+     * @param Context $context
+     * @param CustomerSession $customerSession
+     * @param CheckoutSession $checkoutSession
+     * @param OrderFactory $orderFactory
+     * @param Data $urlHelper
+     * @param LoggerInterface $logger
+     * @param CartManagementInterface $cartManagement
+     * @param CartRepositoryInterface $quoteObject
+     * @param PageFactory $resultPageFactory
+     * @param PaymentHelper $paymentHelper
      * @param OrderSender $orderSender
      * @param InvoiceSender $invoiceSender
      * @param OrderCommentSender $orderCommentSender
-     * @param \Magento\Framework\Encryption\Encryptor $encryptor
-     * @param \Magento\Customer\Model\Url $customerUrl
+     * @param Encryptor $encryptor
+     * @param Url $customerUrl
      * @param OrderRepository $orderRepository
-     * @param \Heidelpay\PhpPaymentApi\Push $heidelpayPush
+     * @param heidelpayPush $heidelpayPush
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param QuoteRepository $quoteRepository
+     * @param orderHelper $orderHelper
      * @param ResponseHelper $repsonseHelper
      */
     public function __construct(
-        \Magento\Framework\App\Action\Context $context,
-        \Magento\Customer\Model\Session $customerSession,
-        \Magento\Checkout\Model\Session $checkoutSession,
-        \Magento\Sales\Model\OrderFactory $orderFactory,
-        \Magento\Framework\Url\Helper\Data $urlHelper,
-        \Psr\Log\LoggerInterface $logger,
-        \Magento\Quote\Api\CartManagementInterface $cartManagement,
-        \Magento\Quote\Api\CartRepositoryInterface $quoteObject,
-        \Magento\Framework\View\Result\PageFactory $resultPageFactory,
-        \Heidelpay\Gateway\Helper\Payment $paymentHelper,
+        Context $context,
+        CustomerSession $customerSession,
+        CheckoutSession $checkoutSession,
+        OrderFactory $orderFactory,
+        Data $urlHelper,
+        LoggerInterface $logger,
+        CartManagementInterface $cartManagement,
+        CartRepositoryInterface $quoteObject,
+        PageFactory $resultPageFactory,
+        PaymentHelper $paymentHelper,
         OrderSender $orderSender,
         InvoiceSender $invoiceSender,
         OrderCommentSender $orderCommentSender,
-        \Magento\Framework\Encryption\Encryptor $encryptor,
-        \Magento\Customer\Model\Url $customerUrl,
+        Encryptor $encryptor,
+        Url $customerUrl,
         OrderRepository $orderRepository,
-        \Heidelpay\PhpPaymentApi\Push $heidelpayPush,
+        heidelpayPush $heidelpayPush,
+        QuoteRepository $quoteRepository,
+        orderHelper $orderHelper,
         SearchCriteriaBuilder $searchCriteriaBuilder,
         ResponseHelper $repsonseHelper
     ) {
@@ -103,17 +129,20 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
 
         $this->orderRepository = $orderRepository;
         $this->heidelpayPush = $heidelpayPush;
+        $this->quoteRepository = $quoteRepository;
+        $this->orderHelper = $orderHelper;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->repsonseHelper = $repsonseHelper;
     }
 
     /**
-     * @return \Magento\Framework\App\ResponseInterface|\Magento\Framework\Controller\ResultInterface|void
-     * @throws \Heidelpay\PhpPaymentApi\Exceptions\XmlResponseParserException
+     * @return ResponseInterface|ResultInterface|void
+     * @throws XmlResponseParserException
+     * @throws NoSuchEntityException
      */
     public function execute()
     {
-        /** @var \Magento\Framework\App\Request\Http $request */
+        /** @var Http $request */
         $request = $this->getRequest();
 
         if (!$request->isPost()) {
@@ -121,7 +150,7 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
             return;
         }
 
-        if ($request->getHeader('Content-Type') != 'application/xml') {
+        if ($request->getHeader('Content-Type') !== 'application/xml') {
             $this->_logger->debug('Heidelpay - Push: Content-Type is not "application/xml"');
         }
 
@@ -153,80 +182,104 @@ class Push extends \Heidelpay\Gateway\Controller\HgwAbstract
             $pushResponse->getPayment()->getCode()
         );
 
-        // in case of receipts, we process the push message for receipts.
-        if ($this->_paymentHelper->isReceiptAble($paymentMethod, $paymentType) && $pushResponse->isSuccess()) {
-            // load the referenced order to receive the order information.
-            $criteria = $this->searchCriteriaBuilder
-                ->addFilter(
-                    'quote_id',
-                    $pushResponse->getIdentification()->getTransactionId()
-                )->create();
+        // Only process transactions that might potentially create new order, this includes receipts.
+        if ($pushResponse->isSuccess() && $this->_paymentHelper->isNewOrderType($paymentType)) {
 
-            /** @var Collection $orderList */
-            $orderList = $this->orderRepository->getList($criteria);
+            $transactionId = $pushResponse->getIdentification()->getTransactionId();
+            $order = $this->orderHelper->fetchOrder($transactionId);
+            $quote = $this->quoteRepository->get($transactionId);
 
-            /** @var Order $order */
-            $order = $orderList->getFirstItem();
-            $payment = $order->getPayment();
+            // create order if it doesn't exists already.
+            if ($order === null || $order->isEmpty()) {
+                $transactionData = $this->_paymentHelper->getDataFromResponse($pushResponse);
+                $this->_paymentHelper->saveHeidelpayTransaction($pushResponse, $transactionData, 'PUSH');
+                $this->_logger->debug('heidelpay Push - Order does not exist for transaction. heidelpay transaction id: '
+                    . $transactionId);
 
-            /** @var HeidelpayAbstractPaymentMethod $methodInstance */
-            $methodInstance = $payment->getMethodInstance();
-            $transactionID = $pushResponse->getPaymentReferenceId();
-
-            /** @var bool $transactionExists Flag to identify new Transaction*/
-            $transactionExists = $methodInstance->heidelpayTransactionExists($transactionID);
-
-            // If Transaction already exists, push wont be processed.
-            if ($transactionExists) {
-                $this->_logger->debug('heidelpay - Push Response: ' . $transactionID . ' already exists');
-                return;
-            }
-
-            $paidAmount = (float)$pushResponse->getPresentation()->getAmount();
-            $dueLeft = $order->getTotalDue() - $paidAmount;
-
-            $state = Order::STATE_PROCESSING;
-            $comment = 'heidelpay - Purchase Complete';
-
-            // if payment is not complete
-            if ($dueLeft > 0.00) {
-                $state = Order::STATE_PAYMENT_REVIEW;
-                $comment = 'heidelpay - Partly Paid ('
-                    . $this->_paymentHelper->format(
-                        $pushResponse->getPresentation()->getAmount()
-                    )
-                    . ' ' . $pushResponse->getPresentation()->getCurrency() . ')';
-            }
-
-            // set the invoice states to 'paid', if no due is left.
-            if ($dueLeft <= 0.00) {
-                /** @var \Magento\Sales\Model\Order\Invoice $invoice */
-                foreach ($order->getInvoiceCollection() as $invoice) {
-                    $invoice->setState(Invoice::STATE_PAID)->save();
+                try {
+                    $order = $this->_paymentHelper->createOrderFromQuote($quote);
+                    if ($order === null || $order->isEmpty())
+                    {
+                        $this->_logger->error('Heidelpay - Response: Cannot submit the Quote. ' . $e->getMessage());
+                        return;
+                    }
+                } catch (Exception $e) {
+                    $this->_logger->error('Heidelpay - Response: Cannot submit the Quote. ' . $e->getMessage());
+                    return;
                 }
+
+                $this->_paymentHelper->mapStatus($transactionData, $order);
+                $this->_logger->debug('order status: ' . $order->getStatus());
+                $this->orderHelper->handleOrderMail($order);
+                $this->orderHelper->handleInvoiceMails($order);
+                $this->orderRepository->save($order);
             }
+            $this->_paymentHelper->handleAdditionalPaymentInformation($quote);
 
-            $order->setTotalPaid($order->getTotalPaid() + $paidAmount)
-                ->setBaseTotalPaid($order->getBaseTotalPaid() + $paidAmount)
-                ->setState($state)
-                ->addStatusHistoryComment($comment, $state);
 
-            // create a heidelpay Transaction.
-            $methodInstance->saveHeidelpayTransaction(
-                $pushResponse,
-                $paymentMethod,
-                $paymentType,
-                'PUSH',
-                []
-            );
+            if ($this->_paymentHelper->isReceiptAble($paymentMethod, $paymentType)) {
+                // load the referenced order to receive the order information.
+                $payment = $order->getPayment();
 
-            // create a child transaction.
-            $payment->setTransactionId($transactionID)
-                ->setParentTransactionId($pushResponse->getIdentification()->getReferenceId())
-                ->setIsTransactionClosed(true)
-                ->addTransaction(Transaction::TYPE_CAPTURE, null, true);
+                /** @var HeidelpayAbstractPaymentMethod $methodInstance */
+                $methodInstance = $payment->getMethodInstance();
+                $uniqueId = $pushResponse->getPaymentReferenceId();
 
-            $this->orderRepository->save($order);
+                /** @var bool $transactionExists Flag to identify new Transaction */
+                $transactionExists = $methodInstance->heidelpayTransactionExists($uniqueId);
+
+                // If Transaction already exists, push wont be processed.
+                if ($transactionExists) {
+                    $this->_logger->debug('heidelpay - Push Response: ' . $uniqueId . ' already exists');
+                    return;
+                }
+
+                $paidAmount = (float)$pushResponse->getPresentation()->getAmount();
+                $dueLeft = $order->getTotalDue() - $paidAmount;
+
+                $state = Order::STATE_PROCESSING;
+                $comment = 'heidelpay - Purchase Complete';
+
+                // if payment is not complete
+                if ($dueLeft > 0.00) {
+                    $state = Order::STATE_PAYMENT_REVIEW;
+                    $comment = 'heidelpay - Partly Paid ('
+                        . $this->_paymentHelper->format(
+                            $pushResponse->getPresentation()->getAmount()
+                        )
+                        . ' ' . $pushResponse->getPresentation()->getCurrency() . ')';
+                }
+
+                // set the invoice states to 'paid', if no due is left.
+                if ($dueLeft <= 0.00) {
+                    /** @var Invoice $invoice */
+                    foreach ($order->getInvoiceCollection() as $invoice) {
+                        $invoice->setState(Invoice::STATE_PAID)->save();
+                    }
+                }
+
+                $order->setTotalPaid($order->getTotalPaid() + $paidAmount)
+                    ->setBaseTotalPaid($order->getBaseTotalPaid() + $paidAmount)
+                    ->setState($state)
+                    ->addStatusHistoryComment($comment, $state);
+
+                // create a heidelpay Transaction.
+                $methodInstance->saveHeidelpayTransaction(
+                    $pushResponse,
+                    $paymentMethod,
+                    $paymentType,
+                    'PUSH',
+                    []
+                );
+
+                // create a child transaction.
+                $payment->setTransactionId($uniqueId)
+                    ->setParentTransactionId($pushResponse->getIdentification()->getReferenceId())
+                    ->setIsTransactionClosed(true)
+                    ->addTransaction(Transaction::TYPE_CAPTURE, null, true);
+
+                $this->orderRepository->save($order);
+            }
         }
     }
 }
