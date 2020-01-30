@@ -5,7 +5,7 @@
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="visible" xsi:type="boolean">true</item>
-                    <item name="label" xsi:type="string" translate="true">QuoteId</item>
+                    <item name="label" xsi:type="string" translate="false">heidelpay TxnId</item>
                 </item>
             </argument>
         </column>
