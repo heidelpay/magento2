@@ -71,8 +71,13 @@ class BasketHelper extends AbstractHelper
         $basketRequest = new Request();
         $basketReferenceId = $basketTotals->getBasketReferenceId();
         $basket = $basketRequest->getBasket();
+
+        $amountGrandTotal = $basketTotals->normalizeValue($quote->getGrandTotal());
+        $amountTotalNet = $basketTotals->getSubtotalWithDiscountAndShipping();
+
         $basket->setCurrencyCode($basketTotals->getCurrencyCode())
-            ->setAmountTotalNet($basketTotals->normalizeValue($quote->getGrandTotal()))
+            ->setAmountTotalNet($amountTotalNet)
+            ->setAmountTotalVat($amountGrandTotal - $amountTotalNet)
             ->setBasketReferenceId($basketReferenceId);
 
         /** @var Item $item */
