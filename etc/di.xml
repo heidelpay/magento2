@@ -157,4 +157,18 @@
     <preference for="Heidelpay\Gateway\Api\Data\TransactionInterface" type="Heidelpay\Gateway\Model\Transaction"/>
     <preference for="Heidelpay\Gateway\Api\Data\TransactionSearchResultInterface" type="Heidelpay\Gateway\Model\TransactionSearchResult"/>
 
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="sales_order_grid_data_source" xsi:type="string">Heidelpay\Gateway\Model\ResourceModel\Order\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+    <virtualType name="Heidelpay\Gateway\Model\ResourceModel\Order\Grid\Collection">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">sales_order_grid</argument>
+            <argument name="resourceModel" xsi:type="string">Magento\Sales\Model\ResourceModel\Order</argument>
+        </arguments>
+    </virtualType>
+
 </config>
