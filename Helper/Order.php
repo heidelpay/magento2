@@ -15,7 +15,7 @@ use Magento\Framework\Api\SearchCriteriaBuilder;
 /**
  * Heidelpay order helper
  *
- * The payment helper is a collection of function to prepare an send
+ * The order helper is a collection of functions to handle common order tasks
  *
  * @license    Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
  * @copyright  Copyright © 2016-present heidelpay GmbH. All rights reserved.

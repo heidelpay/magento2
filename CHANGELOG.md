@@ -4,11 +4,11 @@
 
 This project does not follow a versioning standard. Versions are crafted after the dates; for example, the version 17.7.25 was released on July, 25th in 2017
 
-## X.X.X
+## 20.2.24
 ### Added
 - Refund to iDeal payment method.
 - Add column `heidelpay TxnId` to `sales_order_grid` to enable better mapping between magento order and hIP transactions.
-- Enable push notifications to create an order if it doesnt exist already for an successful reservation or payment.
+- Enable push notifications to create an order if it does not exist already for an successful reservation or payment.
 - Add PHP 7.3 support.
 
 ### Fixed

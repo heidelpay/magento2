@@ -31,7 +31,7 @@ use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory a
 /**
  * Heidelpay payment helper
  *
- * The payment helper is a collection of function to prepare an send
+ * The payment helper is a collection of function to prepare an send payment requests
  *
  * @license    Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
  * @copyright  Copyright © 2016-present heidelpay GmbH. All rights reserved.
