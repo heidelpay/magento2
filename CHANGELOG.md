@@ -9,9 +9,13 @@ This project does not follow a versioning standard. Versions are crafted after t
 - Refund to iDeal payment method.
 - Add column `heidelpay TxnId` to `sales_order_grid` to enable better mapping between magento order and hIP transactions.
 - Enable push notifications to create an order if it doesnt exist already for an successful reservation or payment.
+- Add PHP 7.3 support.
 
 ### Fixed
 -   Made sure the reserved value matches the gross value of the order to avoid problems finalizing.
+
+### Remove
+-   PHP 5.6 support.
 
 ## 19.10.17
 ### Added
