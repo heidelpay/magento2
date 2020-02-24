@@ -4,13 +4,14 @@ namespace Heidelpay\Gateway\Helper;
 use Heidelpay\Gateway\Gateway\Config\HgwMainConfigInterface;
 use Heidelpay\Gateway\Wrapper\ItemWrapper;
 use Heidelpay\Gateway\Wrapper\QuoteWrapper;
+use Heidelpay\PhpBasketApi\Exception\InvalidBasketitemPositionException;
 use Heidelpay\PhpBasketApi\Object\BasketItem;
 use Heidelpay\PhpBasketApi\Request;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\App\ObjectManager;
-use Magento\Framework\HTTP\ZendClientFactory;
 use Magento\Quote\Model\Quote;
+use Magento\Quote\Model\Quote\Item;
 
 /**
  * Heidelpay basket helper
@@ -18,7 +19,7 @@ use Magento\Quote\Model\Quote;
  * The payment helper is a collection of function to prepare an send
  *
  * @license    Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
- * @copyright  Copyright © 2016-present Heidelberger Payment GmbH. All rights reserved.
+ * @copyright  Copyright © 2016-present heidelpay GmbH. All rights reserved.
  *
  * @link       https://dev.heidelpay.de/magento
  *
@@ -54,7 +55,7 @@ class BasketHelper extends AbstractHelper
      * @param Quote $quote
      *
      * @return Request|null
-     * @throws \Heidelpay\PhpBasketApi\Exception\InvalidBasketitemPositionException
+     * @throws InvalidBasketitemPositionException
      */
     public function convertQuoteToBasket(Quote $quote)
     {
@@ -70,13 +71,16 @@ class BasketHelper extends AbstractHelper
         $basketRequest = new Request();
         $basketReferenceId = $basketTotals->getBasketReferenceId();
         $basket = $basketRequest->getBasket();
+
+        $amountGrandTotal = $basketTotals->normalizeValue($quote->getGrandTotal());
+        $amountTotalNet = $basketTotals->getSubtotalWithDiscountAndShipping();
+
         $basket->setCurrencyCode($basketTotals->getCurrencyCode())
-            ->setAmountTotalNet($basketTotals->getSubtotalWithDiscountAndShipping())
-            ->setAmountTotalVat($basketTotals->getActualTaxAmount())
-            ->setAmountTotalDiscount($basketTotals->getTotalDiscountAmount())
+            ->setAmountTotalNet($amountTotalNet)
+            ->setAmountTotalVat($amountGrandTotal - $amountTotalNet)
             ->setBasketReferenceId($basketReferenceId);
 
-        /** @var \Magento\Quote\Model\Quote\Item $item */
+        /** @var Item $item */
         foreach ($quote->getAllVisibleItems() as $item) {
             $basketItem = ObjectManager::getInstance()->create(BasketItem::class);
 
@@ -131,7 +135,7 @@ class BasketHelper extends AbstractHelper
      * @param Quote|null $quote
      *
      * @return null|string
-     * @throws \Heidelpay\PhpBasketApi\Exception\InvalidBasketitemPositionException
+     * @throws InvalidBasketitemPositionException
      */
     public function submitQuoteToBasketApi(Quote $quote = null)
     {

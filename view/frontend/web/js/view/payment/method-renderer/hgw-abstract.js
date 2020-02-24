@@ -20,7 +20,7 @@ define(
                 return (pattern.test(value));
             }, $.mage.__('The given IBAN is invalid.')
         );
-
+        // if selected date was invalid method will be called with date = null and validation will fail.
         $.validator.addMethod(
             'valid-date', function (date){
                 return (date);

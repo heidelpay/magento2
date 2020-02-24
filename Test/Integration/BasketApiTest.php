@@ -3,7 +3,7 @@
  * This test class provides tests of the modules integration with the basket-api.
  *
  * @license Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
- * @copyright Copyright © 2016-present Heidelberger Payment GmbH. All rights reserved.
+ * @copyright Copyright © 2016-present heidelpay GmbH. All rights reserved.
  *
  * @author  Simon Gabriel <development@heidelpay.com>
  *
@@ -14,6 +14,7 @@ namespace Heidelpay\Gateway\Test\Integration;
 use Heidelpay\Gateway\Helper\BasketHelper;
 use Heidelpay\Gateway\Helper\Payment;
 use Heidelpay\Gateway\Wrapper\QuoteWrapper;
+use Heidelpay\PhpBasketApi\Exception\InvalidBasketitemPositionException;
 use Heidelpay\PhpBasketApi\Object\Basket;
 use Heidelpay\PhpBasketApi\Object\BasketItem;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
@@ -21,9 +22,11 @@ use Magento\Catalog\Model\Product\Type;
 use Magento\Catalog\Model\Product\Visibility;
 use Magento\Catalog\Model\Product;
 use Magento\Customer\Api\Data\CustomerInterface;
-use Magento\Customer\Api\Data\CustomerInterfaceFactory;
 use Magento\Customer\Model\Customer;
 use Magento\Customer\Model\Group;
+use Magento\Framework\Exception\CouldNotSaveException;
+use Magento\Framework\Exception\InputException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Quote\Api\CartItemRepositoryInterface;
 use Magento\Quote\Api\CartManagementInterface;
@@ -38,6 +41,8 @@ use Magento\TestFramework\TestCase\AbstractController;
 use Magento\SalesRule\Model\Rule;
 use \Magento\Quote\Model\Quote;
 use Magento\OfflineShippingSampleData\Model\Tablerate;
+use Magento\Customer\Model\CustomerFactory;
+use Magento\Customer\Model\AddressFactory;
 
 class BasketApiTest extends AbstractController
 {
@@ -108,19 +113,7 @@ class BasketApiTest extends AbstractController
         $this->paymentHelper = $this->getObject(Payment::class);
     }
 
-    /**
-     * @return array
-     */
-    public function verifyBasketHasSameValueAsApiCallDP()
-    {
-        return [
-            'No coupon' => [null],
-            'fixed cart 20 EUR coupon' => ['COUPON_FIXED_CART_20_EUR'],
-            '20 percent coupon /wo shipping' => ['COUPON_20_PERC_WO_SHIPPING']
-            // Test deaktiviert, weil Magento bei Rabatt auf Shipping die MwSt nicht richtig berechnet.
-            // '20 percent coupon /w shipping' => ['COUPON_20_PERC_W_SHIPPING']
-        ];
-    }
+    //<editor-fold desc="Tests">
 
     /**
      * @dataProvider verifyBasketHasSameValueAsApiCallDP
@@ -134,7 +127,10 @@ class BasketApiTest extends AbstractController
      *
      * @test
      * @param $couponCode
-     * @throws \Heidelpay\PhpBasketApi\Exception\InvalidBasketitemPositionException
+     * @throws CouldNotSaveException
+     * @throws InputException
+     * @throws InvalidBasketitemPositionException
+     * @throws NoSuchEntityException
      */
     public function verifyBasketHasSameValueAsApiCall($couponCode)
     {
@@ -154,7 +150,10 @@ class BasketApiTest extends AbstractController
      *
      * @test
      * @param $couponCode
-     * @throws \Heidelpay\PhpBasketApi\Exception\InvalidBasketitemPositionException
+     * @throws CouldNotSaveException
+     * @throws InputException
+     * @throws InvalidBasketitemPositionException
+     * @throws NoSuchEntityException
      */
     public function verifyBasketHasSameValueAsApiCallPlusTaxes($couponCode)
     {
@@ -175,7 +174,10 @@ class BasketApiTest extends AbstractController
      *
      * @test
      * @param $couponCode
-     * @throws \Heidelpay\PhpBasketApi\Exception\InvalidBasketitemPositionException
+     * @throws CouldNotSaveException
+     * @throws InputException
+     * @throws InvalidBasketitemPositionException
+     * @throws NoSuchEntityException
      */
     public function verifyBasketHasSameValueAsApiCallPlusTaxesPlusShippingTax($couponCode)
     {
@@ -185,7 +187,10 @@ class BasketApiTest extends AbstractController
     /**
      * @param $couponCode
      * @return array
-     * @throws \Heidelpay\PhpBasketApi\Exception\InvalidBasketitemPositionException
+     * @throws InvalidBasketitemPositionException
+     * @throws CouldNotSaveException
+     * @throws InputException
+     * @throws NoSuchEntityException
      */
     private function performCheckout($couponCode)
     {
@@ -235,6 +240,8 @@ class BasketApiTest extends AbstractController
         return array($quote, $basket);
     }
 
+    //</editor-fold>
+
     //<editor-fold desc="Helper">
 
     /**
@@ -272,16 +279,16 @@ class BasketApiTest extends AbstractController
 
     private function generateCustomerFixture()
     {
-        /** @var \Magento\Tax\Model\ClassModel $customerTaxClass */
+        /** @var ClassModel $customerTaxClass */
         $customerTaxClass = $this->createObject(ClassModel::class);
         $customerTaxClass->load('Retail Customer', 'class_name');
 
-        /** @var \Magento\Customer\Model\Group $customerGroup */
+        /** @var Group $customerGroup */
         $customerGroup = $this->createObject(Group::class)
             ->load('custom_group', 'customer_group_code');
         $customerGroup->setTaxClassId($customerTaxClass->getId())->save();
 
-        $customerFactory = $this->getObject('\Magento\Customer\Model\CustomerFactory');
+        $customerFactory = $this->getObject(CustomerFactory::class);
         /** @var CustomerInterface $customer */
         $customer = $customerFactory->create()
             ->setEmail('l.h@mail.com')
@@ -291,7 +298,7 @@ class BasketApiTest extends AbstractController
             ->setGroupId($customerGroup->getId())
             ->save();
 
-        $addressFactory = $this->getObject('\Magento\Customer\Model\AddressFactory');
+        $addressFactory = $this->getObject(AddressFactory::class);
         $addressFactory->create()
             ->setCustomerId($customer->getId())
             ->setFirstname('Linda')
@@ -330,8 +337,8 @@ class BasketApiTest extends AbstractController
                 ->setName('Simple Product ' . $idx)
                 ->setSku('simple' . $idx)
                 ->setPrice($price)
-                ->setData('news_from_date', null)
-                ->setData('news_to_date', null)
+                ->setData('news_from_date')
+                ->setData('news_to_date')
                 ->setVisibility(Visibility::VISIBILITY_BOTH)
                 ->setStatus(Status::STATUS_ENABLED)
                 ->setStockData(
@@ -401,7 +408,7 @@ class BasketApiTest extends AbstractController
         echo "\nProducts in Basket:";
         /** @var BasketItem $basketItem */
         foreach ($basket->getBasketItems() as $key => $basketItem) {
-            if ('Discount' !== $basketItem->getTitle()) {
+            if ($basketItem->getTitle() !== 'Discount') {
                 echo "\nProduct #" . $key . ': ' .
                     $basketItem->getTitle() . "\t" .
                     $basketItem->getQuantity() . "x \t" .
@@ -427,7 +434,10 @@ class BasketApiTest extends AbstractController
 
     /**
      * @param $couponCode
-     * @throws \Heidelpay\PhpBasketApi\Exception\InvalidBasketitemPositionException
+     * @throws CouldNotSaveException
+     * @throws InputException
+     * @throws InvalidBasketitemPositionException
+     * @throws NoSuchEntityException
      */
     private function assertResult($couponCode)
     {
@@ -448,5 +458,21 @@ class BasketApiTest extends AbstractController
         $this->assertLessThanOrEqual(1, $difference, 'Basket and Payment value difference is greater than 1(ct).');
     }
 
+    //</editor-fold>
+
+    //<editor-fold desc="Data Provider">
+    /**
+     * @return array
+     */
+    public function verifyBasketHasSameValueAsApiCallDP()
+    {
+        return [
+            'No coupon' => [null],
+            'fixed cart 20 EUR coupon' => ['COUPON_FIXED_CART_20_EUR'],
+            '20 percent coupon /wo shipping' => ['COUPON_20_PERC_WO_SHIPPING']
+            // Test deaktiviert, weil Magento bei Rabatt auf Shipping die MwSt nicht richtig berechnet.
+            // '20 percent coupon /w shipping' => ['COUPON_20_PERC_W_SHIPPING']
+        ];
+    }
     //</editor-fold>
 }
