@@ -437,7 +437,7 @@ class Payment extends AbstractHelper
             return true;
         }
         // Reservation should only create order if its not online transfer payment method.
-        if (PaymentMethod::ONLINE_TRANSFER !== $paymentMethod && TransactionType::RESERVATION){
+        if (PaymentMethod::ONLINE_TRANSFER !== $paymentMethod && $paymentType === TransactionType::RESERVATION){
             return true;
         }
         return false;

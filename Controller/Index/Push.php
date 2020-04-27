@@ -191,9 +191,8 @@ class Push extends HgwAbstract
             $transactionId = $pushResponse->getIdentification()->getTransactionId();
             $quote = $this->quoteRepository->get($transactionId);
 
-            $order = $this->orderHelper->fetchOrder($transactionId);
-
             // create order if it doesn't exists already.
+            $order = $this->orderHelper->fetchOrder($transactionId);
             if ($order === null || $order->isEmpty()) {
                 $transactionData = $this->_paymentHelper->getDataFromResponse($pushResponse);
                 $this->_paymentHelper->saveHeidelpayTransaction($pushResponse, $transactionData, 'PUSH');
