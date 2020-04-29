@@ -255,7 +255,7 @@ class Response extends HgwAbstract
                 $quote = $this->quoteRepository->get($identificationTransactionId);
 
                 /** @var Order $order */
-                $order = $this->_paymentHelper->createOrderFromQuote($quote);
+                $order = $this->_paymentHelper->handleOrderCreation($quote, 'RESPONSE');
             } catch (Exception $e) {
                 $this->_logger->error('Heidelpay - Response: Cannot submit the Quote. ' . $e->getMessage());
                 return $result;

@@ -7,6 +7,9 @@ This project does not follow a versioning standard. Versions are crafted after t
 ### Fixed
 - An issue during checkout if phone number is optional and not set by customer. That leads to a failing address comparison 
 for secured payment methods and PayPal.
+
+- An issue creating orders from Reservations.
+
 ## 20.2.24
 ### Added
 - Refund to iDeal payment method.
