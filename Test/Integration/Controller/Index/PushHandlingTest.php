@@ -145,11 +145,15 @@ class PushHandlingTest extends IntegrationTestAbstract
     public function dataProviderPushCreatesNewTransactionDP()
     {
         return [
+            'Create order from invoice reservation' => ['IV.PA', 'hgwivs'],
             'Create order from invoice receipt ' => ['IV.RC', 'hgwivs'],
+            'Create order from direct debit debit' => ['DD.DB', 'hgwdd'],
+            'Create order from credit card reservation' => ['CC.PA', 'hgwcc'],
             'Create order from credit card debit' => ['CC.DB', 'hgwcc'],
             'Create order from sofort receipt' => ['OT.RC', 'hgwsue'],
-            'Create order from sofort reservation' => ['OT.PA', 'hgwsue'],
             'Create order from prepayment receipt' => ['PP.RC', 'hgwpp'],
+            'Create order from PayPal reservation' => ['VA.PA', 'hgwpal'],
+            'Create order from PayPal debit' => ['VA.DB', 'hgwpal'],
         ];
     }
 
@@ -161,8 +165,11 @@ class PushHandlingTest extends IntegrationTestAbstract
         return [
             'Create no order from invoice reversal' => ['IV.RV', 'hgwivs'],
             'Create no order from credit card refund' => ['CC.RF', 'hgwcc'],
+            'Create no order from credit card capture' => ['CC.CP', 'hgwcc'],
             'Create no order from invoice init' => ['IV.IN', 'hgwivs'],
             'Create no order from invoice finalize' => ['IV.FI', 'hgwivs'],
+            'Create no order from sofort reservation' => ['OT.PA', 'hgwsue'],
+            'Create no order from ideal reservation' => ['OT.PA', 'hgwidl'],
         ];
     }
 
