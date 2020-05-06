@@ -108,4 +108,15 @@ class HeidelpayInvoicePaymentMethod extends HeidelpayAbstractPaymentMethod
             $this->_paymentHelper->saveTransaction($invoice);
         }
     }
+
+    /**
+     * @param Order $order
+     */
+    public function setShippedOrderState(&$order)
+    {
+        if ($order->getTotalPaid() < $order->getGrandTotal()) {
+            $state = Order::STATE_PENDING_PAYMENT;
+            $order->setState($state)->addStatusHistoryComment('heidelpay - Order shipped, awaiting payment', true);
+        }
+    }
 }

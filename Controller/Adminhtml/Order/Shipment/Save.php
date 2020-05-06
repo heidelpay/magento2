@@ -131,8 +131,8 @@ class Save extends \Magento\Shipping\Controller\Adminhtml\Order\Shipment\Save
 
                 // if the response isn't successful, redirect back to the order view.
                 if (!$heidelpayMethod->getResponse()->isSuccess()) {
-                    $this->messageManager->addErrorMessage(
-                        __('Heidelpay Error at sending Finalize Request. The Shipment was not created.')
+                    $this->messageManager->addWarningMessage(
+                        __('Heidelpay Error at sending Finalize Request. The Shipment was created.')
                         . ' Error Message: ' . $heidelpayMethod->getResponse()->getError()['message']
                     );
 
@@ -144,14 +144,10 @@ class Save extends \Magento\Shipping\Controller\Adminhtml\Order\Shipment\Save
                     $this->_redirect('*/*/new', ['order_id' => $this->getRequest()->getParam('order_id')]);
                 }
 
-                // set order state to "pending payment"
-                $state = Order::STATE_PENDING_PAYMENT;
-                $order->setState($state)->addStatusHistoryComment('heidelpay - Finalizing Order', true);
-
-                $this->orderResository->save($order);
-
                 $this->messageManager->addSuccessMessage(__('Shipping Notification has been sent to Heidelpay.'));
             }
+            $method->setShippedOrderState($order);
+            $this->orderResository->save($order);
         }
     }
 }
