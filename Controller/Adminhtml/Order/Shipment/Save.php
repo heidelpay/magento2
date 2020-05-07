@@ -142,9 +142,11 @@ class Save extends \Magento\Shipping\Controller\Adminhtml\Order\Shipment\Save
                     );
 
                     $this->_redirect('*/*/new', ['order_id' => $this->getRequest()->getParam('order_id')]);
+                } else {
+                    $order->addStatusHistoryComment('heidelpay - Finalizing Order');
+                    $this->messageManager->addSuccessMessage(__('Shipping Notification has been sent to Heidelpay.'));
                 }
 
-                $this->messageManager->addSuccessMessage(__('Shipping Notification has been sent to Heidelpay.'));
             }
             $method->setShippedOrderState($order);
             $this->orderResository->save($order);
