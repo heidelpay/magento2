@@ -399,9 +399,9 @@ class Payment extends AbstractHelper
                 // in case of guest checkout, set some customer related data.
                 if ($quote->getCustomerId() === null) {
                     $quote->setCustomerId(null)
-                            ->setCustomerEmail($quote->getBillingAddress()->getEmail())
-                            ->setCustomerIsGuest(true)
-                            ->setCustomerGroupId(Group::NOT_LOGGED_IN_ID);
+                        ->setCustomerEmail($quote->getBillingAddress()->getEmail())
+                        ->setCustomerIsGuest(true)
+                        ->setCustomerGroupId(Group::NOT_LOGGED_IN_ID);
                 }
                 $order = $this->_cartManagement->submit($quote);
 
