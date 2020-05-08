@@ -144,7 +144,6 @@ class Order extends AbstractHelper
         return $orderList;
     }
 
-
     /**
      * Returns true if the payment of the order is part of this payment module.
      *
