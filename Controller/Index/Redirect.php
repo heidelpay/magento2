@@ -163,7 +163,7 @@ class Redirect extends HgwAbstract
             /** @var Order $order */
             $order = null;
             try {
-                $this->_logger->warning('Load order by QuoteId: ' . $quoteId);
+                $this->_logger->debug('Load order by QuoteId: ' . $quoteId);
                 $order = $this->orderHelper->fetchOrderByQuoteId($quoteId);
             } catch (Exception $e) {
                 $this->_logger->error(
