@@ -206,17 +206,20 @@ class Redirect extends HgwAbstract
         $checkoutSession->clearHelperData();
 
         // set QuoteIds
-        $checkoutSession->setLastQuoteId($quoteId)
-            ->setLastSuccessQuoteId($quoteId);
+        $checkoutSession->setLastQuoteId($quoteId)->setLastSuccessQuoteId($quoteId);
 
         // set OrderIds
         $checkoutSession->setLastOrderId($order->getId())
             ->setLastRealOrderId($order->getIncrementId())
             ->setLastOrderStatus($order->getStatus());
 
-        $additionalPaymentInformation = $order->getPayment()
-            ->getMethodInstance()
-            ->additionalPaymentInformation($data);
+        $methodInstance = $order->getPayment()->getMethodInstance();
+        $additionalPaymentInformation = '';
+        if (\is_callable([$methodInstance, 'additionalPaymentInformation'])) {
+            $additionalPaymentInformation = $methodInstance->additionalPaymentInformation($data);
+        } else {
+            $this->_logger->error('heidelpay - The payment method seems to be from a different plugin.');
+        }
 
         $checkoutSession->setHeidelpayInfo($additionalPaymentInformation);
     }
