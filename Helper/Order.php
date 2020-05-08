@@ -2,9 +2,11 @@
 
 namespace Heidelpay\Gateway\Helper;
 
-
+use Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
+use Magento\Framework\Data\Collection;
+use Magento\Framework\DataObject;
 use Magento\Sales\Helper\Data as SalesHelper;
 use Magento\Sales\Model\Order as MagentoOrder;
 use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
@@ -117,16 +119,50 @@ class Order extends AbstractHelper
     }
 
     /**
-     * @param $transactionId
-     * @return MagentoOrder
+     * Returns the last Order to the quote with the given quoteId or an empty order object.
+     *
+     * @param $quoteId
+     * @return MagentoOrder|DataObject
      */
-    public function fetchOrder($transactionId)
+    public function fetchOrderByQuoteId($quoteId)
     {
-        $criteria = $this->searchCriteriaBuilder->addFilter('quote_id', $transactionId)->create();
+        $orderList = $this->fetchOrdersByQuoteId($quoteId);
+
+        return $orderList->getLastItem();
+    }
+
+    /**
+     * @param $quoteId
+     * @return Collection
+     */
+    protected function fetchOrdersByQuoteId($quoteId): Collection
+    {
+        $criteria = $this->searchCriteriaBuilder->addFilter('quote_id', $quoteId)->create();
 
         /** @var Collection $orderList */
         $orderList = $this->orderRepository->getList($criteria);
+        return $orderList;
+    }
 
-        return $orderList->getFirstItem();
+    /**
+     * Returns true if the payment of the order is part of this payment module.
+     *
+     * @param MagentoOrder $order
+     * @return bool
+     */
+    public function hasHeidelpayPayment(MagentoOrder $order): bool
+    {
+        $payment = $order->getPayment();
+        $returnVal = true;
+
+        if ($payment === null) {
+            $this->_logger->error('heidelpay - Empty payment.');
+            $returnVal = false;
+        } elseif (!$payment->getMethodInstance() instanceof HeidelpayAbstractPaymentMethod) {
+            $this->_logger->error('heidelpay - Not heidelpay payment.');
+            $returnVal = false;
+        }
+
+        return $returnVal;
     }
 }

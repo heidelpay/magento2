@@ -160,7 +160,14 @@ class AbstractBlock extends \Magento\Payment\Block\Info
         }
 
         if (! empty($this->transactionInfo->getJsonResponse())) {
-            return $this->getMethod()->additionalPaymentInformation($this->transactionInfo->getJsonResponse());
+            $methodInstance = $this->getMethod();
+            if (\is_callable([$methodInstance, 'additionalPaymentInformation'])) {
+                return $methodInstance->additionalPaymentInformation(
+                    $this->transactionInfo->getJsonResponse()
+                );
+            }
+
+            $this->_logger->debug('heidelpay: Could not retrieve additionalPaymentInformation for class: \"' . \get_class($methodInstance) . '\".');
         }
 
         return '';
