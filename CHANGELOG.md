@@ -10,6 +10,7 @@ This project does not follow a versioning standard. Versions are crafted after t
 for secured payment methods and PayPal.
 - Disable caching for dynamic blocks.
 - An issue creating orders from Reservations.
+- Problem when switching from an unknown payment method to a heidelpay gateway method.
 
 ## 20.2.24
 ### Added
