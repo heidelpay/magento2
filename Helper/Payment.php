@@ -176,7 +176,7 @@ class Payment extends AbstractHelper
         $data = [];
 
         foreach ($response->toArray() as $parameterKey => $value) {
-            $data[str_replace('.', '_', $parameterKey)] = $value;
+            $data[str_replace('.', '_', (string)$parameterKey)] = $value;
         }
 
         return $data;
@@ -377,7 +377,7 @@ class Payment extends AbstractHelper
     }
 
     /**
-     * Create an order by submitting the quote. If Order for that qoute already exist this order will be returned.
+     * Create an order by submitting the quote. If Order for that quote already exist this order will be returned.
      * @param Quote $quote
      * @return AbstractExtensibleModel|OrderInterface|Order|object|null
      * @throws LocalizedException
@@ -403,10 +403,12 @@ class Payment extends AbstractHelper
                         ->setCustomerGroupId(Group::NOT_LOGGED_IN_ID);
                 }
                 $order = $this->_cartManagement->submit($quote);
-                if($context) {
-                    $order->addStatusHistoryComment('heidelpay - Order created via ' . $context);
+
+                if ($context) {
+                    $order->addCommentToStatusHistory('heidelpay - Order created via ' . $context);
                 }
             }
+
         } finally {
             $this->lockManager->unlock($lockName);
         }
@@ -434,7 +436,7 @@ class Payment extends AbstractHelper
     public function isNewOrderType($paymentMethod, $paymentType)
     {
         // Order should be created for incoming payments
-        if(in_array($paymentType, self::NEW_ORDER_TRANSACTION_TYPE_ARRAY, true)){
+        if(\in_array($paymentType, self::NEW_ORDER_TRANSACTION_TYPE_ARRAY, true)){
             return true;
         }
         // Reservation should only create order if its not online transfer payment method.
