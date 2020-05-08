@@ -389,9 +389,10 @@ class Payment extends AbstractHelper
         $this->lockManager->lock($lockName);
         try{
             /** @var Order $order */
-            $order = $this->orderHelper->fetchOrder($quote->getId());
-            // Ensure to use the currency of the quote.
-            if ($order === null || $order->isEmpty()) {
+            $order = $this->orderHelper->fetchOrderByQuoteId($quote->getId());
+
+            if ($order === null || $order->isEmpty() || $order->isCanceled()) {
+                // Ensure to use the currency of the quote.
                 $quote->getStore()->setCurrentCurrencyCode($quote->getQuoteCurrencyCode());
                 $quote->collectTotals();
                 // in case of guest checkout, set some customer related data.
