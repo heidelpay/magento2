@@ -890,6 +890,14 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
     }
 
     /**
+     * Define order status after shipment.
+     * @param $order
+     */
+    public function setShippedOrderState(&$order)
+    {
+    }
+
+    /**
      * Load the payment information by store id, customer email address and payment method of the quote
      *
      * @param Quote $quote
