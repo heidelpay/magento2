@@ -172,7 +172,8 @@ class Redirect extends HgwAbstract
             }
 
             // Check whether order was loaded correctly
-            if($order === null || $order->isEmpty()) {
+            $hasHeidelpayPayment = $this->orderHelper->hasHeidelpayPayment($order);
+            if($order === null || $order->isEmpty() || $order->isCanceled() || !$hasHeidelpayPayment) {
                 $this->_logger->error(
                     'Heidelpay - Redirect: Cannot receive order. Order creation might have failed.'
                 );

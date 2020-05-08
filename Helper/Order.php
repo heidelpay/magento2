@@ -2,7 +2,7 @@
 
 namespace Heidelpay\Gateway\Helper;
 
-
+use Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\Data\Collection;
@@ -145,6 +145,25 @@ class Order extends AbstractHelper
     }
 
 
-        return $orderList->getFirstItem();
+    /**
+     * Returns true if the payment of the order is part of this payment module.
+     *
+     * @param MagentoOrder $order
+     * @return bool
+     */
+    public function hasHeidelpayPayment(MagentoOrder $order): bool
+    {
+        $payment = $order->getPayment();
+        $returnVal = true;
+
+        if ($payment === null) {
+            $this->_logger->error('heidelpay - Empty payment.');
+            $returnVal = false;
+        } elseif (!$payment->getMethodInstance() instanceof HeidelpayAbstractPaymentMethod) {
+            $this->_logger->error('heidelpay - Not heidelpay payment.');
+            $returnVal = false;
+        }
+
+        return $returnVal;
     }
 }
