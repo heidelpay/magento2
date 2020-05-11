@@ -114,7 +114,7 @@ class PushHandlingTest extends IntegrationTestAbstract
         $this->assertQuoteActive($quote->getId(), false);
 
         /** @var Order $order */
-        $fetchedOrder = $this->orderHelper->fetchOrder($quote->getId());
+        $fetchedOrder = $this->orderHelper->fetchOrderByQuoteId($quote->getId());
         $this->assertFalse($fetchedOrder->isEmpty(), 'Order creation failed: Order is empty');
 
         $uniqueId = $xml->Transaction->Identification->UniqueID;
@@ -200,7 +200,7 @@ class PushHandlingTest extends IntegrationTestAbstract
         $this->assertQuoteActive($quote->getId(), true);
 
         /** @var Order $order */
-        $fetchedOrder = $this->orderHelper->fetchOrder($quote->getId());
+        $fetchedOrder = $this->orderHelper->fetchOrderByQuoteId($quote->getId());
         $this->assertTrue($fetchedOrder->isEmpty(), 'No Order should be created here');
 
         // Check Transaction
@@ -322,7 +322,7 @@ class PushHandlingTest extends IntegrationTestAbstract
     private function assertQuoteHasNoOrder(Quote $quote)
     {
         /** @var Order $fetchedOrder */
-        $fetchedOrder = $this->orderHelper->fetchOrder($quote->getId());
+        $fetchedOrder = $this->orderHelper->fetchOrderByQuoteId($quote->getId());
         $this->assertTrue($fetchedOrder->isEmpty());
         $this->assertNotNull($quote);
     }
