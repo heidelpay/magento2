@@ -865,7 +865,6 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
             && $billingAddress->getCity() === $shippingAddress->getCity()
             && $billingAddress->getCountryId() === $shippingAddress->getCountryId()
             && $equalCompany
-            && $billingAddress->getTelephone() === $shippingAddress->getTelephone()
         );
     }
 
@@ -888,6 +887,14 @@ class HeidelpayAbstractPaymentMethod extends AbstractMethod
     public function getUseShippingAddressAsBillingAddress()
     {
         return $this->useShippingAddressAsBillingAddress;
+    }
+
+    /**
+     * Define order status after shipment.
+     * @param $order
+     */
+    public function setShippedOrderState(&$order)
+    {
     }
 
     /**

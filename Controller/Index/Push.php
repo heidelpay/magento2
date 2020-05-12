@@ -186,13 +186,13 @@ class Push extends HgwAbstract
         if (
             $pushResponse->isSuccess() &&
             !$pushResponse->isPending() &&
-            $this->_paymentHelper->isNewOrderType($paymentType)
+            $this->_paymentHelper->isNewOrderType($paymentMethod, $paymentType)
         ) {
             $transactionId = $pushResponse->getIdentification()->getTransactionId();
-            $order = $this->orderHelper->fetchOrder($transactionId);
             $quote = $this->quoteRepository->get($transactionId);
 
             // create order if it doesn't exists already.
+            $order = $this->orderHelper->fetchOrderByQuoteId($transactionId);
             if ($order === null || $order->isEmpty()) {
                 $transactionData = $this->_paymentHelper->getDataFromResponse($pushResponse);
                 $this->_paymentHelper->saveHeidelpayTransaction($pushResponse, $transactionData, 'PUSH');
@@ -200,7 +200,7 @@ class Push extends HgwAbstract
                     . $transactionId);
 
                 try {
-                    $order = $this->_paymentHelper->createOrderFromQuote($quote);
+                    $order = $this->_paymentHelper->handleOrderCreation($quote, 'PUSH');
                     if ($order === null || $order->isEmpty())
                     {
                         $this->_logger->error('Heidelpay - Response: Cannot submit the Quote. ' . $e->getMessage());

@@ -2,6 +2,7 @@
 namespace Heidelpay\Gateway\Helper;
 
 use Exception;
+use Heidelpay\Gateway\Helper\Order as OrderHelper;
 use Heidelpay\MessageCodeMapper\Exceptions\MissingLocaleFileException;
 use Heidelpay\MessageCodeMapper\MessageCodeMapper;
 use Heidelpay\PhpPaymentApi\Constants\TransactionType;
@@ -26,6 +27,7 @@ use Heidelpay\Gateway\Model\Transaction;
 use Heidelpay\Gateway\Model\TransactionFactory as HgwTransactionFactory;
 use Heidelpay\Gateway\PaymentMethods\HeidelpayAbstractPaymentMethod;
 use Heidelpay\Gateway\Model\ResourceModel\PaymentInformation\CollectionFactory as PaymentInformationCollectionFactory;
+use Magento\Framework\Lock\LockManagerInterface;
 
 
 /**
@@ -66,13 +68,20 @@ class Payment extends AbstractHelper
 
     const NEW_ORDER_TRANSACTION_TYPE_ARRAY = [
         TransactionType::RECEIPT,
-        TransactionType::DEBIT,
-        TransactionType::RESERVATION
+        TransactionType::DEBIT
     ];
     /**
      * @var PaymentInformationCollectionFactory
      */
     private $paymentInformationCollectionFactory;
+    /**
+     * @var \Heidelpay\Gateway\Helper\Order
+     */
+    private $orderHelper;
+    /**
+     * @var LockManagerInterface
+     */
+    private $lockManager;
 
     /**
      * @param Context $context
@@ -80,7 +89,10 @@ class Payment extends AbstractHelper
      * @param TransactionFactory $transactionFactory
      * @param Resolver $localeResolver
      * @param QuoteManagement $cartManagement
+     * @param PaymentInformationCollectionFactory $paymentInformationCollectionFactory
      * @param HgwTransactionFactory $heidelpayTransactionFactory
+     * @param OrderHelper $orderHelper
+     * @param LockManagerInterface $lockManager
      */
     public function __construct(
         Context $context,
@@ -89,7 +101,9 @@ class Payment extends AbstractHelper
         Resolver $localeResolver,
         QuoteManagement $cartManagement,
         PaymentInformationCollectionFactory $paymentInformationCollectionFactory,
-        HgwTransactionFactory $heidelpayTransactionFactory
+        HgwTransactionFactory $heidelpayTransactionFactory,
+        OrderHelper $orderHelper,
+        LockManagerInterface $lockManager
     ) {
         $this->httpClientFactory = $httpClientFactory;
         $this->transactionFactory = $transactionFactory;
@@ -99,6 +113,8 @@ class Payment extends AbstractHelper
         $this->_cartManagement = $cartManagement;
         $this->heidelpayTransactionFactory = $heidelpayTransactionFactory;
         $this->paymentInformationCollectionFactory = $paymentInformationCollectionFactory;
+        $this->orderHelper = $orderHelper;
+        $this->lockManager = $lockManager;
     }
 
     /**
@@ -160,7 +176,7 @@ class Payment extends AbstractHelper
         $data = [];
 
         foreach ($response->toArray() as $parameterKey => $value) {
-            $data[str_replace('.', '_', $parameterKey)] = $value;
+            $data[str_replace('.', '_', (string)$parameterKey)] = $value;
         }
 
         return $data;
@@ -334,7 +350,6 @@ class Payment extends AbstractHelper
      *
      * @return void
      *
-     * @throws Exception
      */
     public function saveHeidelpayTransaction(Response $response, array $data, $source)
     {
@@ -362,25 +377,47 @@ class Payment extends AbstractHelper
     }
 
     /**
-     * Create an order by submitting the quote.
+     * Create an order by submitting the quote. If Order for that quote already exist this order will be returned.
      * @param Quote $quote
-     * @return AbstractExtensibleModel|OrderInterface|null|object
+     * @return AbstractExtensibleModel|OrderInterface|Order|object|null
      * @throws LocalizedException
+     * @throws Exception
      */
-    public function createOrderFromQuote($quote)
+    public function handleOrderCreation($quote, $context = null)
     {
-        // Ensure to use the currency of the quote.
-        $quote->getStore()->setCurrentCurrencyCode($quote->getQuoteCurrencyCode());
-        $quote->collectTotals();
-        // in case of guest checkout, set some customer related data.
-        if ($quote->getCustomerId() === null) {
-            $quote->setCustomerId(null)
-                ->setCustomerEmail($quote->getBillingAddress()->getEmail())
-                ->setCustomerIsGuest(true)
-                ->setCustomerGroupId(Group::NOT_LOGGED_IN_ID);
+        $lockName = sprintf('heidelpay_gateway_quote_%d', $quote->getId());
+
+        $this->lockManager->lock($lockName);
+        try{
+            /** @var Order $order */
+            $order = $this->orderHelper->fetchOrderByQuoteId($quote->getId());
+
+            if ($order === null || $order->isEmpty() || $order->isCanceled()) {
+                // Ensure to use the currency of the quote.
+                $quote->getStore()->setCurrentCurrencyCode($quote->getQuoteCurrencyCode());
+                $quote->collectTotals();
+                // in case of guest checkout, set some customer related data.
+                if ($quote->getCustomerId() === null) {
+                    $quote->setCustomerId(null)
+                        ->setCustomerEmail($quote->getBillingAddress()->getEmail())
+                        ->setCustomerIsGuest(true)
+                        ->setCustomerGroupId(Group::NOT_LOGGED_IN_ID);
+                }
+                $order = $this->_cartManagement->submit($quote);
+
+                if ($context) {
+                    $order->addCommentToStatusHistory('heidelpay - Order created via ' . $context);
+                }
+            } elseif (!$this->orderHelper->hasHeidelpayPayment($order)) {
+                $quote->setIsActive(false)->save();
+                throw new Exception('The basket has been reset because an order already exists.');
+            }
+
+        } finally {
+            $this->lockManager->unlock($lockName);
         }
 
-        return $this->_cartManagement->submit($quote);
+        return $order;
     }
 
     /**
@@ -396,12 +433,21 @@ class Payment extends AbstractHelper
 
     /**
      * Provide information whether a transaction type is able to create an order or not
+     * @param $paymentMethod
      * @param $paymentType
      * @return bool
      */
-    public function isNewOrderType($paymentType)
+    public function isNewOrderType($paymentMethod, $paymentType)
     {
-        return in_array($paymentType, self::NEW_ORDER_TRANSACTION_TYPE_ARRAY, true);
+        // Order should be created for incoming payments
+        if(\in_array($paymentType, self::NEW_ORDER_TRANSACTION_TYPE_ARRAY, true)){
+            return true;
+        }
+        // Reservation should only create order if its not online transfer payment method.
+        if (PaymentMethod::ONLINE_TRANSFER !== $paymentMethod && $paymentType === TransactionType::RESERVATION){
+            return true;
+        }
+        return false;
     }
 
     /**

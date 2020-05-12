@@ -15,6 +15,7 @@ namespace Heidelpay\Gateway\PaymentMethods;
 
 use Exception;
 use Heidelpay\Gateway\Block\Info\Invoice as InvoiceBlock;
+use Heidelpay\Gateway\Traits\CanShipBeforePayment;
 use Heidelpay\PhpPaymentApi\Exceptions\UndefinedTransactionModeException;
 use Heidelpay\PhpPaymentApi\PaymentMethods\InvoicePaymentMethod;
 use Magento\Sales\Model\Order;
@@ -27,6 +28,8 @@ use Magento\Sales\Model\Order\Payment\Transaction;
  */
 class HeidelpayInvoicePaymentMethod extends HeidelpayAbstractPaymentMethod
 {
+    use CanShipBeforePayment;
+
     /** @var string Payment Code */
     const CODE = 'hgwiv';
 

@@ -15,6 +15,7 @@ namespace Heidelpay\Gateway\PaymentMethods;
 
 use Heidelpay\Gateway\Block\Info\InvoiceSecured as InvoiceSecuredBlock;
 use Heidelpay\Gateway\Model\PaymentInformation;
+use Heidelpay\Gateway\Traits\CanShipBeforePayment;
 use Heidelpay\PhpPaymentApi\Exceptions\UndefinedTransactionModeException;
 use Heidelpay\PhpPaymentApi\PaymentMethods\InvoiceB2CSecuredPaymentMethod;
 use Magento\Quote\Api\Data\CartInterface;
@@ -28,6 +29,7 @@ use Magento\Sales\Model\Order\Payment\Transaction;
  */
 class HeidelpayInvoiceSecuredPaymentMethod extends HeidelpayAbstractPaymentMethod
 {
+    use CanShipBeforePayment;
     /** @var string Payment Code */
     const CODE = 'hgwivs';
 

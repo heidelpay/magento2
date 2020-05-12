@@ -4,6 +4,7 @@ namespace Heidelpay\Gateway\Controller\Index;
 
 use Exception;
 use Heidelpay\Gateway\Controller\HgwAbstract;
+use Heidelpay\Gateway\Helper\Order as OrderHelper;
 use Heidelpay\Gateway\Helper\Payment as HeidelpayHelper;
 use Heidelpay\Gateway\Model\ResourceModel\Transaction\CollectionFactory;
 use Heidelpay\Gateway\Model\Transaction as HeidelpayTransaction;
@@ -50,6 +51,9 @@ class Redirect extends HgwAbstract
     /** @var CollectionFactory */
     private $transactionCollectionFactory;
 
+    /** @var OrderHelper */
+    private $orderHelper;
+
     /**
      * heidelpay Redirect constructor.
      *
@@ -69,6 +73,7 @@ class Redirect extends HgwAbstract
      * @param Encryptor $encryptor
      * @param Url $customerUrl
      * @param CollectionFactory $transactionCollectionFactory
+     * @param OrderHelper $orderHelper
      */
     public function __construct(
         Context $context,
@@ -86,7 +91,8 @@ class Redirect extends HgwAbstract
         OrderCommentSender $orderCommentSender,
         Encryptor $encryptor,
         Url $customerUrl,
-        CollectionFactory $transactionCollectionFactory
+        CollectionFactory $transactionCollectionFactory,
+        OrderHelper $orderHelper
     ) {
         parent::__construct(
             $context,
@@ -107,6 +113,7 @@ class Redirect extends HgwAbstract
         );
 
         $this->transactionCollectionFactory = $transactionCollectionFactory;
+        $this->orderHelper = $orderHelper;
     }
 
     /**
@@ -156,7 +163,8 @@ class Redirect extends HgwAbstract
             /** @var Order $order */
             $order = null;
             try {
-                $order = $this->_orderFactory->create()->loadByAttribute('quote_id', $quoteId);
+                $this->_logger->debug('Load order by QuoteId: ' . $quoteId);
+                $order = $this->orderHelper->fetchOrderByQuoteId($quoteId);
             } catch (Exception $e) {
                 $this->_logger->error(
                     'Heidelpay - Redirect: Cannot receive order.' . $e->getMessage()
@@ -164,7 +172,8 @@ class Redirect extends HgwAbstract
             }
 
             // Check whether order was loaded correctly
-            if($order === null || $order->isEmpty()) {
+            $hasHeidelpayPayment = $this->orderHelper->hasHeidelpayPayment($order);
+            if($order === null || $order->isEmpty() || $order->isCanceled() || !$hasHeidelpayPayment) {
                 $this->_logger->error(
                     'Heidelpay - Redirect: Cannot receive order. Order creation might have failed.'
                 );
@@ -206,17 +215,20 @@ class Redirect extends HgwAbstract
         $checkoutSession->clearHelperData();
 
         // set QuoteIds
-        $checkoutSession->setLastQuoteId($quoteId)
-            ->setLastSuccessQuoteId($quoteId);
+        $checkoutSession->setLastQuoteId($quoteId)->setLastSuccessQuoteId($quoteId);
 
         // set OrderIds
         $checkoutSession->setLastOrderId($order->getId())
             ->setLastRealOrderId($order->getIncrementId())
             ->setLastOrderStatus($order->getStatus());
 
-        $additionalPaymentInformation = $order->getPayment()
-            ->getMethodInstance()
-            ->additionalPaymentInformation($data);
+        $methodInstance = $order->getPayment()->getMethodInstance();
+        $additionalPaymentInformation = '';
+        if (\is_callable([$methodInstance, 'additionalPaymentInformation'])) {
+            $additionalPaymentInformation = $methodInstance->additionalPaymentInformation($data);
+        } else {
+            $this->_logger->error('heidelpay - The payment method seems to be from a different plugin.');
+        }
 
         $checkoutSession->setHeidelpayInfo($additionalPaymentInformation);
     }
