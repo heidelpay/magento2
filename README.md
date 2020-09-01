@@ -1,9 +1,9 @@
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/heidelpay/magento2.svg?style=flat-square)](https://packagist.org/packages/heidelpay/magento2)
 [![Codacy Badge](https://api.codacy.com/project/badge/grade/fb5b516ad21f44a591a58761a8c3ef42)](https://www.codacy.com/app/heidelpay/magento2/dashboard)
-[![PHP 7.0](https://img.shields.io/badge/php-7.0-blue.svg)](http://www.php.net)
 [![PHP 7.1](https://img.shields.io/badge/php-7.1-blue.svg)](http://www.php.net)
 [![PHP 7.2](https://img.shields.io/badge/php-7.2-blue.svg)](http://www.php.net)
 [![PHP 7.3](https://img.shields.io/badge/php-7.3-blue.svg)](http://www.php.net)
+[![PHP 7.4](https://img.shields.io/badge/php-7.4-blue.svg)](http://www.php.net)
 
 ![Logo](http://dev.heidelpay.com/devHeidelpay_400_180.jpg)
 

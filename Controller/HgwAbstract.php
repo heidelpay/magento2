@@ -9,7 +9,7 @@ use Magento\Quote\Model\QuoteManagement;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderCommentSender;
 use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
-use Netresearch\Compatibility\Controller\CsrfAware\Action as CsrfAwareAction;
+use Magento\Framework\App\CsrfAwareActionInterface;
 
 /**
  * Abstract controller class
@@ -21,7 +21,7 @@ use Netresearch\Compatibility\Controller\CsrfAware\Action as CsrfAwareAction;
  * @subpackage Magento2
  * @category Magento2
  */
-abstract class HgwAbstract extends CsrfAwareAction
+abstract class HgwAbstract extends CsrfAwareActionInterface
 {
     protected $resultPageFactory;
     protected $logger;
@@ -144,14 +144,29 @@ abstract class HgwAbstract extends CsrfAwareAction
         return $this->_quote;
     }
 
-    protected function getCsrfExceptionResponse(RequestInterface $request)
+    /**
+     * Create exception in case CSRF validation failed.
+     * Return null if default exception will suffice.
+     *
+     * @param RequestInterface $request
+     *
+     * @return InvalidRequestException|null
+     */
+    public function createCsrfValidationException(RequestInterface $request): ?InvalidRequestException
     {
+        return null;
     }
 
-    protected function proxyValidateForCsrf(RequestInterface $request)
+    /**
+     * Perform custom request validation.
+     * Return null if default validation is needed.
+     *
+     * @param RequestInterface $request
+     *
+     * @return bool|null
+     */
+    public function validateForCsrf(RequestInterface $request): ?bool
     {
         return true;
     }
-
-
 }
