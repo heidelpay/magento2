@@ -14,7 +14,7 @@
     "magento/framework": "^102.0.0 | ^103.0.0",
     "heidelpay/php-message-code-mapper": "~1.0",
     "heidelpay/php-basket-api": "~1.0",
-    "heidelpay/php-payment-api": "~1.7",
+    "heidelpay/php-payment-api": "~2.0",
     "ext-json": "*",
     "ext-bcmath": "*"
   },
