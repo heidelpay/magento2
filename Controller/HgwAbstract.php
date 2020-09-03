@@ -3,13 +3,14 @@
 namespace Heidelpay\Gateway\Controller;
 
 use Heidelpay\Gateway\Helper\Payment as HeidelpayHelper;
+use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\RequestInterface;
-use Magento\Framework\Controller\ResultInterface;
 use Magento\Quote\Model\QuoteManagement;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderCommentSender;
 use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
 use Magento\Framework\App\CsrfAwareActionInterface;
+use Magento\Framework\App\Request\InvalidRequestException;
 
 /**
  * Abstract controller class
@@ -21,7 +22,7 @@ use Magento\Framework\App\CsrfAwareActionInterface;
  * @subpackage Magento2
  * @category Magento2
  */
-abstract class HgwAbstract extends CsrfAwareActionInterface
+abstract class HgwAbstract extends Action implements CsrfAwareActionInterface
 {
     protected $resultPageFactory;
     protected $logger;
