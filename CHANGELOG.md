@@ -4,6 +4,14 @@
 
 This project does not follow a versioning standard. Versions are crafted after the dates; for example, the version 17.7.25 was released on July, 25th in 2017
 
+## 20.x.xx
+### Added
+- Support for PHP 7.4 and Magento 2.4
+
+### Removed
+- Support for PHP 7.0
+- Support for Magento versions 2.2.x and smaller.
+
 ## 20.5.13
 ### Fixed
 - An issue during checkout if phone number is optional and not set by customer. That leads to a failing address comparison 
