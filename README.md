@@ -1,9 +1,9 @@
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/heidelpay/magento2.svg?style=flat-square)](https://packagist.org/packages/heidelpay/magento2)
 [![Codacy Badge](https://api.codacy.com/project/badge/grade/fb5b516ad21f44a591a58761a8c3ef42)](https://www.codacy.com/app/heidelpay/magento2/dashboard)
-[![PHP 7.0](https://img.shields.io/badge/php-7.0-blue.svg)](http://www.php.net)
 [![PHP 7.1](https://img.shields.io/badge/php-7.1-blue.svg)](http://www.php.net)
 [![PHP 7.2](https://img.shields.io/badge/php-7.2-blue.svg)](http://www.php.net)
 [![PHP 7.3](https://img.shields.io/badge/php-7.3-blue.svg)](http://www.php.net)
+[![PHP 7.4](https://img.shields.io/badge/php-7.4-blue.svg)](http://www.php.net)
 
 ![Logo](http://dev.heidelpay.com/devHeidelpay_400_180.jpg)
 
@@ -29,8 +29,8 @@ For more information please visit -http://dev.heidelpay.com/magento2/
 
 ## SYSTEM REQUIREMENTS
 
-This extension requires PHP 7.0, PHP 7.1, PHP 7.2 or PHP 7.3. 
-It also depends on the Heidelpay php-payment-api library, which will be installed along with the plugin.  
+This extension requires PHP 7.1, PHP 7.2, PHP 7.3 or PHP 7.4.
+It also depends on the Heidelpay php-payment-api library, which will be installed along with the plugin.
 
 ## LICENSE
 
@@ -40,7 +40,6 @@ You can find a copy of this license in [LICENSE.txt](LICENSE.txt).
 
 All versions greater than 16.10.17 are based on the heidelpay php-api. (https://github.com/heidelpay/php-api).
 All versions greater than 18.3.1 are based on the heidelpay php-payment-api. (https://github.com/heidelpay/php-payment-api). Please visit https://dev.heidelpay.com/PhpPaymentApi/ for the developer documentation.
-
 
 ## Installation
 
