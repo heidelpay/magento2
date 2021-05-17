@@ -35,6 +35,10 @@ class CaptureCommand extends \Magento\Sales\Model\Order\Payment\State\CaptureCom
      */
     public function execute(OrderPaymentInterface $payment, $amount, OrderInterface $order)
     {
+        if (strpos($payment->getMethod(), 'hgw') !== 0) {
+            return parent::execute($payment, $amount, $order);
+        }
+
         $state = Order::STATE_PROCESSING;
         $status = Order::STATE_PENDING_PAYMENT;
         

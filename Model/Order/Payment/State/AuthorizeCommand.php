@@ -32,6 +32,10 @@ class AuthorizeCommand extends \Magento\Sales\Model\Order\Payment\State\Authoriz
      */
     public function execute(OrderPaymentInterface $payment, $amount, OrderInterface $order)
     {
+        if (strpos($payment->getMethod(), 'hgw') !== 0) {
+            return parent::execute($payment, $amount, $order);
+        }
+
         $state = Order::STATE_NEW;
         $status = $order->getConfig()->getStateDefaultStatus($state);
         $order->setStatus($status)
